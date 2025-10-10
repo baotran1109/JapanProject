@@ -1,0 +1,314 @@
+{
+  "Kamakura Day Trip": [
+    {
+      "name": "Kotoku-in",
+      "lat": 35.3168145,
+      "lng": 139.5357442
+    },
+    {
+      "name": "Hasedera",
+      "lat": 35.3124645,
+      "lng": 139.5330634
+    },
+    {
+      "name": "Kaedena",
+      "lat": 35.313242,
+      "lng": 139.5350659
+    },
+    {
+      "name": "Sangoshō",
+      "lat": 35.3091029,
+      "lng": 139.5166015
+    },
+    {
+      "name": "Shichirigahama Beach",
+      "lat": 35.3043891,
+      "lng": 139.513901
+    },
+    {
+      "name": "Ristorante Amalfi",
+      "lat": 35.3058994,
+      "lng": 139.5075183
+    },
+    {
+      "name": "Enoshima Uomi-tei",
+      "lat": 35.2990494,
+      "lng": 139.4752808
+    },
+    {
+      "name": "Enoshima Sea Candle",
+      "lat": 35.2997417,
+      "lng": 139.478425
+    },
+    {
+      "name": "Chigogafuchi Abyss",
+      "lat": 35.2987385,
+      "lng": 139.4744322
+    },
+    {
+      "name": "Enoshima Iwaya Cave",
+      "lat": 35.2984071,
+      "lng": 139.4755886
+    }
+  ],
+  "Nikko Day Trip": [
+    {
+      "name": "Nikko Sakaeya (​​agé-Yuba Manjū shop)",
+      "lat": 36.7478007,
+      "lng": 139.6188171
+    },
+    {
+      "name": "Shinkyō Bridge",
+      "lat": 36.75337,
+      "lng": 139.6040034
+    },
+    {
+      "name": "Grill & Steak Myōgetsubō",
+      "lat": 36.7540941,
+      "lng": 139.6038227
+    },
+    {
+      "name": "Meiji-no-Yakata",
+      "lat": 36.7567508,
+      "lng": 139.6029851
+    },
+    {
+      "name": "Nikkō Tōshogū",
+      "lat": 36.7580878,
+      "lng": 139.5987466
+    },
+    {
+      "name": "Nikko Tamozawa Imperial Villa Memorial Park",
+      "lat": 36.7525307,
+      "lng": 139.5911421
+    },
+    {
+      "name": "Akechidaira Ropeway",
+      "lat": 36.7374928,
+      "lng": 139.514514
+    },
+    {
+      "name": "Kegon Waterfalls",
+      "lat": 36.7380893,
+      "lng": 139.501941
+    },
+    {
+      "name": "Kegon Waterfall Paid Observation Deck",
+      "lat": 36.7378402,
+      "lng": 139.5040192
+    }
+  ],
+  "Yokohama Day Trip": [
+    {
+      "name": "Cup Noodles Museum",
+      "lat": 35.4554755,
+      "lng": 139.6388669
+    },
+    {
+      "name": "Yokohama Red Brick Warehouse",
+      "lat": 35.4526321,
+      "lng": 139.6428944
+    },
+    {
+      "name": "Osanbashi Hall",
+      "lat": 35.4527872,
+      "lng": 139.6485472
+    },
+    {
+      "name": "NYK Hikawa Maru",
+      "lat": 35.4466661,
+      "lng": 139.6513128
+    },
+    {
+      "name": "Yamashita Park",
+      "lat": 35.4457655,
+      "lng": 139.6497793
+    },
+    {
+      "name": "Coffee House The CAFE",
+      "lat": 35.4448182,
+      "lng": 139.6500125
+    },
+    {
+      "name": "Nan Etsu Bishoku",
+      "lat": 35.4437494,
+      "lng": 139.6469279
+    },
+    {
+      "name": "Saikoushinkan",
+      "lat": 35.4431281,
+      "lng": 139.6468506
+    },
+    {
+      "name": "Daisangen",
+      "lat": 35.442274,
+      "lng": 139.6478505
+    },
+    {
+      "name": "台湾菜館(タイワンサイカン)",
+      "lat": 35.4424363,
+      "lng": 139.6465576
+    },
+    {
+      "name": "青葉新館(アオバシンカン)",
+      "lat": 35.4428729,
+      "lng": 139.6481905
+    },
+    {
+      "name": "ONtheCORNER",
+      "lat": 35.4420124,
+      "lng": 139.6497725
+    },
+    {
+      "name": "Yamate Italian Garden",
+      "lat": 35.4366667,
+      "lng": 139.6433333
+    },
+    {
+      "name": "Sankeien Garden",
+      "lat": 35.4170511,
+      "lng": 139.6588267
+    },
+    {
+      "name": "Yokohama Port Symbol Tower",
+      "lat": 35.4389973,
+      "lng": 139.6896205
+    }
+  ],
+  "Fuji Mount Day Trip": [
+    {
+      "name": "Arakurayama Sengen Park",
+      "lat": 35.5013908,
+      "lng": 138.8016313
+    },
+    {
+      "name": "MIMASU Restaurant",
+      "lat": 35.4912341,
+      "lng": 138.8025353
+    },
+    {
+      "name": "十駕",
+      "lat": 35.4657741,
+      "lng": 138.8052348
+    },
+    {
+      "name": "Oshino hakkai",
+      "lat": 35.4600675,
+      "lng": 138.8324741
+    },
+    {
+      "name": "Yamanakako Hana no Miyako Park",
+      "lat": 35.4392429,
+      "lng": 138.8512632
+    },
+    {
+      "name": "THE PARK",
+      "lat": 35.4276322,
+      "lng": 138.8680675
+    },
+    {
+      "name": "Yamanakako Communication Plaza Kirara",
+      "lat": 35.4204484,
+      "lng": 138.9009377
+    }
+  ],
+  "Hakone Day Trip": [
+    {
+      "name": "The Hakone Open-Air Museum",
+      "lat": 35.2448447,
+      "lng": 139.0513547
+    },
+    {
+      "name": "Pola Museum of Art",
+      "lat": 35.2567066,
+      "lng": 139.0212014
+    },
+    {
+      "name": "Hakone Venetian Glass Museum (Glass Forest)",
+      "lat": 35.2662046,
+      "lng": 139.0177385
+    },
+    {
+      "name": "Owakudani",
+      "lat": 35.2436011,
+      "lng": 139.0197304
+    },
+    {
+      "name": "Hakone Shrine",
+      "lat": 35.2048263,
+      "lng": 139.0253782
+    },
+    {
+      "name": "Peace Torii",
+      "lat": 35.202783,
+      "lng": 139.0257419
+    },
+    {
+      "name": "Narukawa Art Museum",
+      "lat": 35.2,
+      "lng": 139.0311111
+    },
+    {
+      "name": "Hakone Sightseeing Cruise",
+      "lat": 35.1899925,
+      "lng": 139.0245259
+    }
+  ],
+  "Kawagoe Day Trip": [
+    {
+      "name": "TreFacStyle Kawagoe",
+      "lat": 35.9087675,
+      "lng": 139.4819999
+    },
+    {
+      "name": "Ganja",
+      "lat": 35.9150868,
+      "lng": 139.4825599
+    },
+    {
+      "name": "Kita-in",
+      "lat": 35.9175352,
+      "lng": 139.488996
+    },
+    {
+      "name": "Ogakiku",
+      "lat": 35.9206734,
+      "lng": 139.4832727
+    },
+    {
+      "name": "2nd STREET Kawagoe Route 254",
+      "lat": 35.9241598,
+      "lng": 139.4945703
+    },
+    {
+      "name": "Kawagoe Castle Honmaru Palace",
+      "lat": 35.9243931,
+      "lng": 139.4915051
+    },
+    {
+      "name": "Kawagoe Hikawa Shrine",
+      "lat": 35.9275498,
+      "lng": 139.4885588
+    },
+    {
+      "name": "Kashiya Yokocho",
+      "lat": 35.9250599,
+      "lng": 139.4810513
+    },
+    {
+      "name": "Ichibangai Shotengai",
+      "lat": 35.923527,
+      "lng": 139.4829325
+    },
+    {
+      "name": "Toki no Kane",
+      "lat": 35.9234758,
+      "lng": 139.483335
+    },
+    {
+      "name": "Starbucks Coffee - Kawagoe Kanetsuki-dori Street",
+      "lat": 35.9234765,
+      "lng": 139.4838934
+    }
+  ]
+}

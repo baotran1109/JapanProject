@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Osaka · Explore Japan</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Firebase init (auth mini) -->
+  <script type="module" src="/static/js/firebase-init.js?v=3"></script>
+
+  <link rel="icon" href="static/Image/GettyImages-962650558.webp" />
+</head>
+<body class="bg-neutral-50 text-neutral-800 antialiased">
+
+  <!-- NAV (match the rest of the site) -->
+  <nav class="sticky top-0 z-50 bg-[#222] text-white">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+      <div class="flex flex-wrap items-center gap-3">
+        <a href="index.html" class="font-semibold tracking-wide">Home</a>
+        <a href="itineraries.html" class="hover:underline">Recommended Itineraries</a>
+        <a href="cities.html" class="hover:underline">Explore Cities</a>
+        <a href="tips.html" class="hover:underline">Travel Tips</a>
+        <a href="my_itineraries.html" class="hover:underline">My Itineraries</a>
+      </div>
+      <div id="auth-mini" class="text-sm">
+        <span id="auth-name" class="font-medium">Not signed in</span>
+        <span class="text-white/60">·</span>
+        <a href="/auth.html" id="auth-link"
+           class="ml-1 inline-block rounded-md bg-white px-2.5 py-1 font-semibold text-blue-600 hover:bg-slate-100">Sign in</a>
+      </div>
+    </div>
+    <script type="module">
+      import { auth } from "/static/js/firebase-init.js?v=3";
+      import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+      const nameEl = document.getElementById('auth-name');
+      const linkEl = document.getElementById('auth-link');
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          nameEl.textContent = user.displayName || user.email;
+          linkEl.textContent = 'Sign out';
+          linkEl.href = '#';
+          linkEl.onclick = async (e) => { e.preventDefault(); await signOut(auth); };
+          linkEl.className = 'ml-1 inline-block rounded-md bg-white px-2.5 py-1 font-semibold text-slate-800 hover:bg-slate-100';
+        } else {
+          nameEl.textContent = 'Not signed in';
+          linkEl.textContent = 'Sign in';
+          linkEl.href = '/auth.html';
+          linkEl.onclick = null;
+          linkEl.className = 'ml-1 inline-block rounded-md bg-white px-2.5 py-1 font-semibold text-blue-600 hover:bg-slate-100';
+        }
+      });
+    </script>
+  </nav>
+
+  <!-- Hero -->
+  <section id="top" class="mx-auto max-w-6xl px-4 pt-6">
+    <div class="overflow-hidden rounded-3xl shadow-lg">
+      <img
+        src="static/Image/GettyImages-962650558.webp"
+        alt="Dōtonbori canal, Osaka at night"
+        class="h-[44vh] w-full object-cover md:h-[56vh]"
+        loading="eager"
+      />
+    </div>
+
+    <div class="mx-auto max-w-3xl py-8">
+      <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 md:text-5xl">Osaka</h1>
+      <p class="mt-3 text-lg leading-relaxed text-slate-600">
+        Laid-back and lively, Osaka mixes street-food legends with historic icons like
+        <strong>Osaka Castle</strong>. Wander the glow of <strong>Dōtonbori</strong>, snack in
+        <strong>Shinsekai</strong>, and day-trip to <strong>Nara</strong> or <strong>Kobe</strong> with ease.
+      </p>
+
+      <!-- CTA chips (same pattern as Tokyo/Kyoto) -->
+      <div class="mt-6 flex flex-wrap gap-3">
+        <a href="#attractions" class="rounded-full bg-blue-600 px-5 py-2.5 text-white shadow hover:bg-blue-700">Top Attractions</a>
+        <a href="#restaurants" class="rounded-full border border-slate-300 bg-white px-5 py-2.5 text-slate-800 hover:bg-slate-50">Restaurants</a>
+        <a href="#shopping" class="rounded-full border border-slate-300 bg-white px-5 py-2.5 text-slate-800 hover:bg-slate-50">Shopping</a>
+        <a href="#daytrips" class="rounded-full border border-slate-300 bg-white px-5 py-2.5 text-slate-800 hover:bg-slate-50">Day Trips</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main -->
+  <main class="mx-auto max-w-6xl space-y-16 px-4 pb-20">
+
+    <!-- Attractions -->
+    <section id="attractions">
+      <header class="mb-6">
+        <h2 class="text-2xl font-bold md:text-3xl">Top Attractions</h2>
+        <p class="mt-1 text-sm text-neutral-600">Iconic signs, castles, and aquariums.</p>
+      </header>
+
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
+          <img src="static/Image/caption.jpg" alt="Glico Sign, Dōtonbori" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <figcaption class="p-3 text-sm text-neutral-700">Glico Sign (Dōtonbori)</figcaption>
+        </figure>
+        <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
+          <img src="static/Image/hq720.jpg" alt="Osaka Aquarium Kaiyukan" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <figcaption class="p-3 text-sm text-neutral-700">Osaka Aquarium Kaiyukan</figcaption>
+        </figure>
+        <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
+          <img src="static/Image/4000_top.jpg" alt="Osaka Castle" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <figcaption class="p-3 text-sm text-neutral-700">Osaka Castle</figcaption>
+        </figure>
+      </div>
+
+      <details class="group mt-6 rounded-xl border bg-white p-4 open:shadow-sm">
+        <summary class="flex cursor-pointer list-none items-center justify-between">
+          <span class="text-base font-semibold">View Osaka Attractions 🏯</span>
+          <span class="ml-3 text-xs text-neutral-500 group-open:hidden">(expand)</span>
+          <span class="ml-3 hidden text-xs text-neutral-500 group-open:inline">(collapse)</span>
+        </summary>
+        <ul id="attractions-list" class="mt-4 grid gap-2 sm:grid-cols-2"></ul>
+      </details>
+    </section>
+
+    <!-- Shopping -->
+    <section id="shopping">
+      <header class="mb-6">
+        <h2 class="text-2xl font-bold md:text-3xl">Shopping Recommendations</h2>
+        <p class="mt-1 text-sm text-neutral-600">Streetwear hubs and select shops.</p>
+      </header>
+
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
+          <img src="static/Image/AdCG2DN4BVx0QDSxnbseOY7QvWvQ7qEJjTV3fBrkw2lTZhtyyiFzHKmuIAONOiSAdfvDifLUop_wSNqNCbfimL_hEeuilzkK70kz48okDCdVM27ehBlEFQ834fsmgdBmA-WfhVxp61AngHXYUHlBevOQ_an74hDsmqOlzeMRhisW4ZEtmQYZ.jpeg" alt="RIZ Shinsaibashi" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <figcaption class="p-3 text-sm text-neutral-700">RIZ Shinsaibashi (Purchase Shop)</figcaption>
+        </figure>
+        <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
+          <img src="static/Image/ee3cf2c1af7cb602732b372aa3eeae3e.jpg" alt="BIOTOP Osaka" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <figcaption class="p-3 text-sm text-neutral-700">BIOTOP Osaka</figcaption>
+        </figure>
+        <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
+          <img src="static/Image/osaka2_1800x.webp" alt="NUBIAN Osaka" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <figcaption class="p-3 text-sm text-neutral-700">NUBIAN Osaka</figcaption>
+        </figure>
+      </div>
+
+      <details class="group mt-6 rounded-xl border bg-white p-4 open:shadow-sm">
+        <summary class="flex cursor-pointer list-none items-center justify-between">
+          <span class="text-base font-semibold">Where to Shop in Osaka 🛍️</span>
+        </summary>
+        <ul id="shopping-list" class="mt-4 grid gap-2 sm:grid-cols-2"></ul>
+      </details>
+    </section>
+
+    <!-- Restaurants -->
+    <section id="restaurants">
+      <header class="mb-6">
+        <h2 class="text-2xl font-bold md:text-3xl">Restaurants</h2>
+        <p class="mt-1 text-sm text-neutral-600">Takoyaki, okonomiyaki, kushikatsu—start here.</p>
+      </header>
+
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <img src="static/Image/photo0jpg.jpg" alt="Hanadako Takoyaki" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+        <img src="static/Image/640x640_rect_41cb31a4b3569e09caa87e9196b41750.jpg" alt="Budo-tei" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+        <img src="static/Image/8063_ext_02_0.jpg" alt="Fukutaro Okonomiyaki" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+      </div>
+
+      <details class="group mt-6 rounded-xl border bg-white p-4 open:shadow-sm">
+        <summary class="flex cursor-pointer list-none items-center justify-between">
+          <span class="text-base font-semibold">Where to Eat in Osaka 🍜</span>
+        </summary>
+        <ul id="restaurants-list" class="mt-4 grid gap-2 sm:grid-cols-2"></ul>
+      </details>
+    </section>
+
+    <!-- Day Trips -->
+    <section id="daytrips">
+      <header class="mb-6">
+        <h2 class="text-2xl font-bold md:text-3xl">Day Trips</h2>
+        <p class="mt-1 text-sm text-neutral-600">Quick escapes to Nara & Kobe.</p>
+      </header>
+
+      <div class="space-y-12">
+        <!-- Nara -->
+        <div>
+          <h3 class="text-xl font-semibold">Nara</h3>
+          <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <img src="static/Image/4100_11.jpg" alt="Tōdai-ji" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+            <img src="static/Image/10108_1_l.jpg" alt="Wakakusayama Hill" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+            <img src="static/Image/4100_02.jpg" alt="Nara deer" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+          </div>
+          <details class="group mt-4 rounded-xl border bg-white p-4">
+            <summary class="flex cursor-pointer list-none items-center justify-between"><span class="font-medium">View Nara Day Trip 🦌</span></summary>
+            <ul id="Nara-list" class="mt-4 grid gap-2 sm:grid-cols-2"></ul>
+          </details>
+        </div>
+
+        <!-- Kobe -->
+        <div>
+          <h3 class="text-xl font-semibold">Kobe</h3>
+          <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <img src="static/Image/kobe-rwc-fb.jpg" alt="Kobe Chinatown" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+            <img src="static/Image/kobe-port_Sean_Pavone_GettyImages-920466394.jpg" alt="Kobe Port" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+            <img src="static/Image/Kobe-Beef.jpg" alt="Kobe Beef" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+          </div>
+          <details class="group mt-4 rounded-xl border bg-white p-4">
+            <summary class="flex cursor-pointer list-none items-center justify-between"><span class="font-medium">Kobe Restaurants 🍽️</span></summary>
+            <ul id="Kobe-restaurants-list" class="mt-4 grid gap-2 sm:grid-cols-2"></ul>
+          </details>
+          <details class="group mt-4 rounded-xl border bg-white p-4">
+            <summary class="flex cursor-pointer list-none items-center justify-between"><span class="font-medium">Kobe Attractions 🏞️</span></summary>
+            <ul id="Kobe-attractions-list" class="mt-4 grid gap-2 sm:grid-cols-2"></ul>
+          </details>
+          <details class="group mt-4 rounded-xl border bg-white p-4">
+            <summary class="flex cursor-pointer list-none items-center justify-between"><span class="font-medium">Kobe Shopping 🛍️</span></summary>
+            <ul id="Kobe-shopping-list" class="mt-4 grid gap-2 sm:grid-cols-2"></ul>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="py-8 text-center text-sm text-slate-500">
+    <div class="mx-auto max-w-6xl px-4">
+      &copy; 2025 Explore Japan · Bao Tran <span class="text-slate-400">· Last updated</span> <span id="lastUpdated"></span>
+    </div>
+  </footer>
+
+  <!-- Simple fetch JS (no skeletons) using your Osaka JSON files -->
+  <script>
+  // Pretty time
+  document.getElementById('lastUpdated').textContent =
+    new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+
+  function fetchData(id, file) {
+    const ul = document.getElementById(id);
+    if (!ul) return;
+
+    fetch('/data/Osaka/' + file)
+      .then((res) => {
+        if (!res.ok) throw new Error(file + ' missing');
+        return res.json();
+      })
+      .then((data) => {
+        ul.innerHTML = '';
+        data.forEach((item) => {
+          const li = document.createElement('li');
+          const a  = document.createElement('a');
+
+          a.href = item.google_map_url || item.google_maps_url || '#';
+          a.target = '_blank';
+          a.rel = 'noopener';
+          a.textContent = item.name || 'Untitled';
+          a.style.color = '#007BFF';
+          a.style.textDecoration = 'none';
+
+          li.appendChild(a);
+
+          const extra =
+            item.category ? ' (' + item.category + ')' :
+            (item.type ? ' - ' + item.type : '');
+          if (extra) {
+            const span = document.createElement('span');
+            span.textContent = extra;
+            li.appendChild(span);
+          }
+
+          ul.appendChild(li);
+        });
+      })
+      .catch((err) => {
+        console.warn(err.message || err);
+        ul.innerHTML = '<li>Could not load: ' + file + '</li>';
+      });
+  }
+
+  // Load lists
+  fetchData('attractions-list', 'Osaka_Attractions.json');
+  fetchData('shopping-list', 'Osaka_Shopping.json');
+  fetchData('restaurants-list', 'Osaka_Restaurants.json');
+  fetchData('Nara-list', 'Nara_day_trip.json');
+  fetchData('Kobe-restaurants-list', 'Kobe_restaurants.json');
+  fetchData('Kobe-attractions-list', 'Kobe_Attractions.json');
+  fetchData('Kobe-shopping-list', 'Kobe_Shopping.json');
+</script>
+</body>
+</html>

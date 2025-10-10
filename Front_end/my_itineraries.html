@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Itineraries · Explore Japan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script type="module" src="/static/js/firebase-init.js?v=3"></script>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+  <!-- NAV -->
+  <nav class="sticky top-0 z-50 bg-[#222] text-white">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+      <div class="flex flex-wrap items-center gap-3">
+        <a href="index.html" class="font-semibold tracking-wide">Home</a>
+        <a href="itineraries.html" class="hover:underline">Recommended Itineraries</a>
+        <a href="cities.html" class="hover:underline">Explore Cities</a>
+        <a href="tips.html" class="hover:underline">Travel Tips</a>
+        <a href="my_itineraries.html" class="hover:underline">My Itineraries</a>
+      </div>
+      <div id="auth-mini" class="text-sm">
+        <span id="auth-name" class="font-medium">Not signed in</span>
+        <span class="text-white/60">·</span>
+        <a href="/auth.html" id="auth-link"
+           class="ml-1 inline-block rounded-md bg-white px-2.5 py-1 font-semibold text-blue-600 hover:bg-slate-100">
+          Sign in
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HEADER -->
+  <header class="mx-auto max-w-6xl px-4 pt-8 text-center">
+    <h1 class="text-3xl font-bold tracking-tight md:text-5xl">My Itineraries</h1>
+    <p id="whoami" class="mx-auto mt-3 max-w-2xl text-sm text-slate-600"></p>
+  </header>
+
+  <!-- LIST -->
+  <main class="mx-auto max-w-6xl px-4 py-8">
+    <div id="list" class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"></div>
+
+    <!-- Empty -->
+    <div id="empty" class="hidden">
+      <div class="mt-8 rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+        <div class="mx-auto h-10 w-10 rounded-full bg-blue-50 ring-1 ring-blue-100 flex items-center justify-center text-blue-600">🗺️</div>
+        <h2 class="mt-3 text-lg font-semibold">No saved itineraries yet</h2>
+        <p class="mt-1 text-sm text-slate-600">Create your first plan and it will show up here.</p>
+        <div class="mt-4 flex justify-center gap-3">
+          <a href="itineraries.html" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium hover:bg-slate-50">Browse Recommended</a>
+          <a href="plan_tokyo.html" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700">Start a Tokyo Plan</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="py-8 text-center text-sm text-slate-500">
+    &copy; 2025 Explore Japan · Bao Tran
+  </footer>
+
+  <!-- FIREBASE LOGIC -->
+  <script type="module">
+    import { auth, db } from "/static/js/firebase-init.js?v=3";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { collection, getDocs, doc, getDoc, deleteDoc, updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    const whoami = document.getElementById("whoami");
+    const list = document.getElementById("list");
+    const empty = document.getElementById("empty");
+
+    // Load itineraries
+    async function loadSingleDoc(uid) {
+      const snap = await getDoc(doc(db, "itineraries", uid));
+      if (!snap.exists()) return [];
+      const d = snap.data() || {};
+      const items = [];
+      if (Array.isArray(d.plans) && d.plans.length) items.push({ id: "single", title: "General Plan", city: "—", days: d.plans.length, src: "single", field: "plans" });
+      if (Array.isArray(d.tokyoPlan) && d.tokyoPlan.length) items.push({ id: "tokyo", title: "Tokyo Plan", city: "Tokyo", days: d.tokyoPlan.length, src: "single", field: "tokyoPlan" });
+      return items;
+    }
+
+    async function loadSubcollection(uid) {
+      const snap = await getDocs(collection(db, `users/${uid}/itineraries`));
+      const items = [];
+      snap.forEach(docSnap => {
+        const v = docSnap.data() || {};
+        const cities = v.cities || (v.city ? [v.city] : ["Tokyo"]);
+        const title = v.title || `${cities.join(" + ")} Trip`;
+        const days = Array.isArray(v.plan) ? v.plan.length : (typeof v.days === "number" ? v.days : 0);
+        items.push({ id: docSnap.id, title, city: cities.join(" + "), days, src: "subcol", cities });
+      });
+      return items;
+    }
+
+    async function handleDelete(it, uid) {
+      if (!confirm(`Delete "${it.title}"?`)) return;
+      if (it.src === "subcol") await deleteDoc(doc(db, `users/${uid}/itineraries/${it.id}`));
+      else await updateDoc(doc(db, "itineraries", uid), { [it.field]: deleteField() });
+      await refresh(uid);
+    }
+
+    function editorUrl(it) {
+      const cities = (it.cities || []).map(c => c.toLowerCase());
+      if (cities.includes("hakodate") || cities.includes("sapporo")) return `plan_tokyo_hokkaido.html?itineraryId=${it.id}`;
+      if (cities.includes("fukuoka")) return `plan_tokyo_kansai_fukuoka.html?itineraryId=${it.id}`;
+      if (cities.includes("kyoto") || cities.includes("osaka")) return `plan_tokyo_kansai.html?itineraryId=${it.id}`;
+      if(cities.includes("okinawa")) return `plan_tokyo_okinawa.html?itineraryId=${it.id}`;
+      return `plan_tokyo.html?itineraryId=${it.id}`;
+    }
+
+    function render(items, uid) {
+      list.innerHTML = "";
+      if (!items.length) { empty.classList.remove("hidden"); return; }
+      empty.classList.add("hidden");
+      items.forEach(it => {
+        const card = document.createElement("div");
+        card.className = "rounded-xl border border-slate-200 bg-white p-5 shadow-sm";
+        card.innerHTML = `
+          <h3 class="text-lg font-semibold">${it.title}</h3>
+          <p class="mt-1 text-sm text-slate-600">City: ${it.city} · Days: ${it.days}</p>
+          <div class="mt-3 flex gap-2">
+            <a class="rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700" href="${editorUrl(it)}">Edit</a>
+            <button class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium hover:bg-slate-50">Delete</button>
+          </div>
+        `;
+        card.querySelector("button").addEventListener("click", () => handleDelete(it, uid));
+        list.appendChild(card);
+      });
+    }
+
+    async function refresh(uid) {
+      const sub = await loadSubcollection(uid);
+      if (sub.length) return render(sub, uid);
+      const single = await loadSingleDoc(uid);
+      render(single, uid);
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { whoami.textContent = "Please sign in to see your itineraries."; render([], ""); return; }
+      whoami.textContent = `Signed in as ${user.email}`;
+      await refresh(user.uid);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+[
+    {
+      "name": "TreFacStyle Kawagoe",
+      "lat": 35.9087675,
+      "lng": 139.4819999,
+      "google_map_url":"https://maps.google.com/?cid=16643746023474255734"
+    },
+    {
+      "name": "Ganja",
+      "lat": 35.9150868,
+      "lng": 139.4825599,
+      "google_map_url":"https://maps.google.com/?cid=5646962208579631324"
+    },
+    {
+      "name": "Kita-in",
+      "lat": 35.9175352,
+      "lng": 139.488996,
+      "google_map_url":"https://maps.google.com/?cid=16936809585039863477"
+    },
+    {
+      "name": "Ogakiku",
+      "lat": 35.9206734,
+      "lng": 139.4832727,
+      "google_map_url":"https://maps.google.com/?cid=6115106734021921369"
+    },
+    {
+      "name": "2nd STREET Kawagoe Route 254",
+      "lat": 35.9241598,
+      "lng": 139.4945703,
+      "google_map_url":"https://maps.google.com/?cid=17811796007884158280"
+    },
+    {
+      "name": "Kawagoe Castle Honmaru Palace",
+      "lat": 35.9243931,
+      "lng": 139.4915051,
+      "google_map_url":"https://maps.google.com/?cid=12471370701927824369"
+    },
+    {
+      "name": "Kawagoe Hikawa Shrine",
+      "lat": 35.9275498,
+      "lng": 139.4885588,
+      "google_map_url":"https://maps.google.com/?cid=9209437817087783004"
+    },
+    {
+      "name": "Kashiya Yokocho",
+      "lat": 35.9250599,
+      "lng": 139.4810513,
+      "google_map_url":"https://maps.google.com/?cid=5295597158508306682"
+    },
+    {
+      "name": "Ichibangai Shotengai",
+      "lat": 35.923527,
+      "lng": 139.4829325,
+      "google_map_url":"https://maps.google.com/?cid=2878523704329094195"
+    },
+    {
+      "name": "Toki no Kane",
+      "lat": 35.9234758,
+      "lng": 139.483335,
+      "google_map_url":"https://maps.google.com/?cid=13347384384474513249"
+    },
+    {
+      "name": "Starbucks Coffee - Kawagoe Kanetsuki-dori Street",
+      "lat": 35.9234765,
+      "lng": 139.4838934,
+      "google_map_url":"https://maps.google.com/?cid=10177794580109634420"
+    }
+]

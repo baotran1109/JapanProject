@@ -1,0 +1,20 @@
+[
+    {
+      "name": "Wakakusayama Hill",
+      "lat": 34.6906189,
+      "lng": 135.8540221,
+      "google_map_url":"https://maps.google.com/?cid=2263195875244312305"
+    },
+    {
+      "name": "Tōdai-ji",
+      "lat": 34.6889851,
+      "lng": 135.8398158,
+      "google_map_url":"https://maps.google.com/?cid=17911005107283377295"
+    },
+    {
+      "name": "Isuien Garden and Neiraku Museum",
+      "lat": 34.6860413,
+      "lng": 135.8371815,
+      "google_map_url":"https://maps.google.com/?cid=6490064857812221347"
+    }
+]

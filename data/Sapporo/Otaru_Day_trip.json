@@ -1,0 +1,62 @@
+[
+    {
+      "name": "Hiyoriyama Lighthouse",
+      "lat": 43.2383823,
+      "lng": 141.015675,
+      "google_map_url":"https://maps.google.com/?cid=5142998758583122764"
+    },
+    {
+      "name": "Otaru Shukutsu Panorama Observation Deck",
+      "lat": 43.2381474,
+      "lng": 141.0094517,
+      "google_map_url":"https://maps.google.com/?cid=14481280003027339113"
+    },
+    {
+      "name": "Otaru Aquarium",
+      "lat": 43.2369305,
+      "lng": 141.0119143,
+      "google_map_url":"https://maps.google.com/?cid=122447808970495057"
+    },
+    {
+      "name": "Old Aoyama Villa (Herring Palace)",
+      "lat": 43.2317269,
+      "lng": 141.0079569,
+      "google_map_url":"https://maps.google.com/?cid=9398391850615351495"
+    },
+    {
+      "name": "Yamanaka Dairy Farm Otaru Shop",
+      "lat": 43.1991165,
+      "lng": 140.9993422,
+      "google_map_url":"https://maps.google.com/?cid=13087257314659445108"
+    },
+    {
+      "name": "Uomasa",
+      "lat": 43.1978419,
+      "lng": 140.9985657,
+      "google_map_url":"https://maps.google.com/?cid=16937422294470843851"
+    },
+    {
+      "name": "Otaru Art Base",
+      "lat": 43.1976641,
+      "lng": 141.0018713,
+      "google_map_url":"https://maps.google.com/?cid=3601949190212216873"
+    },
+    {
+      "name": "Kitakaro Otaru Main Shop",
+      "lat": 43.191763,
+      "lng": 141.0073377,
+      "google_map_url":"https://maps.google.com/?cid=14120157591681245769"
+    },
+    {
+      "name": "LeTAO Main Store",
+      "lat": 43.191311,
+      "lng": 141.007433,
+      "google_map_url":"https://maps.google.com/?cid=8259555981103032062"
+    },
+    {
+      "name": "Otaru Music Box Museum",
+      "lat": 43.1905754,
+      "lng": 141.0078377,
+      "google_map_url":"https://maps.google.com/?cid=13013518922636518855"
+    }
+]

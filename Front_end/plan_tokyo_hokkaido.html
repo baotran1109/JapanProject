@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Plan Tokyo + Hokkaidō · Explore Japan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Firebase init -->
+  <script type="module" src="/static/js/firebase-init.js?v=3"></script>
+
+  <style>
+    :root{ --brand:#0e6efd; --ink:#222; --bg:#f7f9fb; --line:#e5e7eb; }
+    nav{background:#222;color:#fff;position:sticky;top:0;z-index:1000}
+    .nav-wrap{max-width:1100px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
+    nav a{color:#fff;text-decoration:none;margin:0 10px;font-weight:600}
+    nav a:hover{text-decoration:underline}
+    #auth-mini{color:#fff;font-size:14px}
+    #auth-mini a{color:var(--brand);background:#fff;padding:4px 8px;border-radius:6px;text-decoration:none;margin-left:6px;font-weight:600}
+    #auth-mini a:hover{background:#f3f4f6;color:#0b58c9}
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 selection:bg-blue-100 selection:text-blue-900">
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-wrap">
+      <div>
+        <a href="index.html">Home</a>
+        <a href="itineraries.html">Recommended Itineraries</a>
+        <a href="cities.html">Explore Cities</a>
+        <a href="tips.html">Travel Tips</a>
+        <a href="my_itineraries.html">My Itineraries</a>
+      </div>
+      <div id="auth-mini">
+        <span id="auth-name">Not signed in</span>
+        <a href="/auth.html" id="auth-link">Sign in</a>
+      </div>
+    </div>
+    <script type="module">
+      import { auth } from "/static/js/firebase-init.js?v=3";
+      import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+      const nameEl = document.getElementById("auth-name");
+      const linkEl = document.getElementById("auth-link");
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          nameEl.textContent = user.displayName || user.email;
+          linkEl.textContent = "Sign out";
+          linkEl.href = "#";
+          linkEl.onclick = async (e) => { e.preventDefault(); await signOut(auth); };
+        } else {
+          nameEl.textContent = "Not signed in";
+          linkEl.textContent = "Sign in";
+          linkEl.href = "/auth.html";
+          linkEl.onclick = null;
+        }
+      });
+    </script>
+  </nav>
+
+  <!-- HERO -->
+  <header class="relative">
+    <img src="static/Image/japan.jpg" alt="" class="absolute inset-0 -z-10 h-56 w-full object-cover md:h-64" />
+    <div class="absolute inset-0 -z-10 bg-black/35"></div>
+    <div class="mx-auto max-w-6xl px-4 h-56 md:h-64 flex items-center">
+      <div class="text-white">
+        <h1 class="text-2xl md:text-4xl font-bold tracking-tight drop-shadow">Plan Tokyo + Hokkaidō</h1>
+        <p class="mt-1 text-white/90">Tokyo · Hakodate · Sapporo — build your trip day by day and save it to your account.</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="mx-auto max-w-6xl px-4 py-8 grid gap-8 lg:grid-cols-[1.3fr_0.7fr]">
+
+    <!-- LEFT: Planner -->
+    <section class="space-y-6">
+      <!-- TOKYO -->
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5">
+        <div class="flex items-center justify-between gap-3">
+          <h2 class="text-xl font-semibold">🗼 Tokyo</h2>
+          <button onclick="addDay('tokyo')" class="rounded-lg bg-blue-600 px-4 py-2 text-white font-medium hover:bg-blue-700">
+            + Add Tokyo Day
+          </button>
+        </div>
+        <div id="tokyo-days" class="mt-4 space-y-4"></div>
+      </div>
+
+      <!-- HAKODATE -->
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5">
+        <div class="flex items-center justify-between gap-3">
+          <h2 class="text-xl font-semibold">⭐ Hakodate</h2>
+          <button onclick="addDay('hakodate')" class="rounded-lg bg-blue-600 px-4 py-2 text-white font-medium hover:bg-blue-700">
+            + Add Hakodate Day
+          </button>
+        </div>
+        <div id="hakodate-days" class="mt-4 space-y-4"></div>
+      </div>
+
+      <!-- SAPPORO -->
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5">
+        <div class="flex items-center justify-between gap-3">
+          <h2 class="text-xl font-semibold">❄️ Sapporo</h2>
+          <button onclick="addDay('sapporo')" class="rounded-lg bg-blue-600 px-4 py-2 text-white font-medium hover:bg-blue-700">
+            + Add Sapporo Day
+          </button>
+        </div>
+        <div id="sapporo-days" class="mt-4 space-y-4"></div>
+      </div>
+
+      <!-- Save + AI Row -->
+      <div class="flex flex-wrap items-center gap-3">
+        <button onclick="savePlan()" class="rounded-lg bg-emerald-600 px-5 py-2.5 text-white font-semibold hover:bg-emerald-700">
+          💾 Save Plan
+        </button>
+
+        <button id="ask-ai" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-800 font-semibold hover:bg-slate-50">
+          🤖 Ask AI to review
+        </button>
+
+        <span id="save-msg" class="text-emerald-700 font-medium"></span>
+
+        <button id="toggle-info" class="ml-auto rounded-lg bg-slate-900 px-4 py-2 text-white font-medium hover:bg-black lg:hidden">
+          🗺️ View Recommendations
+        </button>
+      </div>
+
+      <!-- AI Review Panel -->
+      <aside id="ai-panel" class="hidden rounded-2xl border border-slate-200 bg-white shadow-sm p-5">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-semibold">AI Review</h3>
+          <span class="text-sm text-slate-500">Score: <span id="ai-score">—</span>/10</span>
+        </div>
+
+        <div class="grid gap-6 md:grid-cols-3 mt-3">
+          <div>
+            <h4 class="font-semibold">✅ Strengths</h4>
+            <ul id="ai-strengths" class="mt-2 list-disc pl-5 text-sm text-slate-700 space-y-1"></ul>
+          </div>
+          <div>
+            <h4 class="font-semibold">⚠️ Risks</h4>
+            <ul id="ai-risks" class="mt-2 list-disc pl-5 text-sm text-slate-700 space-y-1"></ul>
+          </div>
+          <div class="md:col-span-1"></div>
+        </div>
+
+        <div class="mt-4">
+          <h4 class="font-semibold">💡 Suggestions</h4>
+          <div id="ai-suggestions" class="mt-2 grid gap-3">
+            <!-- cards injected here -->
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <!-- RIGHT: Recommendations -->
+    <aside id="recommendation-panel" class="hidden lg:block rounded-2xl border border-slate-200 bg-white shadow-sm p-5 h-fit">
+      <div class="space-y-6">
+
+        <!-- TOKYO -->
+        <div>
+          <h3 class="text-lg font-semibold">Tokyo Recommendations</h3>
+          <details class="mt-2">
+            <summary class="cursor-pointer text-blue-700 hover:underline">Top Attractions</summary>
+            <ul id="tokyo-attractions" class="mt-1 list-disc pl-5 text-sm text-slate-700 space-y-1"></ul>
+          </details>
+
+          <details class="mt-2">
+            <summary class="cursor-pointer text-blue-700 hover:underline">Shopping</summary>
+            <ul id="tokyo-shopping" class="mt-1 list-disc pl-5 text-sm text-slate-700 space-y-1"></ul>
+          </details>
+
+          <div class="border-t border-slate-200 mt-3 pt-3">
+            <h4 class="font-medium">Restaurants by Area</h4>
+            <div class="mt-1 space-y-2">
+              <details><summary class="cursor-pointer text-blue-700 hover:underline">Akihabara</summary><ul id="akihabara-list" class="list-disc pl-5 text-sm mt-1 space-y-1"></ul></details>
+              <details><summary class="cursor-pointer text-blue-700 hover:underline">Asakusa</summary><ul id="asakusa-list" class="list-disc pl-5 text-sm mt-1 space-y-1"></ul></details>
+              <details><summary class="cursor-pointer text-blue-700 hover:underline">Ginza</summary><ul id="ginza-list" class="list-disc pl-5 text-sm mt-1 space-y-1"></ul></details>
+              <details><summary class="cursor-pointer text-blue-700 hover:underline">Ikebukuro</summary><ul id="ikebukuro-list" class="list-disc pl-5 text-sm mt-1 space-y-1"></ul></details>
+              <details><summary class="cursor-pointer text-blue-700 hover:underline">Meguro</summary><ul id="meguro-list" class="list-disc pl-5 text-sm mt-1 space-y-1"></ul></details>
+              <details><summary class="cursor-pointer text-blue-700 hover:underline">Roppongi</summary><ul id="roppongi-list" class="list-disc pl-5 text-sm mt-1 space-y-1"></ul></details>
+              <details><summary class="cursor-pointer text-blue-700 hover:underline">Shibuya</summary><ul id="shibuya-list" class="list-disc pl-5 text-sm mt-1 space-y-1"></ul></details>
+              <details><summary class="cursor-pointer text-blue-700 hover:underline">Shinjuku</summary><ul id="shinjuku-list" class="list-disc pl-5 text-sm mt-1 space-y-1"></ul></details>
+              <details><summary class="cursor-pointer text-blue-700 hover:underline">Other Areas</summary><ul id="other-area-list" class="list-disc pl-5 text-sm mt-1 space-y-1"></ul></details>
+            </div>
+          </div>
+
+          <div class="border-t border-slate-200 mt-3 pt-3">
+            <h4 class="font-medium">Tokyo Day Trips</h4>
+            <details><summary class="cursor-pointer text-blue-700 hover:underline">Yokohama</summary><ul id="Yokohama-list" class="list-disc pl-5 text-sm"></ul></details>
+            <details><summary class="cursor-pointer text-blue-700 hover:underline">Nikko</summary><ul id="Nikko-list" class="list-disc pl-5 text-sm"></ul></details>
+            <details><summary class="cursor-pointer text-blue-700 hover:underline">Kamakura</summary><ul id="Kamakura-list" class="list-disc pl-5 text-sm"></ul></details>
+            <details><summary class="cursor-pointer text-blue-700 hover:underline">Kawagoe</summary><ul id="Kawagoe-list" class="list-disc pl-5 text-sm"></ul></details>
+            <details><summary class="cursor-pointer text-blue-700 hover:underline">Hakone</summary><ul id="Hakone-list" class="list-disc pl-5 text-sm"></ul></details>
+            <details><summary class="cursor-pointer text-blue-700 hover:underline">Mount Fuji</summary><ul id="MountFuji-list" class="list-disc pl-5 text-sm"></ul></details>
+          </div>
+        </div>
+
+        <!-- HAKODATE -->
+        <div>
+          <h3 class="text-lg font-semibold">Hakodate Recommendations</h3>
+          <details class="mt-2">
+            <summary class="cursor-pointer text-blue-700 hover:underline">Attractions</summary>
+            <ul id="hakodate-attractions" class="mt-1 list-disc pl-5 text-sm text-slate-700 space-y-1"></ul>
+          </details>
+          <details class="mt-2">
+            <summary class="cursor-pointer text-blue-700 hover:underline">Restaurants</summary>
+            <ul id="hakodate-restaurants" class="mt-1 list-disc pl-5 text-sm text-slate-700 space-y-1"></ul>
+          </details>
+          <details class="mt-2">
+            <summary class="cursor-pointer text-blue-700 hover:underline">Ōnuma National Park (Half-day)</summary>
+            <ul id="onuma-national-park" class="mt-1 list-disc pl-5 text-sm text-slate-700 space-y-1"></ul>
+          </details>
+        </div>
+
+        <!-- SAPPORO -->
+        <div>
+          <h3 class="text-lg font-semibold">Sapporo Recommendations</h3>
+          <details class="mt-2">
+            <summary class="cursor-pointer text-blue-700 hover:underline">Attractions</summary>
+            <ul id="sapporo-attractions" class="mt-1 list-disc pl-5 text-sm text-slate-700 space-y-1"></ul>
+          </details>
+          <details class="mt-2">
+            <summary class="cursor-pointer text-blue-700 hover:underline">Shopping</summary>
+            <ul id="sapporo-shopping" class="mt-1 list-disc pl-5 text-sm text-slate-700 space-y-1"></ul>
+          </details>
+          <details class="mt-2">
+            <summary class="cursor-pointer text-blue-700 hover:underline">Restaurants</summary>
+            <ul id="sapporo-restaurants" class="mt-1 list-disc pl-5 text-sm text-slate-700 space-y-1"></ul>
+          </details>
+
+          <div class="border-t border-slate-200 mt-3 pt-3">
+            <h4 class="font-medium">Day Trips</h4>
+            <details><summary class="cursor-pointer text-blue-700 hover:underline">Noboribetsu</summary><ul id="noboribetsu-list" class="list-disc pl-5 text-sm"></ul></details>
+            <details><summary class="cursor-pointer text-blue-700 hover:underline">Otaru</summary><ul id="otaru-list" class="list-disc pl-5 text-sm"></ul></details>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+  </main>
+
+  <footer class="py-10 text-center text-sm text-slate-500">&copy; 2025 Explore Japan · Bao Tran</footer>
+
+  <!-- Planner UI -->
+  <script>
+    const cityEl = (c)=>document.getElementById(`${c}-days`);
+
+    function renumberCity(city){
+      const boxes = cityEl(city).querySelectorAll(".day-box");
+      boxes.forEach((box, idx)=>{
+        const n = idx + 1;
+        box.setAttribute("data-day", n);
+        box.querySelector("[data-day-label]").textContent = `Day ${n}`;
+        box.querySelector(`[id^="${city}-loc-"]`).id = `${city}-loc-${n}`;
+        box.querySelector(`[id^="${city}-act-"]`).id = `${city}-act-${n}`;
+      });
+    }
+
+    function removeDay(btn, city){
+      const box = btn.closest(".day-box");
+      if(!box) return;
+      box.remove();
+      renumberCity(city);
+    }
+
+    function dayCard(city, n){
+      return `
+        <div class="day-box rounded-xl border border-slate-200 bg-white shadow-sm p-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-semibold"><span data-day-label>Day ${n}</span></h3>
+            <button type="button"
+              onclick="removeDay(this,'${city}')"
+              class="rounded-md bg-rose-600 px-3 py-1.5 text-white text-sm font-medium hover:bg-rose-700">Delete day</button>
+          </div>
+
+          <label class="mt-3 text-sm font-medium text-slate-700">Location / Area</label>
+          <input id="${city}-loc-${n}" type="text"
+                 placeholder="e.g., Asakusa · Motomachi · Ōdōri Park…"
+                 class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" />
+
+          <label class="mt-4 text-sm font-medium text-slate-700">Activities / Notes</label>
+          <textarea id="${city}-act-${n}" rows="3"
+                    placeholder="e.g., teamLab, Mount Hakodate night view, soup curry…"
+                    class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2"></textarea>
+        </div>`;
+    }
+
+    function addDay(city){
+      const count = cityEl(city).querySelectorAll(".day-box").length;
+      const n = count + 1;
+      const wrap = document.createElement("div");
+      wrap.innerHTML = dayCard(city, n);
+      cityEl(city).appendChild(wrap.firstElementChild);
+    }
+    window.addDay = addDay; window.removeDay = removeDay;
+
+    // Mobile recommendations toggle
+    document.getElementById("toggle-info")?.addEventListener("click", () => {
+      const p = document.getElementById("recommendation-panel");
+      const show = p.classList.contains("hidden");
+      p.classList.toggle("hidden", !show);
+      if (show) window.scrollTo({ top: p.offsetTop - 80, behavior: "smooth" });
+    });
+
+    // Local draft for create mode only
+    function saveLocal(){
+      const regions=["tokyo","hakodate","sapporo"];
+      const plan = { tokyo:[], hakodate:[], sapporo:[] };
+      regions.forEach(r=>{
+        const boxes = document.querySelectorAll(`#${r}-days .day-box`);
+        boxes.forEach((box,i)=>{
+          const loc = box.querySelector(`[id^="${r}-loc-"]`)?.value || "";
+          const act = box.querySelector(`[id^="${r}-act-"]`)?.value || "";
+          plan[r].push({ day:i+1, location:loc, activities:act });
+        });
+      });
+      localStorage.setItem("tokyoHokkaidoPlan", JSON.stringify(plan));
+    }
+
+    function loadLocal(){
+      const saved = JSON.parse(localStorage.getItem("tokyoHokkaidoPlan")||"null");
+      const regions=["tokyo","hakodate","sapporo"];
+      regions.forEach(r=>{ cityEl(r).innerHTML=""; });
+      if (saved){
+        regions.forEach(r=>{
+          (saved[r]||[]).forEach(()=>{ addDay(r); });
+          (saved[r]||[]).forEach((d, idx)=>{
+            const i = idx+1;
+            document.getElementById(`${r}-loc-${i}`).value = d.location || "";
+            document.getElementById(`${r}-act-${i}`).value = d.activities || "";
+          });
+          if (!saved[r] || saved[r].length===0) addDay(r);
+        });
+      } else {
+        regions.forEach(r=> addDay(r));
+      }
+    }
+
+    // Initial (create mode only — edit mode handled by Firestore script)
+    window.addEventListener("load", () => {
+      const params = new URLSearchParams(location.search);
+      if (params.get("itineraryId")) return;
+      loadLocal();
+    });
+
+    // Expose original local save for signed-out users; Firestore script overrides when signed in
+    window.savePlan = function(){
+      saveLocal();
+      document.getElementById("save-msg").textContent = "Plan saved locally.";
+    };
+
+    // Fetch lists helper
+    const fetchList = async (id, file) => {
+      try{
+        const res = await fetch(`/data/${file}`);
+        if(!res.ok) throw new Error(`${file}: ${res.status}`);
+        const data = await res.json();
+        const ul = document.getElementById(id);
+        if(!ul) return;
+        for(const item of data){
+          const li = document.createElement("li");
+          const a  = document.createElement("a");
+          a.href = item.google_map_url || item.google_maps_url || "#";
+          a.target = "_blank";
+          a.textContent = item.name || "(Unnamed)";
+          a.className = "text-blue-700 hover:underline";
+          li.appendChild(a);
+          ul.appendChild(li);
+        }
+      }catch(e){ console.log("Fetch failed:", e.message||e); }
+    };
+
+    // Tokyo
+    fetchList("tokyo-attractions", "Tokyo/Tokyo Attractions.json");
+    fetchList("tokyo-shopping", "Tokyo/Tokyo shopping.json");
+    fetchList("akihabara-list", "Tokyo/Akihabara_restaurants.json");
+    fetchList("asakusa-list", "Tokyo/Asakusa_restaurants.json");
+    fetchList("ginza-list", "Tokyo/Ginza_restaurants.json");
+    fetchList("ikebukuro-list", "Tokyo/Ikebukuro_restaurants.json");
+    fetchList("meguro-list", "Tokyo/meguro_restaurants.json");
+    fetchList("roppongi-list", "Tokyo/roppongi_restaurants.json");
+    fetchList("shibuya-list", "Tokyo/shibuya_restaurants.json");
+    fetchList("shinjuku-list", "Tokyo/Shinjuku_restaurants.json");
+    fetchList("other-area-list", "Tokyo/tokyo_other_area_restaurants.json");
+    fetchList("Yokohama-list", "Tokyo/Yokohama_daytrip.json");
+    fetchList("Hakone-list", "Tokyo/Hakone_daytrip.json");
+    fetchList("Nikko-list", "Tokyo/Nikko_daytrip.json");
+    fetchList("Kamakura-list", "Tokyo/Kamakura_daytrip.json");
+    fetchList("MountFuji-list", "Tokyo/Fujimount_daytrip.json");
+    fetchList("Kawagoe-list", "Tokyo/Kawagoe_daytrip.json");
+
+    // Hokkaidō
+    fetchList("hakodate-attractions","Hakodate/Hakodate_Attractions.json");
+    fetchList("hakodate-restaurants","Hakodate/Hakodate_Restaurants.json");
+    fetchList("onuma-national-park","Hakodate/Onuma National Park Half Day Trip.json");
+    fetchList("sapporo-restaurants","Sapporo/Sapporo_Restaurants.json");
+    fetchList("sapporo-shopping","Sapporo/Sapporo_Shopping.json");
+    fetchList("sapporo-attractions","Sapporo/Sapporo_Attractions.json");
+    fetchList("otaru-list","Sapporo/Otaru_Day_trip.json");
+    fetchList("noboribetsu-list","Sapporo/Noboribetsu_Day_Trip.json");
+  </script>
+
+  <!-- ===== AI REVIEW: multi-city (Tokyo/Hakodate/Sapporo) ===== -->
+  <script>
+    // --- Collect plan (only include days with any content) ---
+    function collectPlanForAI(){
+      const regions = ["tokyo","hakodate","sapporo"];
+      const out = {};
+      regions.forEach(r=>{
+        const boxes = document.querySelectorAll(`#${r}-days .day-box`);
+        const days = [];
+        boxes.forEach((box,i)=>{
+          const loc = box.querySelector(`[id^="${r}-loc-"]`)?.value.trim() || "";
+          const act = box.querySelector(`[id^="${r}-act-"]`)?.value.trim() || "";
+          if (loc || act){
+            days.push({ day:i+1, location:loc, activities:act });
+          }
+        });
+        if (days.length) out[r] = days;
+      });
+      return out;
+    }
+
+    // --- Apply functions (region-aware) ---
+    function findFields(region, day){
+      const loc = document.getElementById(`${region}-loc-${day}`);
+      const act = document.getElementById(`${region}-act-${day}`);
+      return {loc, act};
+    }
+    function includesToken(text, token){
+      return (text||"").toLowerCase().includes((token||"").toLowerCase());
+    }
+    function removeOnce(text, token){
+      if(!text || !token) return text||"";
+      const re = new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+      return text.replace(re, "").replace(/\s{2,}/g, " ").replace(/[\/|;,]\s*(?=\/|$)/g,"").trim();
+    }
+    function applyMove(region, item, fromDay, toDay){
+      // ensure target day exists
+      while(!document.getElementById(`${region}-act-${toDay}`)){
+        addDay(region);
+      }
+      const from = findFields(region, fromDay);
+      const to   = findFields(region, toDay);
+      if(!from.act || !to.act) return alert("Day not found.");
+
+      // remove from source (try activities, then location)
+      if (includesToken(from.act.value, item)){
+        from.act.value = removeOnce(from.act.value, item);
+      } else if (from.loc && includesToken(from.loc.value, item)){
+        from.loc.value = removeOnce(from.loc.value, item);
+      } else {
+        console.warn("Item not found in Day", fromDay, item);
+      }
+
+      // append to target activities
+      const glue = to.act.value.trim() ? " / " : "";
+      to.act.value = `${to.act.value.trim()}${glue}${item}`.trim();
+    }
+    function applySwap(region, a, b, day){
+      const {act, loc} = findFields(region, day);
+      if(!act) return alert("Day not found.");
+      const safe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      let t = act.value;
+      const reA = new RegExp(safe(a), "i");
+      const reB = new RegExp(safe(b), "i");
+      if (reA.test(t) && reB.test(t)){
+        t = t.replace(reA, "__TMP__");
+        t = t.replace(reB, a);
+        t = t.replace(/__TMP__/g, b);
+        act.value = t;
+      }
+      if (loc){
+        if (new RegExp(safe(a), "i").test(loc.value) && !new RegExp(safe(b), "i").test(loc.value)){
+          loc.value = loc.value.replace(new RegExp(safe(a), "i"), b);
+        } else if (new RegExp(safe(b), "i").test(loc.value) && !new RegExp(safe(a), "i").test(loc.value)){
+          loc.value = loc.value.replace(new RegExp(safe(b), "i"), a);
+        }
+      }
+    }
+    function applyTrim(region, item, day){
+      const {act, loc} = findFields(region, day);
+      if(!act) return alert("Day not found.");
+      act.value = removeOnce(act.value, item);
+      if (loc) loc.value = removeOnce(loc.value, item);
+    }
+    function applySuggestion(s){
+      const region = String(s.region||"").toLowerCase();
+      const day = parseInt(s.day, 10);
+      const d = s.details || {};
+      if(!region || !day || !d) return alert("Invalid suggestion.");
+      if (s.action === "move")  return applyMove(region, d.item, day, d.toDay);
+      if (s.action === "swap")  return applySwap(region, d.a, d.b, day);
+      if (s.action === "trim")  return applyTrim(region, d.item, day);
+      alert("Unsupported suggestion.");
+    }
+
+    // --- Render review ---
+    function renderReview(r){
+      const panel = document.getElementById("ai-panel");
+      panel.classList.remove("hidden");
+
+      document.getElementById("ai-score").textContent =
+        (typeof r.overallScore === "number" ? r.overallScore : "—");
+
+      const strengthsEl = document.getElementById("ai-strengths");
+      const risksEl = document.getElementById("ai-risks");
+      const suggsEl = document.getElementById("ai-suggestions");
+      strengthsEl.innerHTML = ""; risksEl.innerHTML = ""; suggsEl.innerHTML = "";
+
+      (r.strengths||[]).forEach(t=>{
+        const li = document.createElement("li"); li.textContent = t; strengthsEl.appendChild(li);
+      });
+      (r.risks||[]).forEach(t=>{
+        const li = document.createElement("li"); li.textContent = t; risksEl.appendChild(li);
+      });
+
+      (r.suggestions||[]).forEach((s, idx)=>{
+        const card = document.createElement("div");
+        card.className = "rounded-xl border border-slate-200 p-4";
+
+        const header = document.createElement("div");
+        header.className = "flex items-start justify-between gap-3";
+        const h = document.createElement("div");
+        h.innerHTML = `<div class="font-semibold">${s.title || "Suggested minor edit"}</div>
+                       <div class="text-xs text-slate-500">${(s.region||"").toUpperCase()} • Day ${s.day} • ${s.action}</div>`;
+        header.appendChild(h);
+
+        const conf = document.createElement("div");
+        conf.className = "text-xs text-slate-500";
+        const pct = Math.round((s.confidence ?? 0)*100);
+        conf.textContent = `${pct}%`;
+        header.appendChild(conf);
+        card.appendChild(header);
+
+        const reason = document.createElement("p");
+        reason.className = "mt-2 text-sm text-slate-700";
+        reason.textContent = s.reason || "";
+        card.appendChild(reason);
+
+        if (s.impact){
+          const imp = document.createElement("p");
+          imp.className = "mt-1 text-xs text-slate-500";
+          imp.textContent = `Impact: ${s.impact}`;
+          card.appendChild(imp);
+        }
+
+        const btn = document.createElement("button");
+        btn.className = "mt-3 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold hover:bg-slate-50";
+        btn.textContent = "Apply this suggestion";
+        btn.onclick = ()=> applySuggestion(s);
+        card.appendChild(btn);
+
+        suggsEl.appendChild(card);
+      });
+      if(!r.suggestions || r.suggestions.length===0){
+        const empty = document.createElement("div");
+        empty.className = "text-sm text-slate-500";
+        empty.textContent = "No concrete micro-edits needed.";
+        suggsEl.appendChild(empty);
+      }
+      // smooth scroll to panel
+      panel.scrollIntoView({behavior:"smooth", block:"start"});
+    }
+
+    // --- Hook the Ask AI button ---
+    document.getElementById("ask-ai")?.addEventListener("click", async ()=>{
+      try{
+        const plan = collectPlanForAI();
+        if (Object.keys(plan).length === 0){
+          alert("Add at least one day with a location or activity before requesting an AI review.");
+          return;
+        }
+        const res = await fetch("/ai/review", {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ plan})
+        });
+        if (!res.ok){
+          let msg = `HTTP ${res.status}`;
+          try{ const j = await res.json(); if (j?.error) msg = j.error; }catch{}
+          throw new Error(msg);
+        }
+        const review = await res.json();
+        renderReview(review);
+      }catch(e){
+        console.error(e);
+        alert("AI review failed: " + (e?.message || e));
+      }
+    });
+  </script>
+
+  <!-- Firestore save/edit -->
+  <script type="module">
+    import { auth, db } from "/static/js/firebase-init.js?v=3";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { doc, getDoc, updateDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    const msg = document.getElementById("save-msg");
+    const params = new URLSearchParams(location.search);
+    const itineraryId = params.get("itineraryId");
+
+    function collectPlan(){
+      const regions=["tokyo","hakodate","sapporo"];
+      const plan = { tokyo:[], hakodate:[], sapporo:[] };
+      regions.forEach(r=>{
+        const boxes = document.querySelectorAll(`#${r}-days .day-box`);
+        boxes.forEach((box,i)=>{
+          const loc = box.querySelector(`[id^="${r}-loc-"]`)?.value || "";
+          const act = box.querySelector(`[id^="${r}-act-"]`)?.value || "";
+          plan[r].push({ day:i+1, location:loc, activities:act });
+        });
+      });
+      return plan;
+    }
+
+    function renderPlan(p){
+      ["tokyo","hakodate","sapporo"].forEach(r=>{
+        const cont = document.getElementById(`${r}-days`);
+        cont.innerHTML = "";
+        const arr = p?.[r] || [];
+        if (!arr.length){ window.addDay?.(r); return; }
+        arr.forEach(()=> window.addDay?.(r));
+        arr.forEach((d, idx)=>{
+          const i = idx+1;
+          document.getElementById(`${r}-loc-${i}`).value = d.location || "";
+          document.getElementById(`${r}-act-${i}`).value = d.activities || "";
+        });
+      });
+    }
+
+    // override when signed in
+    window.savePlan = ()=>{};
+
+    onAuthStateChanged(auth, async (user) => {
+      const readyUser = user || null;
+      if (!readyUser) return;
+
+      if (itineraryId){
+        // EDIT
+        const ref = doc(db, `users/${readyUser.uid}/itineraries/${itineraryId}`);
+        const snap = await getDoc(ref);
+        const data = snap.exists() ? (snap.data() || {}) : {};
+        const plan = data.plan || { tokyo:[], hakodate:[], sapporo:[] };
+        renderPlan(plan);
+
+        window.savePlan = async ()=>{
+          const newPlan = collectPlan();
+          const totalDays = ["tokyo","hakodate","sapporo"].reduce((n,c)=>n+(newPlan[c]?.length||0),0);
+          msg.textContent = "Saving…";
+          try{
+            await updateDoc(ref, {
+              plan:newPlan,
+              days: totalDays,
+              cities:["Tokyo","Hakodate","Sapporo"].filter(c => (newPlan[c.toLowerCase()]||[]).length>0),
+              updatedAt: serverTimestamp()
+            });
+            alert("Changes saved."); msg.textContent = "Changes saved.";
+          }catch(e){ console.error(e); alert(`Save failed: ${e.message||e}`); msg.textContent = "Save failed."; }
+        };
+
+        // Save As Copy
+        const saveBtn = document.querySelector('button[onclick="savePlan()"]');
+        const copyBtn = document.createElement("button");
+        copyBtn.textContent = "Save As Copy";
+        copyBtn.className = "ml-2 rounded-lg bg-slate-700 px-5 py-2.5 text-white font-semibold hover:bg-black";
+        saveBtn.after(copyBtn);
+        copyBtn.onclick = async ()=>{
+          const newPlan = collectPlan();
+          const totalDays = ["tokyo","hakodate","sapporo"].reduce((n,c)=>n+(newPlan[c]?.length||0),0);
+          const title = prompt("Copy title?", `Tokyo + Hokkaidō Trip (Copy ${new Date().toLocaleDateString()})`)
+                     || `Tokyo + Hokkaidō Trip (${new Date().toLocaleDateString()})`;
+          try{
+            const colRef = collection(db, `users/${readyUser.uid}/itineraries`);
+            await addDoc(colRef, {
+              title, city:"Tokyo + Hokkaidō",
+              plan:newPlan, days:totalDays,
+              cities:["Tokyo","Hakodate","Sapporo"].filter(c => (newPlan[c.toLowerCase()]||[]).length>0),
+              createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+            });
+            alert("Saved a new copy!");
+          }catch(e){ console.error(e); alert(`Save-as-copy failed: ${e.message||e}`); }
+        };
+        return;
+      }
+
+      // CREATE
+      window.savePlan = async ()=>{
+        const newPlan = collectPlan();
+        const totalDays = ["tokyo","hakodate","sapporo"].reduce((n,c)=>n+(newPlan[c]?.length||0),0);
+        const title = prompt("Trip title?", `Tokyo + Hokkaidō Trip (${new Date().toLocaleDateString()})`)
+                   || `Tokyo + Hokkaidō Trip (${new Date().toLocaleDateString()})`;
+        msg.textContent = "Saving to the cloud…";
+        try{
+          const colRef = collection(db, `users/${readyUser.uid}/itineraries`);
+          await addDoc(colRef, {
+            title, city:"Tokyo + Hokkaidō",
+            plan:newPlan, days:totalDays,
+            cities:["Tokyo","Hakodate","Sapporo"].filter(c => (newPlan[c.toLowerCase()]||[]).length>0),
+            createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+          });
+          alert("Saved as a new itinerary!");
+          msg.textContent = "Saved as a new itinerary.";
+        }catch(e){
+          console.error(e); alert(`Cloud save failed: ${e.code||""} ${e.message||e}`);
+          msg.textContent = "Save failed. See console.";
+        }
+      };
+    });
+  </script>
+</body>
+</html>

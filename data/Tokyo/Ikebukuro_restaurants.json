@@ -1,0 +1,332 @@
+[
+  {
+    "name": "Pâtisserie Très Calme",
+    "lat": 35.728616,
+    "lng": 139.7419911,
+    "cuisine": "Cake shop",
+    "rating": 4.2,
+    "price_level": 1,
+    "area": "Sengoku",
+    "google_map_url": "https://www.google.com/maps/place/P%C3%A2tisserie+Tr%C3%A8s+Calme/@35.728616,139.7419911,18.28z/data=!4m6!3m5!1s0x60188da32d466087:0xb152c6c2254dd395!8m2!3d35.728601!4d139.7423924!16s%2Fg%2F11b6_jb4nj?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "Marue Chuka Soba Sugamo",
+    "lat": 35.7331212,
+    "lng": 139.7405902,
+    "cuisine": "ramen",
+    "rating": 4,
+    "price_level": 1,
+    "area": "Sugamo",
+    "google_map_url": "https://www.google.com/maps/place/Marue+Chuka+Soba+Sugamo/@35.7331212,139.7405902,19.61z/data=!4m6!3m5!1s0x60188dcfff77e649:0xbfc99e63449ab8ee!8m2!3d35.7329475!4d139.7406286!16s%2Fg%2F11jv609h4v?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "French Pound House",
+    "lat": 35.7329363,
+    "lng": 139.7417842,
+    "cuisine": "Dessert shop",
+    "rating": 4.1,
+    "price_level": 1,
+    "area": "Sugamo",
+    "google_map_url": "https://www.google.com/maps/place/French+Pound+House/@35.7329363,139.7417842,20.18z/data=!4m6!3m5!1s0x60188d98267912f1:0xa6c2bbba10601a8b!8m2!3d35.7329592!4d139.7419058!16s%2Fg%2F1tj5qr2p?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "Mensouan Sunada",
+    "lat": 35.7381241,
+    "lng": 139.7334179,
+    "cuisine": "ramen",
+    "rating": 4,
+    "price_level": 1,
+    "area": "Sugamo",
+    "google_map_url": "https://www.google.com/maps/place/Mensouan+Sunada/@35.7381241,139.7334179,16.66z/data=!4m6!3m5!1s0x60188d47d1ab65b7:0xdda68b214a866d2a!8m2!3d35.7373869!4d139.7336064!16s%2Fg%2F11j37fmv5g?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "King Seimen",
+    "lat": 35.7538644,
+    "lng": 139.7333903,
+    "cuisine": "ramen",
+    "rating": 4.3,
+    "price_level": 1,
+    "area": "Ojihoncho",
+    "google_map_url": "https://www.google.com/maps/place/King+Seimen/@35.7538644,139.7333903,17.15z/data=!4m6!3m5!1s0x6018934165949535:0x652fbb7d5c86baa2!8m2!3d35.7534071!4d139.7338205!16s%2Fg%2F11h0mmskg6?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "Sōgetsu",
+    "lat": 35.7637108,
+    "lng": 139.7283089,
+    "cuisine": "Japanese confectionery shop",
+    "rating": 4.3,
+    "price_level": 1,
+    "area": "Higashijujo",
+    "google_map_url": "https://www.google.com/maps/place/S%C5%8Dgetsu/@35.7637108,139.7283089,17.97z/data=!4m6!3m5!1s0x601892f4d0d1fc21:0xde4bd68a4bf79516!8m2!3d35.7632934!4d139.7291479!16s%2Fg%2F1tctxkjp?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "Sansanto",
+    "lat": 35.7644794,
+    "lng": 139.7255091,
+    "cuisine": "ramen",
+    "rating": 4.3,
+    "price_level": 1,
+    "area": "Nakajujo",
+    "google_map_url": "https://www.google.com/maps/place/Sansanto/@35.7644794,139.7255091,19.02z/data=!4m6!3m5!1s0x601892f39659ddeb:0x60c25da6b1b90c32!8m2!3d35.7645796!4d139.7257922!16s%2Fg%2F12qfm3slv?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "Niboshi Soba RU.",
+    "lat": 35.7610447,
+    "lng": 139.7222387,
+    "cuisine": "ramen",
+    "rating": 4.1,
+    "price_level": 1,
+    "area": "Kamijujo",
+    "google_map_url": "https://www.google.com/maps/place/Niboshi+Soba+RU./@35.7610447,139.7222387,19.43z/data=!4m6!3m5!1s0x601892f2bcaba661:0x3ee2c1e9d1902e77!8m2!3d35.7610819!4d139.7224053!16s%2Fg%2F11b75f3yc6?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "Asahi Chonaikai",
+    "lat": 35.7497185,
+    "lng": 139.7106629,
+    "cuisine": "ramen",
+    "rating": 4.2,
+    "price_level": 1,
+    "area": "Itabashi",
+    "google_map_url": "https://www.google.com/maps/place/Asahi+Chonaikai/@35.7497185,139.7106629,16.78z/data=!4m6!3m5!1s0x6018937d7b559a15:0x98ec9e8c80aee944!8m2!3d35.7501033!4d139.7121578!16s%2Fg%2F11j4sq7kmb?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "Osada",
+    "lat": 35.7469793,
+    "lng": 139.703869,
+    "cuisine": "ramen",
+    "rating": 4.2,
+    "price_level": 1,
+    "area": "Oyamakanaicho",
+    "google_map_url": "https://www.google.com/maps/place/Osada/@35.7469793,139.703869,17.64z/data=!4m6!3m5!1s0x6018936e325975f1:0x6da8cfe4bab094a5!8m2!3d35.7474964!4d139.7041908!16s%2Fg%2F11pkcj7404?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "Patisserie Materiel",
+    "lat": 35.7483827,
+    "lng": 139.6986141,
+    "cuisine": "Patisserie",
+    "rating": 4.3,
+    "price_level": 1,
+    "area": "Oyamacho",
+    "google_map_url": "https://www.google.com/maps/place/Patisserie+Materiel/@35.7483827,139.6986141,19.42z/data=!4m6!3m5!1s0x601892b6fe2c4bfd:0x792ca9f457416127!8m2!3d35.7482646!4d139.6987669!16s%2Fg%2F1td4dkby?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "Guchoku",
+    "lat": 35.7529978,
+    "lng": 139.6905974,
+    "cuisine": "ramen",
+    "rating": 3.9,
+    "price_level": 1,
+    "area": "Oyaguchikitacho",
+    "google_map_url": "https://www.google.com/maps/place/Guchoku/@35.7529978,139.6905974,19.28z/data=!4m6!3m5!1s0x6018ed3349621a2f:0x17fab4dd9a99c85d!8m2!3d35.7530556!4d139.6908333!16s%2Fg%2F1tdd58_q?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "Criollo",
+    "lat": 35.7442335,
+    "lng": 139.6819774,
+    "cuisine": "Pastry Shop",
+    "rating": 4.4,
+    "price_level": 1,
+    "area": "Mukaihara",
+    "google_map_url": "https://www.google.com/maps/place/Criollo/@35.7442335,139.6819774,17.9z/data=!4m6!3m5!1s0x6018ed37dd09d3bd:0xee588e87a07233df!8m2!3d35.744453!4d139.682443!16s%2Fg%2F1thl0wvk?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "まちのパーラー",
+    "lat": 35.7435775,
+    "lng": 139.6750628,
+    "cuisine": "Bakery",
+    "rating": 4.1,
+    "price_level": 1,
+    "area": "Kotakecho",
+    "google_map_url": "https://www.google.com/maps/place/%E3%81%BE%E3%81%A1%E3%81%AE%E3%83%91%E3%83%BC%E3%83%A9%E3%83%BC/@35.7435775,139.6750628,19.88z/data=!4m6!3m5!1s0x6018ed3ed66468b3:0x1ac3387d5fe7e51e!8m2!3d35.74352!4d139.675324!16s%2Fg%2F1tj45yq1?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "Men-ya Kintoki",
+    "lat": 35.7388806,
+    "lng": 139.6769439,
+    "cuisine": "ramen",
+    "rating": 4.3,
+    "price_level": 1,
+    "area": "Kotakecho",
+    "google_map_url": "https://www.google.com/maps/place/Men-ya+Kintoki/@35.7388806,139.6769439,16.73z/data=!4m6!3m5!1s0x6018ed46870a8b59:0x3361e5785beb0666!8m2!3d35.73832!4d139.678286!16s%2Fg%2F12qgv8kjz?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "KaneKitchen Noodles",
+    "lat": 35.728933,
+    "lng": 139.6824401,
+    "cuisine": "ramen",
+    "rating": 4,
+    "price_level": 1,
+    "area": "minaminagasaki",
+    "google_map_url": "https://www.google.com/maps/place/KaneKitchen+Noodles/@35.7292997,139.6823632,17.8z/data=!3m1!5s0x6018ed5710b77e93:0xbb98c26e771c9fd8!4m6!3m5!1s0x6018ed5710c4e143:0x93d95f4b3b7a4546!8m2!3d35.7290311!4d139.6827286!16s%2Fg%2F11c5xlc2l9?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "L'Automne - Nakano Branch",
+    "lat": 35.7328574,
+    "lng": 139.6700822,
+    "cuisine": "Dessert shop",
+    "rating": 4.3,
+    "price_level": 1,
+    "area": "Eharacho",
+    "google_map_url": "https://www.google.com/maps/place/L'Automne+-+Nakano+Branch/@35.7328574,139.6700822,17.76z/data=!4m6!3m5!1s0x6018ed682a2a3aa9:0x641cbcc60d0d9c65!8m2!3d35.732244!4d139.670686!16s%2Fg%2F1wk6zt2z?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "RAMEN GOTTSU",
+    "lat": 35.7355874,
+    "lng": 139.6553621,
+    "cuisine": "ramen",
+    "rating": 3.9,
+    "price_level": 1,
+    "area": "Nerima",
+    "google_map_url": "https://www.google.com/maps/place/RAMEN+GOTTSU/@35.7355874,139.6553621,15.26z/data=!3m1!5s0x6018ed0e9509fd89:0xa2320c7268807bd5!4m6!3m5!1s0x6018ed0e950de81d:0xd28a40e51c3e498c!8m2!3d35.7394109!4d139.6568335!16s%2Fg%2F12qfvxw7v?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "Torichō",
+    "lat": 35.7346507,
+    "lng": 139.65688,
+    "cuisine": "yakitori",
+    "rating": 4.4,
+    "price_level": 3,
+    "area": "Toyotamakita",
+    "google_map_url": "https://www.google.com/maps/place/Torich%C5%8D/@35.7346507,139.65688,18.36z/data=!4m6!3m5!1s0x6018ed0cc6419ead:0x79145eca1bbfd613!8m2!3d35.7345899!4d139.6568269!16s%2Fg%2F11b6twlfpb?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "Gyuzo",
+    "lat": 35.7359193,
+    "lng": 139.6287609,
+    "cuisine": "yakiniku",
+    "rating": 4.6,
+    "price_level": 2,
+    "area": "Nukui",
+    "google_map_url": "https://www.google.com/maps/place/Gyuzo/@35.7359193,139.6287609,20.25z/data=!3m1!5s0x6018edc9f3f6ecd3:0xf5640e708577363b!4m6!3m5!1s0x6018edc9f46b1093:0xf717b0584cd91815!8m2!3d35.7360338!4d139.6289933!16s%2Fg%2F1hc4dxfzw?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "Shinagawa",
+    "lat": 35.7307793,
+    "lng": 139.6984522,
+    "cuisine": "ramen",
+    "rating": 4,
+    "price_level": 1,
+    "area": "Nishiikebukuro",
+    "google_map_url": "https://www.google.com/maps/place/Shinagawa/@35.7307793,139.6984522,18.25z/data=!4m6!3m5!1s0x60188d57ab310001:0x196e48764774e07d!8m2!3d35.7303103!4d139.6988208!16s%2Fg%2F12qh0fdvv?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "Kaeru Shokudo",
+    "lat": 35.7335826,
+    "lng": 139.7027084,
+    "cuisine": "curry",
+    "rating": 4.3,
+    "price_level": 1,
+    "area": "Ikebukuro",
+    "google_map_url": "https://www.google.com/maps/place/Kaeru+Shokudo/@35.7335826,139.7027084,19.03z/data=!4m6!3m5!1s0x60188d58741835cd:0x86a72c08df34aead!8m2!3d35.7338109!4d139.7029461!16s%2Fg%2F1thhkhqf?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "Mixue",
+    "lat": 35.7313998,
+    "lng": 139.7055207,
+    "cuisine": "Ice Cream Shop",
+    "rating": 4.1,
+    "price_level": 1,
+    "area": "Nishiikebukuro",
+    "google_map_url": "https://www.google.com/maps/place/Mixue/@35.7313998,139.7055207,19.49z/data=!3m1!5s0x60188d5945a94cdd:0x90c24ae5975b8b33!4m6!3m5!1s0x60188d01f210dcbb:0xb74899160ccd7ede!8m2!3d35.7312556!4d139.7056554!16s%2Fg%2F11trsr01yk?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "Japanese Ramen Gokan",
+    "lat": 35.7336606,
+    "lng": 139.7171408,
+    "cuisine": "ramen",
+    "rating": 4.3,
+    "price_level": 1,
+    "area": "Higashiikebukuro",
+    "google_map_url": "https://www.google.com/maps/place/Japanese+Ramen+Gokan/@35.7336606,139.7171408,18.38z/data=!4m6!3m5!1s0x60188de9d2b472e9:0xb04b8d55301aabe7!8m2!3d35.7330795!4d139.7179055!16s%2Fg%2F11srz49yx2?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "焼肉冷麺だいじゅ",
+    "lat": 35.7326255,
+    "lng": 139.7277264,
+    "cuisine": "yakiniku",
+    "rating": 4.5,
+    "price_level": 2,
+    "area": "Kitaotsuka",
+    "google_map_url": "https://www.google.com/maps/place/%E7%84%BC%E8%82%89%E5%86%B7%E9%BA%BA%E3%81%A0%E3%81%84%E3%81%98%E3%82%85/@35.7326255,139.7277264,19.54z/data=!4m6!3m5!1s0x60188d4d35a24edf:0x97fa06d0f77a598f!8m2!3d35.7324881!4d139.7278893!16s%2Fg%2F11ftv9s2_y?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "Sōsakumen Kōbō Nakiryū",
+    "lat": 35.7286893,
+    "lng": 139.7302229,
+    "cuisine": "ramen",
+    "rating": 4.3,
+    "price_level": 1,
+    "area": "Minamiotsuka",
+    "google_map_url": "https://www.google.com/maps/place/S%C5%8Dsakumen+K%C5%8Db%C5%8D+Nakiry%C5%AB/@35.7286893,139.7302229,20.77z/data=!4m6!3m5!1s0x60188d750ebbb143:0xc93cf4fd48f57a07!8m2!3d35.7286762!4d139.7303427!16s%2Fg%2F119tpc62k?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "Golden Italian",
+    "lat": 35.7311609,
+    "lng": 139.7145041,
+    "cuisine": "Italian Restaurant",
+    "rating": 4.3,
+    "price_level": 2,
+    "area": "Higashiikebukuro",
+    "google_map_url": "https://www.google.com/maps/place/Golden+Italian/@35.7311609,139.7145041,18.94z/data=!3m1!5s0x60188d664685859f:0xee485a60c69c3d39!4m6!3m5!1s0x60188d6647c67565:0x6ac3243e15f07a20!8m2!3d35.7312675!4d139.7148285!16s%2Fg%2F1ptxnp9vm?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "Mendokoro Hanada Ikebukuro",
+    "lat": 35.7294453,
+    "lng": 139.7152603,
+    "cuisine": "ramen",
+    "rating": 4,
+    "price_level": 1,
+    "area": "Higashiikebukuro",
+    "google_map_url": "https://www.google.com/maps/place/Mendokoro+Hanada+Ikebukuro/@35.7294453,139.7152603,19.79z/data=!3m1!5s0x60188d689827258f:0xbb71f7614bd38747!4m6!3m5!1s0x60188d68bc75857f:0xb1c187e8c053636!8m2!3d35.7292897!4d139.7155645!16s%2Fg%2F1tdc9t79?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "焼肉うしごろ 池袋店",
+    "lat": 35.728836,
+    "lng": 139.7154529,
+    "cuisine": "yakiniku",
+    "rating": 4.4,
+    "price_level": 3,
+    "area": "Higashiikebukuro",
+    "google_map_url": "https://www.google.com/maps/place/%E7%84%BC%E8%82%89%E3%81%86%E3%81%97%E3%81%94%E3%82%8D+%E6%B1%A0%E8%A2%8B%E5%BA%97/@35.728836,139.7154529,20.15z/data=!4m6!3m5!1s0x60188d68bf18dc05:0xc147ccacbf3b05a4!8m2!3d35.7289517!4d139.7156225!16s%2Fg%2F11krp6b7kb?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "GUNRINDOU",
+    "lat": 35.717447,
+    "lng": 139.7284043,
+    "cuisine": "Japanese confectionery shop",
+    "rating": 4.4,
+    "price_level": 1,
+    "area": "Otowa",
+    "google_map_url": "https://www.google.com/maps/place/GUNRINDOU/@35.717447,139.7284043,19.85z/data=!4m6!3m5!1s0x60188d0890900001:0xc3ec114555271041!8m2!3d35.7175403!4d139.7284964!16s%2Fg%2F11cjp6n87c?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "Mensho",
+    "lat": 35.7165388,
+    "lng": 139.7285504,
+    "cuisine": "ramen",
+    "rating": 4.1,
+    "price_level": 1,
+    "area": "Otowa",
+    "google_map_url": "https://www.google.com/maps/place/Mensho/@35.7165388,139.7285504,19.55z/data=!3m1!5s0x60188d0624cf7aa3:0x59dc70a5cee22ff4!4m14!1m7!3m6!1s0x60188d0890900001:0xc3ec114555271041!2sGUNRINDOU!8m2!3d35.7175403!4d139.7284964!16s%2Fg%2F11cjp6n87c!3m5!1s0x60188d062354b9b9:0xefc2a9df1a128d18!8m2!3d35.7163294!4d139.7286796!16s%2Fg%2F11c60576hx?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "Aigre Douce",
+    "lat": 35.7224223,
+    "lng": 139.6999237,
+    "cuisine": "Patisserie",
+    "rating": 4.4,
+    "price_level": 1,
+    "area": "Shimoochiai",
+    "google_map_url": "https://www.google.com/maps/place/Aigre+Douce/@35.7224223,139.6999237,18.21z/data=!4m6!3m5!1s0x60188d4f91910911:0xa8ea48a725fb60d8!8m2!3d35.7224674!4d139.7006317!16s%2Fg%2F1vhly5dx?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  },
+  {
+    "name": "Shimura Confectionery",
+    "lat": 35.7222764,
+    "lng": 139.7055523,
+    "cuisine": "Japanese confectionery shop",
+    "rating": 4.2,
+    "price_level": 1,
+    "area": "Meijiro",
+    "google_map_url": "https://www.google.com/maps/place/Shimura+Confectionery/@35.7222764,139.7055523,19.88z/data=!3m1!5s0x60188d4413bc080f:0xe0d82cdd60addb78!4m6!3m5!1s0x60188d44131c22c1:0x7c7e1f61d8eed7e0!8m2!3d35.7223324!4d139.7056175!16s%2Fg%2F1vfn6nb4?entry=ttu&g_ep=EgoyMDI1MDcyMy4wIKXMDSoASAFQAw%3D%3D"
+  }
+]

@@ -1,0 +1,32 @@
+[
+    {
+      "name": "Tatehana Wharf Morning Market",
+      "lat": 40.5278596,
+      "lng": 141.5294053,
+      "google_maps_url": ""
+    },
+    {
+      "name": "Ashigezaki tenbōdai Observatory",
+      "lat": 40.5390678,
+      "lng": 141.5803351,
+      "google_maps_url": ""
+    },
+    {
+      "name": "Kabushima Shrine",
+      "lat": 40.5385428,
+      "lng": 141.5575712,
+      "google_maps_url": ""
+    },
+    {
+      "name": "Hasshoku Center",
+      "lat": 40.5264414,
+      "lng": 141.4529163,
+      "google_maps_url": ""
+    },
+    {
+      "name": "Kushihiki Hachimangu shrine",
+      "lat": 40.4900174,
+      "lng": 141.4347971,
+      "google_maps_url": ""
+    }
+  ]

@@ -1,0 +1,87 @@
+[
+    {
+      "name": "Cape Tachimachi",
+      "lat": 41.7450354,
+      "lng": 140.7212027,
+      "google_map_url":"https://maps.google.com/?cid=5749328193620995062"
+    },
+    {
+      "name": "Hakodate Hachimangu",
+      "lat": 41.7538677,
+      "lng": 140.7098647,
+      "google_map_url":"https://maps.google.com/?cid=17817480319742112276"
+    },
+    {
+      "name": "Hakodate Park",
+      "lat": 41.7563506,
+      "lng": 140.7158338,
+      "google_map_url":"https://maps.google.com/?cid=14327223869931335679"
+    },
+    {
+      "name": "Hakodate Gokoku Shrine",
+      "lat": 41.759291,
+      "lng": 140.7133523,
+      "google_map_url":"https://maps.google.com/?cid=7483039015911040516"
+    },
+    {
+      "name": "Mt. Hakodate Ropeway - Mountain Base Station",
+      "lat": 41.7609078,
+      "lng": 140.7143007,
+      "google_map_url":"https://maps.google.com/?cid=1570703230736335212"
+    },
+    {
+      "name": "Mt. Hakodate Observatory",
+      "lat": 41.7594596,
+      "lng": 140.7046519,
+      "google_map_url":"https://maps.google.com/?cid=13357459552488566614"
+    },
+    {
+      "name": "Hakodate Orthodox Church",
+      "lat": 41.7627913,
+      "lng": 140.7122004,
+      "google_map_url":"https://maps.google.com/?cid=3915762119995387066"
+    },
+    {
+      "name": "Old Public Hall of Hakodate Ward",
+      "lat": 41.7650219,
+      "lng": 140.7089348,
+      "google_map_url":"https://maps.google.com/?cid=7533059940468054576"
+    },
+    {
+      "name": "Hakodate City Seikan Train Ferry Memorial Museum Mashū-maru",
+      "lat": 41.7728908,
+      "lng": 140.7217883,
+      "google_map_url":"https://maps.google.com/?cid=9057115399007451604"
+    },
+    {
+      "name": "Hakodate Morning Market Ekini Market",
+      "lat": 41.7724585,
+      "lng": 140.7256912,
+      "google_map_url":"https://maps.google.com/?cid=16464796835552829333"
+    },
+    {
+      "name": "Yukura Shrine",
+      "lat": 41.7822064,
+      "lng": 140.7910424,
+      "google_map_url":"https://maps.google.com/?cid=6839842317124687292"
+    },
+    {
+      "name": "Goryōkaku",
+      "lat": 41.7969245,
+      "lng": 140.7567838,
+      "google_map_url":"https://maps.google.com/?cid=12242117690600510722"
+    },
+    {
+      "name": "Goryōkaku Tower",
+      "lat": 41.7946699,
+      "lng": 140.75402,
+      "google_map_url":"https://maps.google.com/?cid=8499972688741247134"
+    },
+    {
+      "name": "Our Lady of the Angels Trappistine Abbey",
+      "lat": 41.7879845,
+      "lng": 140.8226181,
+      "google_map_url":"https://maps.google.com/?cid=14835269583554491768"
+    }
+]
+    

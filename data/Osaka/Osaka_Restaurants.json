@@ -1,0 +1,398 @@
+[
+    {
+      "name": "Sanukiudon Byakuan",
+      "lat": 34.7319676,
+      "lng": 135.4737031,
+      "google_map_url":"https://maps.google.com/?cid=17593181254953422624"
+    },
+    {
+      "name": "トラットリアチェーロ",
+      "lat": 34.7289651,
+      "lng": 135.4958637,
+      "google_map_url":"https://maps.google.com/?cid=7609529671985938573"
+    },
+    {
+      "name": "Mugito Mensuke",
+      "lat": 34.7113526,
+      "lng": 135.5000027,
+      "google_map_url":"https://maps.google.com/?cid=3279025535520593386"
+    },
+    {
+      "name": "Cafe Fate",
+      "lat": 34.7122164,
+      "lng": 135.5102168,
+      "google_map_url":"https://maps.google.com/?cid=4098706187926573818"
+    },
+    {
+      "name": "Gomenne Jiro",
+      "lat": 34.7073712,
+      "lng": 135.5131773,
+      "google_map_url":"https://maps.google.com/?cid=17719975767528996436"
+    },
+    {
+      "name": "Onigiri Gorichan",
+      "lat": 34.7071179,
+      "lng": 135.5058786,
+      "google_map_url":"https://maps.google.com/?cid=5273802679295432360"
+    },
+    {
+      "name": "Pâtisserie Ravi,e relier",
+      "lat": 34.7057156,
+      "lng": 135.5076872,
+      "google_map_url":"https://maps.google.com/?cid=6068018298353206804"
+    },
+    {
+      "name": "Gorichan",
+      "lat": 34.7037239,
+      "lng": 135.5032994,
+      "google_map_url":"https://maps.google.com/?cid=17877513488187555451"
+    },
+    {
+      "name": "大阪中華 サワダ飯店",
+      "lat": 34.7020994,
+      "lng": 135.499974,
+      "google_map_url":"https://maps.google.com/?cid=16738307915034590647"
+    },
+    {
+      "name": "Hanadako",
+      "lat": 34.7031557,
+      "lng": 135.497981,
+      "google_map_url":"https://maps.google.com/?cid=11352409233880323705"
+    },
+    {
+      "name": "BOTANI:CURRY",
+      "lat": 34.7012247,
+      "lng": 135.4983775,
+      "google_map_url":"https://maps.google.com/?cid=11877360651130273992"
+    },
+    {
+      "name": "LE PINEAU",
+      "lat": 34.7012797,
+      "lng": 135.4983196,
+      "google_map_url":"https://maps.google.com/?cid=2506312864542092820"
+    },
+    {
+      "name": "ECHI PONTE VECCHIO A OSAKA",
+      "lat": 34.7028866,
+      "lng": 135.4953236,
+      "google_map_url":"https://maps.google.com/?cid=18407973869736361777"
+    },
+    {
+      "name": "Fukutaro Okonomiyaki",
+      "lat": 34.7042542,
+      "lng": 135.494773,
+      "google_map_url":"https://maps.google.com/?cid=8569155778504395775"
+    },
+    {
+      "name": "中国菜オイル",
+      "lat": 34.701537,
+      "lng": 135.4890091,
+      "google_map_url":"https://maps.google.com/?cid=13250653614485726299"
+    },
+    {
+      "name": "Ramen Jinsei JET",
+      "lat": 34.6986086,
+      "lng": 135.4865983,
+      "google_map_url":"https://maps.google.com/?cid=12004084120505548181"
+    },
+    {
+      "name": "Dal Brigante",
+      "lat": 34.6930057,
+      "lng": 135.4843101,
+      "google_map_url":"https://maps.google.com/?cid=15062967647340753471"
+    },
+    {
+      "name": "Chibo Okonomiyaki",
+      "lat": 34.6986819,
+      "lng": 135.4926937,
+      "google_map_url":"https://maps.google.com/?cid=16422559146882816525"
+    },
+    {
+      "name": "BOULANGERIE BURDIGALA",
+      "lat": 34.699071,
+      "lng": 135.493557,
+      "google_map_url":"https://maps.google.com/?cid=3702739426210642097"
+    },
+    {
+      "name": "Budo-tei",
+      "lat": 34.6990531,
+      "lng": 135.4994434,
+      "google_map_url":"https://maps.google.com/?cid=569317690820604886"
+    },
+    {
+      "name": "son-ju-cue|村塾 屋根裏別邸",
+      "lat": 34.6988039,
+      "lng": 135.5013399,
+      "google_map_url":"https://maps.google.com/?cid=17913137064244795397"
+    },
+    {
+      "name": "Torisho Ishii",
+      "lat": 34.6956719,
+      "lng": 135.5060603,
+      "google_map_url":"https://maps.google.com/?cid=12261534271409583083"
+    },
+    {
+      "name": "Nakamuraya, Croquette and Beef Cutlet",
+      "lat": 34.6971004,
+      "lng": 135.5116475,
+      "google_map_url":"https://maps.google.com/?cid=6352827470905661489"
+    },
+    {
+      "name": "Ogimachi Udon-ya Asuroh",
+      "lat": 34.701752,
+      "lng": 135.511235,
+      "google_map_url":"https://maps.google.com/?cid=14951123387409938968"
+    },
+    {
+      "name": "Yakiniku Shioyaki Satsuma",
+      "lat": 34.6964009,
+      "lng": 135.5003601,
+      "google_map_url":"https://maps.google.com/?cid=9892155427079620150"
+    },
+    {
+      "name": "Doozono",
+      "lat": 34.6977005,
+      "lng": 135.4973647,
+      "google_map_url":"https://maps.google.com/?cid=776758720476927087"
+    },
+    {
+      "name": "Le Sucré-Coeur",
+      "lat": 34.6956847,
+      "lng": 135.4992736,
+      "google_map_url":"https://maps.google.com/?cid=4351276256240407613"
+    },
+    {
+      "name": "Quatre Lapin",
+      "lat": 34.6957575,
+      "lng": 135.4993423,
+      "google_map_url":"https://maps.google.com/?cid=6994579881770366650"
+    },
+    {
+      "name": "Paris-h",
+      "lat": 34.6931849,
+      "lng": 135.4925411,
+      "google_map_url":"https://maps.google.com/?cid=13263694851155006231"
+    },
+    {
+      "name": "Ristorante Quintocanto",
+      "lat": 34.69327,
+      "lng": 135.492491,
+      "google_map_url":"https://maps.google.com/?cid=8447653081797975520"
+    },
+    {
+      "name": "La Fête Hiramatsu",
+      "lat": 34.6935631,
+      "lng": 135.496935,
+      "google_map_url":"https://maps.google.com/?cid=6462909157012909929"
+    },
+    {
+      "name": "Joel",
+      "lat": 34.691384,
+      "lng": 135.4998839,
+      "google_map_url":"https://maps.google.com/?cid=17880926903945115718"
+    },
+    {
+      "name": "Tori Soba ZAGIN Main Shop",
+      "lat": 34.6896133,
+      "lng": 135.4950563,
+      "google_map_url":"https://maps.google.com/?cid=6838999796133111039"
+    },
+    {
+      "name": "Okonomiyaki Shimizu",
+      "lat": 34.688876,
+      "lng": 135.4915184,
+      "google_map_url":"https://maps.google.com/?cid=13033010827360130177"
+    },
+    {
+      "name": "CURRY家 Ghar",
+      "lat": 34.6872658,
+      "lng": 135.4954047,
+      "google_map_url":"https://maps.google.com/?cid=5511778665485765271"
+    },
+    {
+      "name": "Calendrier",
+      "lat": 34.6832361,
+      "lng": 135.5035,
+      "google_map_url":"https://maps.google.com/?cid=6658593072821651353"
+    },
+    {
+      "name": "Yoshokuya Fujiya",
+      "lat": 34.6826205,
+      "lng": 135.5131302,
+      "google_map_url":"https://maps.google.com/?cid=17667201789546999541"
+    },
+    {
+      "name": "Kamekichi bistro",
+      "lat": 34.6826363,
+      "lng": 135.5155281,
+      "google_map_url":"https://maps.google.com/?cid=6349554086816882590"
+    },
+    {
+      "name": "Jibundoki",
+      "lat": 34.6794212,
+      "lng": 135.4982597,
+      "google_map_url":"https://maps.google.com/?cid=5484596682914067900"
+    },
+    {
+      "name": "Pizzeria da Tigre",
+      "lat": 34.6772752,
+      "lng": 135.4942991,
+      "google_map_url":"https://maps.google.com/?cid=14403378469546268161"
+    },
+    {
+      "name": "pâtisserie accueil",
+      "lat": 34.6744429,
+      "lng": 135.4944781,
+      "google_map_url":"https://maps.google.com/?cid=16435835357479877859"
+    },
+    {
+      "name": "Kadoya Shokudo",
+      "lat": 34.6760951,
+      "lng": 135.4838409,
+      "google_map_url":"https://maps.google.com/?cid=4715903537433432411"
+    },
+    {
+      "name": "Le Premier Cafe",
+      "lat": 34.6742317,
+      "lng": 135.5017542,
+      "google_map_url":"https://maps.google.com/?cid=230885030624463585"
+    },
+    {
+      "name": "Albalonga",
+      "lat": 34.6746343,
+      "lng": 135.5024795,
+      "google_map_url":"https://maps.google.com/?cid=17151456654524731582"
+    },
+    {
+      "name": "Baranoki",
+      "lat": 34.6720714,
+      "lng": 135.502719,
+      "google_map_url":"https://maps.google.com/?cid=4952237400277311898"
+    },
+    {
+      "name": "Wayōshusai Hide",
+      "lat": 34.6716382,
+      "lng": 135.5020502,
+      "google_map_url":"https://maps.google.com/?cid=5275225223556099230"
+    },
+    {
+      "name": "Dekasan",
+      "lat": 34.6697236,
+      "lng": 135.5118796,
+      "google_map_url":"https://maps.google.com/?cid=6568950670422497395"
+    },
+    {
+      "name": "Tsurugyu",
+      "lat": 34.6695868,
+      "lng": 135.5117058,
+      "google_map_url":"https://maps.google.com/?cid=3204626011589143086"
+    },
+    {
+      "name": "Men-no-Yoji",
+      "lat": 34.6682938,
+      "lng": 135.5112946,
+      "google_map_url":"https://maps.google.com/?cid=11833311574059077621"
+    },
+    {
+      "name": "Gyokuseiya",
+      "lat": 34.6672984,
+      "lng": 135.5050895,
+      "google_map_url":"https://maps.google.com/?cid=17193496079202062229"
+    },
+    {
+      "name": "Okonomiyaki Mizuno",
+      "lat": 34.6683548,
+      "lng": 135.5032226,
+      "google_map_url":"https://maps.google.com/?cid=14993068628475195202"
+    },
+    {
+      "name": "American",
+      "lat": 34.668381,
+      "lng": 135.5030413,
+      "google_map_url":"https://maps.google.com/?cid=16910750404935257493"
+    },
+    {
+      "name": "Creperie Alcyon",
+      "lat": 34.6674099,
+      "lng": 135.5022563,
+      "google_map_url":"https://maps.google.com/?cid=4819490743023198706"
+    },
+    {
+      "name": "Namba Okonomiyaki Ajinoya Honten",
+      "lat": 34.668065,
+      "lng": 135.500976,
+      "google_map_url":"https://maps.google.com/?cid=13558371125293422542"
+    },
+    {
+      "name": "Wagyu IDATEN",
+      "lat": 34.6677597,
+      "lng": 135.5010546,
+      "google_map_url":"https://maps.google.com/?cid=4922574177392583819"
+    },
+    {
+      "name": "Jyutei",
+      "lat": 34.6662152,
+      "lng": 135.5021989,
+      "google_map_url":"https://maps.google.com/?cid=716891188368770783"
+    },
+    {
+      "name": "Rakurakuza",
+      "lat": 34.6661825,
+      "lng": 135.4989653,
+      "google_map_url":"https://maps.google.com/?cid=9628849964245967323"
+    },
+    {
+      "name": "Tahei",
+      "lat": 34.6641368,
+      "lng": 135.4999768,
+      "google_map_url":"https://maps.google.com/?cid=14163482718389581439"
+    },
+    {
+      "name": "Revo 本店",
+      "lat": 34.6359786,
+      "lng": 135.494886,
+      "google_map_url":"https://maps.google.com/?cid=17939467938939486476"
+    },
+    {
+      "name": "Matasaburo",
+      "lat": 34.6121679,
+      "lng": 135.512908,
+      "google_map_url":"https://maps.google.com/?cid=13831102149187783155"
+    },
+    {
+      "name": "Naniwaya",
+      "lat": 34.609469,
+      "lng": 135.513119,
+      "google_map_url":"https://maps.google.com/?cid=11372418130667855021"
+    },
+    {
+      "name": "Manmasa",
+      "lat": 34.6620156,
+      "lng": 135.5359602,
+      "google_map_url":"https://maps.google.com/?cid=5138672742046468206"
+    },
+    {
+      "name": "Kiyosuke",
+      "lat": 34.6754024,
+      "lng": 135.5197095,
+      "google_map_url":"https://maps.google.com/?cid=10221208078783218860"
+    },
+    {
+      "name": "Tonkatsu Manger",
+      "lat": 34.6200645,
+      "lng": 135.5983796,
+      "google_map_url":"https://maps.google.com/?cid=371562154138431314"
+    },
+    {
+      "name": "The Münch",
+      "lat": 34.6149988,
+      "lng": 135.619448,
+      "google_map_url":"https://maps.google.com/?cid=2591386095873291678"
+    },
+    {
+      "name": "Kusaka Curry",
+      "lat": 34.6765787,
+      "lng": 135.5011141,
+      "google_map_url":"https://maps.google.com/?cid=18351212612332591303"
+    }
+]

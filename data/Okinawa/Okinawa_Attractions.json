@@ -1,0 +1,104 @@
+[
+    {
+      "name": "Okinawa World",
+      "lat": 26.1404807,
+      "lng": 127.7489447,
+      "google_maps_url": "https://maps.google.com/?cid=18363440050121383371"
+    },
+    {
+      "name": "Farmers Market Itoman Umanchu Market",
+      "lat": 26.1384132,
+      "lng": 127.6620587,
+      "google_maps_url": "https://maps.google.com/?cid=12701165401208148849"
+    },
+    {
+      "name": "Umikaji Terrace Senagajima",
+      "lat": 26.1766603,
+      "lng": 127.6404367,
+      "google_maps_url": "https://maps.google.com/?cid=11904711692991169464"
+    },
+    {
+      "name": "Naminoue Shrine",
+      "lat": 26.2207369,
+      "lng": 127.6711012,
+      "google_maps_url": "https://maps.google.com/?cid=8604780068634698924"
+    },
+    {
+      "name": "Naminoue Beach",
+      "lat": 26.2212041,
+      "lng": 127.6720664,
+      "google_maps_url": "https://maps.google.com/?cid=6358497946686522270"
+    },
+    {
+      "name": "Makishi Public Market",
+      "lat": 26.2145927,
+      "lng": 127.6883013,
+      "google_maps_url": "https://maps.google.com/?cid=12134031717300061400"
+    },
+    {
+      "name": "Okinawa Prefectural Museum and Art Museum (Okimyu)",
+      "lat": 26.2273138,
+      "lng": 127.6938489,
+      "google_maps_url": "https://maps.google.com/?cid=6785339530844620063"
+    },
+    {
+      "name": "Tomari Iyumachi Fish Market",
+      "lat": 26.2300663,
+      "lng": 127.6802558,
+      "google_maps_url": "https://maps.google.com/?cid=4017231740454652322"
+    },
+    {
+      "name": "Shuri Castle",
+      "lat": 26.2170449,
+      "lng": 127.7194833,
+      "google_maps_url": "https://maps.google.com/?cid=13873795751300976523"
+    },
+    {
+      "name": "Shikina-en Royal Gardens 識名園",
+      "lat": 26.2038547,
+      "lng": 127.7153279,
+      "google_maps_url": "https://maps.google.com/?cid=10783843086364632427"
+    },
+    {
+      "name": "Cape Maeda",
+      "lat": 26.4450618,
+      "lng": 127.7714252,
+      "google_maps_url": "https://maps.google.com/?cid=8203357222013195823"
+    },
+    {
+      "name": "Kanna Beach",
+      "lat": 26.4736875,
+      "lng": 127.9600625,
+      "google_maps_url": "https://maps.google.com/?cid=3758775879756592145"
+    },
+    {
+      "name": "Kouri Bridge View Point",
+      "lat": 26.6788164,
+      "lng": 128.0126263,
+      "google_maps_url": "https://maps.google.com/?cid=12687395700775574542"
+    },
+    {
+      "name": "Okinawa Churaumi Aquarium",
+      "lat": 26.694338,
+      "lng": 127.8780131,
+      "google_maps_url": "https://maps.google.com/?cid=16863911804921552894"
+    },
+    {
+      "name": "Kokuei Okinawakinenkoen Emerald Beach",
+      "lat": 26.6991832,
+      "lng": 127.8775903,
+      "google_maps_url": "https://maps.google.com/?cid=12836500976534541201"
+    },
+    {
+      "name": "Sesoko Beach",
+      "lat": 26.6499375,
+      "lng": 127.8563125,
+      "google_maps_url": "https://maps.google.com/?cid=12695998777094848900"
+    },
+    {
+      "name": "Cape Manzamo",
+      "lat": 26.50523,
+      "lng": 127.85047,
+      "google_maps_url": "https://maps.google.com/?cid=16135339115350022424"
+    }
+  ]

@@ -1,0 +1,21 @@
+[
+    {
+      "name": "Onuma National Park",
+      "lat": 41.9838473,
+      "lng": 140.6721442,
+      "google_map_url":"https://maps.google.com/?cid=8656010056954195789"
+    },
+    {
+      "name": "Numa No Ya",
+      "lat": 41.981612,
+      "lng": 140.6706474,
+      "google_map_url":"https://maps.google.com/?cid=16289505425784233282"
+    },
+    {
+      "name": "TABLE DE RIVAGE",
+      "lat": 41.9873362,
+      "lng": 140.6689769,
+      "google_map_url":"https://maps.google.com/?cid=417007650904880305"
+    }
+
+]

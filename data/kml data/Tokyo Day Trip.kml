@@ -1,0 +1,607 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Tokyo Day Trip</name>
+    <description/>
+    <Style id="icon-1899-0288D1-nodesc-normal">
+      <IconStyle>
+        <color>ffd18802</color>
+        <scale>1</scale>
+        <Icon>
+          <href>https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+        <hotSpot x="32" xunits="pixels" y="64" yunits="insetPixels"/>
+      </IconStyle>
+      <LabelStyle>
+        <scale>0</scale>
+      </LabelStyle>
+      <BalloonStyle>
+        <text><![CDATA[<h3>$[name]</h3>]]></text>
+      </BalloonStyle>
+    </Style>
+    <Style id="icon-1899-0288D1-nodesc-highlight">
+      <IconStyle>
+        <color>ffd18802</color>
+        <scale>1</scale>
+        <Icon>
+          <href>https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+        <hotSpot x="32" xunits="pixels" y="64" yunits="insetPixels"/>
+      </IconStyle>
+      <LabelStyle>
+        <scale>1</scale>
+      </LabelStyle>
+      <BalloonStyle>
+        <text><![CDATA[<h3>$[name]</h3>]]></text>
+      </BalloonStyle>
+    </Style>
+    <StyleMap id="icon-1899-0288D1-nodesc">
+      <Pair>
+        <key>normal</key>
+        <styleUrl>#icon-1899-0288D1-nodesc-normal</styleUrl>
+      </Pair>
+      <Pair>
+        <key>highlight</key>
+        <styleUrl>#icon-1899-0288D1-nodesc-highlight</styleUrl>
+      </Pair>
+    </StyleMap>
+    <Folder>
+      <name>Kamakura Day Trip</name>
+      <Placemark>
+        <name>Kotoku-in</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.5357442,35.3168145,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Hasedera</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.5330634,35.3124645,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Kaedena</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.5350659,35.313242,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Sangoshō</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.5166015,35.3091029,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Shichirigahama Beach</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.513901,35.3043891,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Ristorante Amalfi</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.5075183,35.3058994,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Enoshima Uomi-tei</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.4752808,35.2990494,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Enoshima Sea Candle</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.478425,35.2997417,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Chigogafuchi Abyss</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.4744322,35.2987385,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Enoshima Iwaya Cave</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.4755886,35.2984071,0
+          </coordinates>
+        </Point>
+      </Placemark>
+    </Folder>
+    <Folder>
+      <name>Nikko Day Trip</name>
+      <Placemark>
+        <name>Nikko Sakaeya (​​agé-Yuba Manjū shop)</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.6188171,36.7478007,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Shinkyō Bridge</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.6040034,36.75337,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name><![CDATA[Grill & Steak Myōgetsubō]]></name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.6038227,36.7540941,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Meiji-no-Yakata</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.6029851,36.7567508,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Nikkō Tōshogū</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.5987466,36.7580878,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Nikko Tamozawa Imperial Villa Memorial Park</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.5911421,36.7525307,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Akechidaira Ropeway</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.514514,36.7374928,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Kegon Waterfalls</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.501941,36.7380893,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Kegon Waterfall Paid Observation Deck</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.5040192,36.7378402,0
+          </coordinates>
+        </Point>
+      </Placemark>
+    </Folder>
+    <Folder>
+      <name>Yokohama Day Trip</name>
+      <Placemark>
+        <name>Cup Noodles Museum</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.6388669,35.4554755,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Yokohama Red Brick Warehouse</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.6428944,35.4526321,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Osanbashi Hall</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.6485472,35.4527872,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>NYK Hikawa Maru</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.6513128,35.4466661,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Yamashita Park</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.6497793,35.4457655,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Coffee House The CAFE</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.6500125,35.4448182,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Nan Etsu Bishoku</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.6469279,35.4437494,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Saikoushinkan</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.6468506,35.4431281,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Daisangen</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.6478505,35.442274,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>台湾菜館(タイワンサイカン)</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.6465576,35.4424363,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>青葉新館(アオバシンカン)</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.6481905,35.4428729,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>ONtheCORNER</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.6497725,35.4420124,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Yamate Italian Garden</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.6433333,35.4366667,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Sankeien Garden</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.6588267,35.4170511,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Yokohama Port Symbol Tower</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.6896205,35.4389973,0
+          </coordinates>
+        </Point>
+      </Placemark>
+    </Folder>
+    <Folder>
+      <name>Fuji Mount Day Trip</name>
+      <Placemark>
+        <name>Arakurayama Sengen Park</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            138.8016313,35.5013908,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>MIMASU Restaurant</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            138.8025353,35.4912341,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>十駕</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            138.8052348,35.4657741,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Oshino hakkai</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            138.8324741,35.4600675,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Yamanakako Hana no Miyako Park</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            138.8512632,35.4392429,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>THE PARK</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            138.8680675,35.4276322,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Yamanakako Communication Plaza Kirara</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            138.9009377,35.4204484,0
+          </coordinates>
+        </Point>
+      </Placemark>
+    </Folder>
+    <Folder>
+      <name>Hakone Day Trip</name>
+      <Placemark>
+        <name>The Hakone Open-Air Museum</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.0513547,35.2448447,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Pola Museum of Art</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.0212014,35.2567066,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Hakone Venetian Glass Museum (Glass Forest)</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.0177385,35.2662046,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Owakudani</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.0197304,35.2436011,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Hakone Shrine</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.0253782,35.2048263,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Peace Torii</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.0257419,35.202783,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Narukawa Art Museum</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.0311111,35.2,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Hakone Sightseeing Cruise</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.0245259,35.1899925,0
+          </coordinates>
+        </Point>
+      </Placemark>
+    </Folder>
+    <Folder>
+      <name>Kawagoe Day Trip</name>
+      <Placemark>
+        <name>TreFacStyle Kawagoe</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.4819999,35.9087675,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Ganja</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.4825599,35.9150868,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Kita-in</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.488996,35.9175352,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Ogakiku</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.4832727,35.9206734,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>2nd STREET Kawagoe Route 254</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.4945703,35.9241598,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Kawagoe Castle Honmaru Palace</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.4915051,35.9243931,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Kawagoe Hikawa Shrine</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.4885588,35.9275498,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Kashiya Yokocho</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.4810513,35.9250599,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Ichibangai Shotengai</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.4829325,35.923527,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Toki no Kane</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.483335,35.9234758,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Starbucks Coffee - Kawagoe Kanetsuki-dori Street</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            139.4838934,35.9234765,0
+          </coordinates>
+        </Point>
+      </Placemark>
+    </Folder>
+  </Document>
+</kml>

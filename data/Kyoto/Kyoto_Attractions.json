@@ -1,0 +1,158 @@
+[
+  {
+    "name": "teamLab Biovortex Kyoto",
+    "lat": 34.9837409,
+    "lng": 135.764893,
+    "google_map_url":"https://maps.google.com/?cid=755170767874408507"
+  },
+  {
+    "name": "Tōfuku-ji Temple",
+    "lat": 34.976025,
+    "lng": 135.7737627,
+    "google_map_url":"https://maps.google.com/?cid=7117677159742707137"
+  },
+  {
+    "name": "Fushimi Inari Taisha",
+    "lat": 34.9676945,
+    "lng": 135.7791876,
+    "google_map_url":"https://maps.google.com/?cid=8870624639634301673"
+  },
+  {
+    "name": "To-ji Temple",
+    "lat": 34.9803395,
+    "lng": 135.7476935,
+    "google_map_url":"https://maps.google.com/?cid=15271193799445412112"
+  },
+  {
+    "name": "Kiyomizu-dera",
+    "lat": 34.9946662,
+    "lng": 135.784661,
+    "google_map_url":"https://maps.google.com/?cid=7111013964196361402"
+  },
+  {
+    "name": "Shōgunzuka Mound",
+    "lat": 35.002102,
+    "lng": 135.7869601,
+    "google_map_url":"https://maps.google.com/?cid=755444468483894030"
+  },
+  {
+    "name": "Kodaiji Temple",
+    "lat": 35.0007687,
+    "lng": 135.7812718,
+    "google_map_url":"https://maps.google.com/?cid=2616919559259342976"
+  },
+  {
+    "name": "Yasaka Shrine",
+    "lat": 35.0036559,
+    "lng": 135.7785534,
+    "google_map_url":"https://maps.google.com/?cid=14374021738854095593"
+  },
+  {
+    "name": "Nanzen-ji",
+    "lat": 35.0114138,
+    "lng": 135.7944841,
+    "google_map_url":"https://maps.google.com/?cid=4085672666846396493"
+  },
+  {
+    "name": "Kyoto City KYOCERA Museum of Art",
+    "lat": 35.0128613,
+    "lng": 135.7835544,
+    "google_map_url":"https://maps.google.com/?cid=10510040219820797016"
+  },
+  {
+    "name": "Heian Jingu Shrine",
+    "lat": 35.0159823,
+    "lng": 135.7824263,
+    "google_map_url":"https://maps.google.com/?cid=8484457972734838095"
+  },
+  {
+    "name": "Eikandō Temple",
+    "lat": 35.0148543,
+    "lng": 135.7941588,
+    "google_map_url":"https://maps.google.com/?cid=2060121541776026964"
+  },
+  {
+    "name": "Ginkaku-ji",
+    "lat": 35.0270213,
+    "lng": 135.7982058,
+    "google_map_url":"https://maps.google.com/?cid=2705196751698570185"
+  },
+  {
+    "name": "Ninna-ji Temple",
+    "lat": 35.0310937,
+    "lng": 135.7138198,
+    "google_map_url":"https://maps.google.com/?cid=16869319989750642499"
+  },
+  {
+    "name": "Ryōan-ji",
+    "lat": 35.0344943,
+    "lng": 135.7182634,
+    "google_map_url":"https://maps.google.com/?cid=16261116435795248450"
+  },
+  {
+    "name": "Kinkaku-ji",
+    "lat": 35.03937,
+    "lng": 135.7292431,
+    "google_map_url":"https://maps.google.com/?cid=1073025677330113631"
+  },
+  {
+    "name": "Toei Kyoto Studio Park",
+    "lat": 35.0164521,
+    "lng": 135.7080227,
+    "google_map_url":"https://maps.google.com/?cid=3150840243035149927"
+  },
+  {
+    "name": "Tenryu-ji",
+    "lat": 35.0158379,
+    "lng": 135.6737654,
+    "google_map_url":"https://maps.google.com/?cid=14815785984447432896"
+  },
+  {
+    "name": "Arashiyama Bamboo Forest",
+    "lat": 35.0168187,
+    "lng": 135.6713013,
+    "google_map_url":"https://maps.google.com/?cid=18131488233213033693"
+  },
+  {
+    "name": "Manpuku-ji",
+    "lat": 34.9137675,
+    "lng": 135.8058509,
+    "google_map_url":"https://maps.google.com/?cid=12704707028814983097"
+  },
+  {
+    "name": "Ujikami Shrine",
+    "lat": 34.8919274,
+    "lng": 135.8112954,
+    "google_map_url":"https://maps.google.com/?cid=1252017123913850719"
+  },
+  {
+    "name": "Uji Park",
+    "lat": 34.8892094,
+    "lng": 135.8094713,
+    "google_map_url":"https://maps.google.com/?cid=8384241488966614667"
+  },
+  {
+    "name": "Byodo-in Temple",
+    "lat": 34.8892908,
+    "lng": 135.8076783,
+    "google_map_url":"https://maps.google.com/?cid=6954706348575164324"
+  },
+  {
+    "name": "Nintendo Museum",
+    "lat": 34.8927989,
+    "lng": 135.784166,
+    "google_map_url":"https://maps.google.com/?cid=7237248636885019469"
+  },
+  {
+    "name": "Nijō Castle",
+    "lat": 35.0140379,
+    "lng": 135.7484258,
+    "google_map_url":"https://maps.google.com/?cid=1183188145859604271"
+  },
+  {
+    "name": "Kyoto Imperial Palace",
+    "lat": 35.0240977,
+    "lng": 135.7621436,
+    "google_map_url":"https://maps.google.com/?cid=8944354417040377478"
+  }
+]

@@ -1,0 +1,698 @@
+[
+    {
+      "name": "Misonobashi Sakai",
+      "lat": 35.0571246,
+      "lng": 135.7470652,
+      "google_map_url":"https://maps.google.com/?cid=5568660471986268702"
+    },
+    {
+      "name": "Briant（ブリアン）北山本店",
+      "lat": 35.0513094,
+      "lng": 135.7640149,
+      "google_map_url":"https://maps.google.com/?cid=16987870160505391344"
+    },
+    {
+      "name": "Shogetsu",
+      "lat": 35.0443863,
+      "lng": 135.7525947,
+      "google_map_url":"https://maps.google.com/?cid=8009255622537024941"
+    },
+    {
+      "name": "Grill Hasegawa",
+      "lat": 35.0439087,
+      "lng": 135.7615257,
+      "google_map_url":"https://maps.google.com/?cid=5195661183049007396"
+    },
+    {
+      "name": "WIFE & HUSBAND",
+      "lat": 35.0433972,
+      "lng": 135.7617265,
+      "google_map_url":"https://maps.google.com/?cid=15549647870587008146"
+    },
+    {
+      "name": "Ramen Touhichi",
+      "lat": 35.0500201,
+      "lng": 135.7914224,
+      "google_map_url":"https://maps.google.com/?cid=12981634251260599160"
+    },
+    {
+      "name": "Men-ya Gokkei",
+      "lat": 35.0472176,
+      "lng": 135.7871338,
+      "google_map_url":"https://maps.google.com/?cid=10249343747795898642"
+    },
+    {
+      "name": "Takayasu",
+      "lat": 35.0451027,
+      "lng": 135.7851299,
+      "google_map_url":"https://maps.google.com/?cid=6519996197422050623"
+    },
+    {
+      "name": "Tendresse",
+      "lat": 35.0429029,
+      "lng": 135.7928952,
+      "google_map_url":"https://maps.google.com/?cid=5977364005691525685"
+    },
+    {
+      "name": "Grill Ninjin",
+      "lat": 35.0418747,
+      "lng": 135.7931352,
+      "google_map_url":"https://maps.google.com/?cid=16055953121415120114"
+    },
+    {
+      "name": "Akihana",
+      "lat": 35.0394834,
+      "lng": 135.7922867,
+      "google_map_url":"https://maps.google.com/?cid=1595626720022600940"
+    },
+    {
+      "name": "Kitchen Gorilla",
+      "lat": 35.0344809,
+      "lng": 135.7841266,
+      "google_map_url":"https://maps.google.com/?cid=6366854972616274443"
+    },
+    {
+      "name": "Pizzeria da Ciro",
+      "lat": 35.0279059,
+      "lng": 135.7905859,
+      "google_map_url":"https://maps.google.com/?cid=3679466593329750053"
+    },
+    {
+      "name": "Ikazuchi Udon",
+      "lat": 35.0281407,
+      "lng": 135.7897245,
+      "google_map_url":"https://maps.google.com/?cid=18159416072241830460"
+    },
+    {
+      "name": "Bistro Cerisier",
+      "lat": 35.0298012,
+      "lng": 135.7743766,
+      "google_map_url":"https://maps.google.com/?cid=4357299680524225350"
+    },
+    {
+      "name": "Togenkyo",
+      "lat": 35.0303846,
+      "lng": 135.7488989,
+      "google_map_url":"https://maps.google.com/?cid=9348344389474048532"
+    },
+    {
+      "name": "Kitchen Papa",
+      "lat": 35.032489,
+      "lng": 135.7424527,
+      "google_map_url":"https://maps.google.com/?cid=13637715423223872948"
+    },
+    {
+      "name": "Itosen",
+      "lat": 35.0296675,
+      "lng": 135.7381148,
+      "google_map_url":"https://maps.google.com/?cid=5078590716337502304"
+    },
+    {
+      "name": "Yamazaki Menjiro",
+      "lat": 35.0194889,
+      "lng": 135.7316414,
+      "google_map_url":"https://maps.google.com/?cid=10520976909441637782"
+    },
+    {
+      "name": "Yakiniku Ebata",
+      "lat": 35.0230931,
+      "lng": 135.741316,
+      "google_map_url":"https://maps.google.com/?cid=4139638558565572863"
+    },
+    {
+      "name": "Karasemitei",
+      "lat": 35.020078,
+      "lng": 135.748128,
+      "google_map_url":"https://maps.google.com/?cid=5614739330656938348"
+    },
+    {
+      "name": "Kyoto Curry Seisakusho Karil",
+      "lat": 35.0182218,
+      "lng": 135.7566536,
+      "google_map_url":"https://maps.google.com/?cid=10512731048912655336"
+    },
+    {
+      "name": "Tonkatsu Shimizu",
+      "lat": 35.0196799,
+      "lng": 135.7692518,
+      "google_map_url":"https://maps.google.com/?cid=14895312476652217249"
+    },
+    {
+      "name": "Ortensia",
+      "lat": 35.0188351,
+      "lng": 135.7694615,
+      "google_map_url":"https://maps.google.com/?cid=2516770009875513401"
+    },
+    {
+      "name": "Le14e",
+      "lat": 35.0171573,
+      "lng": 135.7688254,
+      "google_map_url":"https://maps.google.com/?cid=10488100466541310063"
+    },
+    {
+      "name": "Grill Kodakara",
+      "lat": 35.015849,
+      "lng": 135.7847674,
+      "google_map_url":"https://maps.google.com/?cid=8747067629740610963"
+    },
+    {
+      "name": "Yamamoto Menzou",
+      "lat": 35.0141863,
+      "lng": 135.7848226,
+      "google_map_url":"https://maps.google.com/?cid=6861482635893519122"
+    },
+    {
+      "name": "Cucina Italiana Toudou",
+      "lat": 35.015134,
+      "lng": 135.7609185,
+      "google_map_url":"https://maps.google.com/?cid=828184737311123600"
+    },
+    {
+      "name": "Salao",
+      "lat": 35.0137357,
+      "lng": 135.764881,
+      "google_map_url":"https://maps.google.com/?cid=17641250494685677946"
+    },
+    {
+      "name": "Sumiyaki Sousai Toriya Hitomi",
+      "lat": 35.0133847,
+      "lng": 135.7731236,
+      "google_map_url":"https://maps.google.com/?cid=17794288860312287304"
+    },
+    {
+      "name": "Lapintaika",
+      "lat": 35.0116571,
+      "lng": 135.7782171,
+      "google_map_url":"https://maps.google.com/?cid=15943129039998270535"
+    },
+    {
+      "name": "Ippodo Tea Kyoto Main Store",
+      "lat": 35.0144485,
+      "lng": 135.7673381,
+      "google_map_url":"https://maps.google.com/?cid=15086512250717214680"
+    },
+    {
+      "name": "Yakiniku Dining Kinoe",
+      "lat": 35.0123503,
+      "lng": 135.7641867,
+      "google_map_url":"https://maps.google.com/?cid=548473744856270742"
+    },
+    {
+      "name": "Jiji Baba Mokuba-tei",
+      "lat": 35.0123724,
+      "lng": 135.7601522,
+      "google_map_url":"https://maps.google.com/?cid=14326874143371803243"
+    },
+    {
+      "name": "Grill French",
+      "lat": 35.0119939,
+      "lng": 135.7541126,
+      "google_map_url":"https://maps.google.com/?cid=13455288933362711561"
+    },
+    {
+      "name": "fudo",
+      "lat": 35.01115,
+      "lng": 135.7654185,
+      "google_map_url":"https://maps.google.com/?cid=2317270944221809243"
+    },
+    {
+      "name": "Kyoto Yakiniku (BBQ) HIRO Senbon Sanjo Location",
+      "lat": 35.0084557,
+      "lng": 135.7433816,
+      "google_map_url":"https://maps.google.com/?cid=18341160657467705734"
+    },
+    {
+      "name": "Sweets Cafe KYOTO KEIZO",
+      "lat": 35.0086176,
+      "lng": 135.7498048,
+      "google_map_url":"https://maps.google.com/?cid=9052693859472485364"
+    },
+    {
+      "name": "Fruit parlor Yaoiso",
+      "lat": 35.0035038,
+      "lng": 135.7500627,
+      "google_map_url":"https://maps.google.com/?cid=11231170796967302222"
+    },
+    {
+      "name": "Beto Kitchen",
+      "lat": 34.9987172,
+      "lng": 135.7418174,
+      "google_map_url":"https://maps.google.com/?cid=8064062832495421845"
+    },
+    {
+      "name": "Seabura no Kami",
+      "lat": 35.0004325,
+      "lng": 135.7469354,
+      "google_map_url":"https://maps.google.com/?cid=14484600607456637862"
+    },
+    {
+      "name": "Maruki Bakery",
+      "lat": 34.9986932,
+      "lng": 135.7503047,
+      "google_map_url":"https://maps.google.com/?cid=16849004629883831225"
+    },
+    {
+      "name": "Mugi no Yoake",
+      "lat": 34.9926711,
+      "lng": 135.7313003,
+      "google_map_url":"https://maps.google.com/?cid=8802936154293960321"
+    },
+    {
+      "name": "Kobushi Ramen",
+      "lat": 34.9892975,
+      "lng": 135.7436967,
+      "google_map_url":"https://maps.google.com/?cid=2077937282772192030"
+    },
+    {
+      "name": "Tonkatsu Ichiban",
+      "lat": 34.9882381,
+      "lng": 135.7500327,
+      "google_map_url":"https://maps.google.com/?cid=9794119705659922313"
+    },
+    {
+      "name": "Arata",
+      "lat": 34.982053,
+      "lng": 135.756172,
+      "google_map_url":"https://maps.google.com/?cid=9934559169238703532"
+    },
+    {
+      "name": "Yakiniku Hayashi - Jujo",
+      "lat": 34.9734068,
+      "lng": 135.7629555,
+      "google_map_url":"https://maps.google.com/?cid=1092510459166276383"
+    },
+    {
+      "name": "Xiao Xiao",
+      "lat": 34.9863803,
+      "lng": 135.7699628,
+      "google_map_url":"https://maps.google.com/?cid=10803674182130306061"
+    },
+    {
+      "name": "Honke Daiichi-Asahi - Main Shop",
+      "lat": 34.986696,
+      "lng": 135.762502,
+      "google_map_url":"https://maps.google.com/?cid=11956261545466959499"
+    },
+    {
+      "name": "Shinpuku Saikan - Main Shop",
+      "lat": 34.9867471,
+      "lng": 135.7624974,
+      "google_map_url":"https://maps.google.com/?cid=569084589944505485"
+    },
+    {
+      "name": "Yamamoto Mambo",
+      "lat": 34.9879349,
+      "lng": 135.762843,
+      "google_map_url":"https://maps.google.com/?cid=15007516441916275023"
+    },
+    {
+      "name": "trattoria sette",
+      "lat": 34.9888884,
+      "lng": 135.7735268,
+      "google_map_url":"https://maps.google.com/?cid=8117038400980621042"
+    },
+    {
+      "name": "cafe 33",
+      "lat": 34.9887907,
+      "lng": 135.7736595,
+      "google_map_url":"https://maps.google.com/?cid=5861292609882624307"
+    },
+    {
+      "name": "IL PAPPALARDO",
+      "lat": 34.9894533,
+      "lng": 135.7753428,
+      "google_map_url":"https://maps.google.com/?cid=9041525841122494038"
+    },
+    {
+      "name": "Shibosai Sumiyoshi",
+      "lat": 34.9922542,
+      "lng": 135.7747657,
+      "google_map_url":"https://maps.google.com/?cid=16405809878825788941"
+    },
+    {
+      "name": "Walden Woods Kyoto",
+      "lat": 34.9933458,
+      "lng": 135.7631616,
+      "google_map_url":"https://maps.google.com/?cid=17532417395355382157"
+    },
+    {
+      "name": "Asperge Blanche",
+      "lat": 34.9955422,
+      "lng": 135.7590508,
+      "google_map_url":"https://maps.google.com/?cid=9688624614093002498"
+    },
+    {
+      "name": "Muromachi Kaji",
+      "lat": 34.998827,
+      "lng": 135.7577714,
+      "google_map_url":"https://maps.google.com/?cid=5178868699803304390"
+    },
+    {
+      "name": "Maccha House",
+      "lat": 34.997465,
+      "lng": 135.7811203,
+      "google_map_url":"https://maps.google.com/?cid=3520782284335041013"
+    },
+    {
+      "name": "Mishina",
+      "lat": 34.99822,
+      "lng": 135.7806812,
+      "google_map_url":"https://maps.google.com/?cid=9365290189199434822"
+    },
+    {
+      "name": "% ARABICA Kyoto Higashiyama",
+      "lat": 34.9986354,
+      "lng": 135.778294,
+      "google_map_url":"https://maps.google.com/?cid=5927226485630185275"
+    },
+    {
+      "name": "Canton Shunsai Ikki",
+      "lat": 35.0009282,
+      "lng": 135.7779539,
+      "google_map_url":"https://maps.google.com/?cid=13460299118949197461"
+    },
+    {
+      "name": "Gion Koishi",
+      "lat": 35.0039348,
+      "lng": 135.7767147,
+      "google_map_url":"https://maps.google.com/?cid=5595762156977302616"
+    },
+    {
+      "name": "Junidan-ya",
+      "lat": 35.002993,
+      "lng": 135.775346,
+      "google_map_url":"https://maps.google.com/?cid=7866897119911620867"
+    },
+    {
+      "name": "Gion Kinana",
+      "lat": 35.0023284,
+      "lng": 135.7742848,
+      "google_map_url":"https://maps.google.com/?cid=15096848154242012698"
+    },
+    {
+      "name": "Saryo Tsujiri Tea House, Gion Main Store",
+      "lat": 35.003665,
+      "lng": 135.774477,
+      "google_map_url":"https://maps.google.com/?cid=7677863780453147220"
+    },
+    {
+      "name": "Takocho",
+      "lat": 35.002023,
+      "lng": 135.771618,
+      "google_map_url":"https://maps.google.com/?cid=1710188905337198360"
+    },
+    {
+      "name": "Salon de thé François",
+      "lat": 35.0032923,
+      "lng": 135.7702134,
+      "google_map_url":"https://maps.google.com/?cid=18118152212597146212"
+    },
+    {
+      "name": "Shokudo Ogawa",
+      "lat": 35.0027376,
+      "lng": 135.7699891,
+      "google_map_url":"https://maps.google.com/?cid=4021412810246282288"
+    },
+    {
+      "name": "Bocca del Vino",
+      "lat": 35.0018909,
+      "lng": 135.7700183,
+      "google_map_url":"https://maps.google.com/?cid=7637013832095115119"
+    },
+    {
+      "name": "Chinese Noodles ROKU",
+      "lat": 35.0026011,
+      "lng": 135.7688239,
+      "google_map_url":"https://maps.google.com/?cid=9020426365839451458"
+    },
+    {
+      "name": "Yukou",
+      "lat": 35.0023297,
+      "lng": 135.7690645,
+      "google_map_url":"https://maps.google.com/?cid=17511712565429526112"
+    },
+    {
+      "name": "Men-ya Inoichi",
+      "lat": 35.0013284,
+      "lng": 135.7669639,
+      "google_map_url":"https://maps.google.com/?cid=7790049876187503413"
+    },
+    {
+      "name": "Izugen",
+      "lat": 35.0020724,
+      "lng": 135.7626342,
+      "google_map_url":"https://maps.google.com/?cid=16239957818945249075"
+    },
+    {
+      "name": "Washoku Haru",
+      "lat": 35.0024859,
+      "lng": 135.7625297,
+      "google_map_url":"https://maps.google.com/?cid=4702899363786546259"
+    },
+    {
+      "name": "KARA-KUSA curry",
+      "lat": 35.0024301,
+      "lng": 135.7615118,
+      "google_map_url":"https://maps.google.com/?cid=16484270752263999563"
+    },
+    {
+      "name": "Restaurant Aki",
+      "lat": 35.0038347,
+      "lng": 135.757087,
+      "google_map_url":"https://maps.google.com/?cid=8228766696764986455"
+    },
+    {
+      "name": "株式会社ムレスナティーハウス京都",
+      "lat": 35.0050073,
+      "lng": 135.7590484,
+      "google_map_url":"https://maps.google.com/?cid=4384369886811124245"
+    },
+    {
+      "name": "Sushizen",
+      "lat": 35.0086974,
+      "lng": 135.7569023,
+      "google_map_url":"https://maps.google.com/?cid=17451355482176302446"
+    },
+    {
+      "name": "NISHITOMIYA",
+      "lat": 35.0090147,
+      "lng": 135.7818339,
+      "google_map_url":"https://maps.google.com/?cid=14395738888995434565"
+    },
+    {
+      "name": "Marushin Hanten",
+      "lat": 35.008981,
+      "lng": 135.777948,
+      "google_map_url":"https://maps.google.com/?cid=3055094362884929743"
+    },
+    {
+      "name": "Gion Kappa Restaurant",
+      "lat": 35.0050326,
+      "lng": 135.7730631,
+      "google_map_url":"https://maps.google.com/?cid=15026127832774012551"
+    },
+    {
+      "name": "Panel Cafe Kyoto",
+      "lat": 35.0051395,
+      "lng": 135.772634,
+      "google_map_url":"https://maps.google.com/?cid=4606513294828699001"
+    },
+    {
+      "name": "enen",
+      "lat": 35.0051649,
+      "lng": 135.77104,
+      "google_map_url":"https://maps.google.com/?cid=1520526523576001577"
+    },
+    {
+      "name": "Mendokoro Janomeya",
+      "lat": 35.004148,
+      "lng": 135.7678897,
+      "google_map_url":"https://maps.google.com/?cid=5759909157313788021"
+    },
+    {
+      "name": "Ryoushi Goya",
+      "lat": 35.0051584,
+      "lng": 135.7660752,
+      "google_map_url":"https://maps.google.com/?cid=509483961609545083"
+    },
+    {
+      "name": "MOTOI Gyoza",
+      "lat": 35.0044131,
+      "lng": 135.7641669,
+      "google_map_url":"https://maps.google.com/?cid=13108102059948347991"
+    },
+    {
+      "name": "Yakiniku Hiro Shoten Karasuma Nishiki",
+      "lat": 35.005052,
+      "lng": 135.7605616,
+      "google_map_url":"https://maps.google.com/?cid=5858902168432902659"
+    },
+    {
+      "name": "Pizzeria Marita",
+      "lat": 35.0059846,
+      "lng": 135.7631869,
+      "google_map_url":"https://maps.google.com/?cid=8019897374392898010"
+    },
+    {
+      "name": "Pontocho Masuda",
+      "lat": 35.0057928,
+      "lng": 135.771063,
+      "google_map_url":"https://maps.google.com/?cid=11519110095288407472"
+    },
+    {
+      "name": "mumokuteki cafe&foods Kyoto",
+      "lat": 35.0065569,
+      "lng": 135.766561,
+      "google_map_url":"https://maps.google.com/?cid=4991423578254395560"
+    },
+    {
+      "name": "Les champs d'or",
+      "lat": 35.0065566,
+      "lng": 135.7637424,
+      "google_map_url":"https://maps.google.com/?cid=163760817807568177"
+    },
+    {
+      "name": "RAMEN MURAJI",
+      "lat": 35.0071034,
+      "lng": 135.7639026,
+      "google_map_url":"https://maps.google.com/?cid=16385885384490147956"
+    },
+    {
+      "name": "Bonjour",
+      "lat": 35.007218,
+      "lng": 135.7609013,
+      "google_map_url":"https://maps.google.com/?cid=17515653461848057902"
+    },
+    {
+      "name": "Savory",
+      "lat": 35.0077402,
+      "lng": 135.7612039,
+      "google_map_url":"https://maps.google.com/?cid=2076244014670650318"
+    },
+    {
+      "name": "Pâtisserie S Salon",
+      "lat": 35.0076006,
+      "lng": 135.7648158,
+      "google_map_url":"https://maps.google.com/?cid=1090562532697118774"
+    },
+    {
+      "name": "Kichi Kichi Omurice",
+      "lat": 35.0072788,
+      "lng": 135.7708108,
+      "google_map_url":"https://maps.google.com/?cid=11015035326870229940"
+    },
+    {
+      "name": "Kyo-no-Yakiniku-Dokoro Hiro Pontocho",
+      "lat": 35.0081003,
+      "lng": 135.7707225,
+      "google_map_url":"https://maps.google.com/?cid=17072335618888195337"
+    },
+    {
+      "name": "Bar MICHIya",
+      "lat": 35.009184,
+      "lng": 135.77053,
+      "google_map_url":"https://maps.google.com/?cid=5518806146790552027"
+    },
+    {
+      "name": "Smart Coffee",
+      "lat": 35.0094531,
+      "lng": 135.7670815,
+      "google_map_url":"https://maps.google.com/?cid=4515862979063215810"
+    },
+    {
+      "name": "Mishima-Tei (Original)",
+      "lat": 35.0085412,
+      "lng": 135.7670506,
+      "google_map_url":"https://maps.google.com/?cid=5381991523602015602"
+    },
+    {
+      "name": "Kuishinbo Yamanaka",
+      "lat": 34.9793729,
+      "lng": 135.6934732,
+      "google_map_url":"https://maps.google.com/?cid=14934909654446726419"
+    },
+    {
+      "name": "Takara Sushi",
+      "lat": 35.0091449,
+      "lng": 135.6809506,
+      "google_map_url":"https://maps.google.com/?cid=7531332720760559849"
+    },
+    {
+      "name": "MUKU",
+      "lat": 35.0106703,
+      "lng": 135.6780228,
+      "google_map_url":"https://maps.google.com/?cid=3885890900299621969"
+    },
+    {
+      "name": "Cafe Hassui",
+      "lat": 35.0137742,
+      "lng": 135.6732767,
+      "google_map_url":"https://maps.google.com/?cid=16930105576821584950"
+    },
+    {
+      "name": "Hatoya Ryoyousha Honten",
+      "lat": 35.0166748,
+      "lng": 135.6888369,
+      "google_map_url":"https://maps.google.com/?cid=15908722967513721712"
+    },
+    {
+      "name": "Steak Otsuka",
+      "lat": 35.020412,
+      "lng": 135.6804664,
+      "google_map_url":"https://maps.google.com/?cid=11241761051421113241"
+    },
+    {
+      "name": "Tamakitei",
+      "lat": 34.9101064,
+      "lng": 135.8034225,
+      "google_map_url":"https://maps.google.com/?cid=4864680728407226694"
+    },
+    {
+      "name": "Chez Hagata",
+      "lat": 34.8991535,
+      "lng": 135.8085295,
+      "google_map_url":"https://maps.google.com/?cid=5925630223051209780"
+    },
+    {
+      "name": "Itoh Kyuemon - Uji Head Shop / Sabo",
+      "lat": 34.8966402,
+      "lng": 135.8087628,
+      "google_map_url":"https://maps.google.com/?cid=14634454861380210344"
+    },
+    {
+      "name": "Tsuen Main Branch",
+      "lat": 34.89329,
+      "lng": 135.8072759,
+      "google_map_url":"https://maps.google.com/?cid=2102438674156082753"
+    },
+    {
+      "name": "Surugaya Keihan Uji Station",
+      "lat": 34.8933821,
+      "lng": 135.8074116,
+      "google_map_url":"https://maps.google.com/?cid=3177287728634518558"
+    },
+    {
+      "name": "Fukujuen Uji (Uji Tea Factory)",
+      "lat": 34.8901729,
+      "lng": 135.8105501,
+      "google_map_url":"https://maps.google.com/?cid=12704034376170402383"
+    },
+    {
+      "name": "Mogmog Bakery",
+      "lat": 34.8906239,
+      "lng": 135.8034954,
+      "google_map_url":"https://maps.google.com/?cid=2607371569082109061"
+    },
+    {
+      "name": "Tsujirihei Honten - Kyoto Uji Main Shop",
+      "lat": 34.8894866,
+      "lng": 135.7976721,
+      "google_map_url":"https://maps.google.com/?cid=2323043251714537158"
+    },
+    {
+      "name": "Seikoudoku",
+      "lat": 34.8858348,
+      "lng": 135.7949392,
+      "google_map_url":"https://maps.google.com/?cid=15157716329922634178"
+    }
+]

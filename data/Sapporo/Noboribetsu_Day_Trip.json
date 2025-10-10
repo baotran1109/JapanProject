@@ -1,0 +1,26 @@
+[
+    {
+      "name": "Noboribetsu Bear Park",
+      "lat": 42.4905331,
+      "lng": 141.1588672,
+      "google_map_url":"https://maps.google.com/?cid=10651668614508890876"
+    },
+    {
+      "name": "Noboribetsu Bear Park Ropeway Base Station",
+      "lat": 42.4930844,
+      "lng": 141.1444956,
+      "google_map_url":"https://maps.google.com/?cid=13418986116984458007"
+    },
+    {
+      "name": "Noboribetsu Jigokudani Valley",
+      "lat": 42.4976231,
+      "lng": 141.1486603,
+      "google_map_url":"https://maps.google.com/?cid=14390601882475151052"
+    },
+    {
+      "name": "Noboribetsu Marine Park Nixe",
+      "lat": 42.4549885,
+      "lng": 141.1821301,
+      "google_map_url":"https://maps.google.com/?cid=8435215094759806340"
+    }
+]

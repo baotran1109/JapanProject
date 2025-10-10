@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fukuoka · Explore Japan</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Firebase init (auth mini) -->
+  <script type="module" src="/static/js/firebase-init.js?v=3"></script>
+
+  <link rel="icon" href="static/Image/fukuoka-skyline-iStock-845231208-1024x600.jpg" />
+</head>
+<body class="bg-neutral-50 text-neutral-800 antialiased">
+
+  <!-- NAV (same as index/cities/itineraries) -->
+  <nav class="sticky top-0 z-50 bg-[#222] text-white">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+      <div class="flex flex-wrap items-center gap-3">
+        <a href="index.html" class="font-semibold tracking-wide">Home</a>
+        <a href="itineraries.html" class="hover:underline">Recommended Itineraries</a>
+        <a href="cities.html" class="hover:underline">Explore Cities</a>
+        <a href="tips.html" class="hover:underline">Travel Tips</a>
+        <a href="my_itineraries.html" class="hover:underline">My Itineraries</a>
+      </div>
+      <div id="auth-mini" class="text-sm">
+        <span id="auth-name" class="font-medium">Not signed in</span>
+        <span class="text-white/60">·</span>
+        <a href="/auth.html" id="auth-link"
+           class="ml-1 inline-block rounded-md bg-white px-2.5 py-1 font-semibold text-blue-600 hover:bg-slate-100">Sign in</a>
+      </div>
+    </div>
+    <script type="module">
+      import { auth } from "/static/js/firebase-init.js?v=3";
+      import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+      const nameEl = document.getElementById('auth-name');
+      const linkEl = document.getElementById('auth-link');
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          nameEl.textContent = user.displayName || user.email;
+          linkEl.textContent = 'Sign out';
+          linkEl.href = '#';
+          linkEl.onclick = async (e) => { e.preventDefault(); await signOut(auth); };
+          linkEl.className = 'ml-1 inline-block rounded-md bg-white px-2.5 py-1 font-semibold text-slate-800 hover:bg-slate-100';
+        } else {
+          nameEl.textContent = 'Not signed in';
+          linkEl.textContent = 'Sign in';
+          linkEl.href = '/auth.html';
+          linkEl.onclick = null;
+          linkEl.className = 'ml-1 inline-block rounded-md bg-white px-2.5 py-1 font-semibold text-blue-600 hover:bg-slate-100';
+        }
+      });
+    </script>
+  </nav>
+
+  <!-- Hero -->
+  <section id="top" class="mx-auto max-w-6xl px-4 pt-6">
+    <div class="overflow-hidden rounded-3xl shadow-lg">
+      <img
+        src="static/Image/fukuoka-skyline-iStock-845231208-1024x600.jpg"
+        alt="Fukuoka skyline at dusk"
+        class="h-[44vh] w-full object-cover md:h-[56vh]"
+        loading="eager"
+      />
+    </div>
+
+    <div class="mx-auto max-w-3xl py-8">
+      <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 md:text-5xl">Fukuoka</h1>
+      <p class="mt-3 text-lg leading-relaxed text-slate-600">
+        Fukuoka blends chill coastal vibes with a lively food scene. Slurp rich <strong>Hakata ramen</strong>
+        at yatai stalls, stroll <strong>Ohori Park</strong>, browse <strong>Canal City</strong>, and hop to nearby
+        beaches and shrines with ease.
+      </p>
+
+      <!-- CTA chips -->
+      <div class="mt-6 flex flex-wrap gap-3">
+        <a href="#attractions" class="rounded-full bg-blue-600 px-5 py-2.5 text-white shadow hover:bg-blue-700">Top Attractions</a>
+        <a href="#restaurants" class="rounded-full border border-slate-300 bg-white px-5 py-2.5 text-slate-800 hover:bg-slate-50">Restaurants</a>
+        <a href="#shopping" class="rounded-full border border-slate-300 bg-white px-5 py-2.5 text-slate-800 hover:bg-slate-50">Shopping</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main -->
+  <main class="mx-auto max-w-6xl space-y-16 px-4 pb-20">
+
+    <!-- Attractions -->
+    <section id="attractions">
+      <header class="mb-6">
+        <h2 class="text-2xl font-bold md:text-3xl">Top Attractions</h2>
+        <p class="mt-1 text-sm text-neutral-600">Parks, bayside views, shrines, and big-architecture malls.</p>
+      </header>
+
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
+          <img src="static/Image/Canal-City_Fukuoka_Shutterstock_1280w.jpg" alt="Canal City Hakata" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <figcaption class="p-3 text-sm text-neutral-700">Canal City Hakata</figcaption>
+        </figure>
+        <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
+          <img src="static/Image/japan-2019-trip-day-19-09.webp" alt="Kushida Shrine / Hakata" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <figcaption class="p-3 text-sm text-neutral-700">Kushida Shrine</figcaption>
+        </figure>
+        <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
+          <img src="static/Image/momochibeach3.jpg" alt="Momochi Seaside Park" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <figcaption class="p-3 text-sm text-neutral-700">Momochi Seaside Park</figcaption>
+        </figure>
+      </div>
+
+      <details class="group mt-6 rounded-xl border bg-white p-4 open:shadow-sm">
+        <summary class="flex cursor-pointer list-none items-center justify-between">
+          <span class="text-base font-semibold">View Fukuoka Attractions</span>
+          <span class="ml-3 text-xs text-neutral-500 group-open:hidden">(expand)</span>
+          <span class="ml-3 hidden text-xs text-neutral-500 group-open:inline">(collapse)</span>
+        </summary>
+        <ul id="attractions-list" class="mt-4 grid gap-2 sm:grid-cols-2"></ul>
+      </details>
+    </section>
+
+    <!-- Shopping -->
+    <section id="shopping">
+      <header class="mb-6">
+        <h2 class="text-2xl font-bold md:text-3xl">Shopping Recommendations</h2>
+        <p class="mt-1 text-sm text-neutral-600">Select shops, local makers, and big centers.</p>
+      </header>
+
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
+          <img src="static/Image/BIOTOP_f_01b.jpg" alt="BIOTOP Fukuoka" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <figcaption class="p-3 text-sm text-neutral-700">BIOTOP Fukuoka</figcaption>
+        </figure>
+        <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
+          <img src="static/Image/re_14.jpg" alt="Daimyo area" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <figcaption class="p-3 text-sm text-neutral-700">Daimyo / Tenjin</figcaption>
+        </figure>
+        <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
+          <img src="static/Image/b0398dc1-414b-4f1b-b1a5-213098b23338.jpg" alt="Canal City Shops" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <figcaption class="p-3 text-sm text-neutral-700">Canal City Shops</figcaption>
+        </figure>
+      </div>
+
+      <details class="group mt-6 rounded-xl border bg-white p-4 open:shadow-sm">
+        <summary class="flex cursor-pointer list-none items-center justify-between">
+          <span class="text-base font-semibold">Where to Shop in Fukuoka 🛍️</span>
+        </summary>
+        <ul id="shopping-list" class="mt-4 grid gap-2 sm:grid-cols-2"></ul>
+      </details>
+    </section>
+
+    <!-- Restaurants -->
+    <section id="restaurants">
+      <header class="mb-6">
+        <h2 class="text-2xl font-bold md:text-3xl">Restaurants</h2>
+        <p class="mt-1 text-sm text-neutral-600">Yatai stalls, mentaiko, and Hakata ramen.</p>
+      </header>
+
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <img src="static/Image/5b90bbd8.jpg" alt="Yatai stalls" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+        <img src="static/Image/640x640_rect_c5fdd814ed487c453b7c83046c47ce46.jpg" alt="Hakata Ramen" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+        <img src="static/Image/DSC01237-2.jpg" alt="Motsunabe" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+      </div>
+
+      <details class="group mt-6 rounded-xl border bg-white p-4 open:shadow-sm">
+        <summary class="flex cursor-pointer list-none items-center justify-between">
+          <span class="text-base font-semibold">Where to Eat in Fukuoka 🍜</span>
+        </summary>
+        <ul id="restaurants-list" class="mt-4 grid gap-2 sm:grid-cols-2"></ul>
+      </details>
+    </section>
+  </main>
+
+  <footer class="py-8 text-center text-sm text-slate-500">
+    <div class="mx-auto max-w-6xl px-4">
+      &copy; 2025 Explore Japan · Bao Tran
+    </div>
+  </footer>
+
+  <!-- Simple fetch JS (matches your pattern; no skeletons) -->
+  <script>
+  // Pretty time
+  document.getElementById('lastUpdated').textContent =
+    new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+
+  function fetchData(id, file) {
+    const ul = document.getElementById(id);
+    if (!ul) return;
+
+    fetch('/data/Fukuoka/' + file)
+      .then((res) => {
+        if (!res.ok) throw new Error(file + ' missing');
+        return res.json();
+      })
+      .then((data) => {
+        ul.innerHTML = '';
+        data.forEach((item) => {
+          const li = document.createElement('li');
+          const a  = document.createElement('a');
+
+          a.href = item.google_map_url || item.google_maps_url || '#';
+          a.target = '_blank';
+          a.rel = 'noopener';
+          a.textContent = item.name || 'Untitled';
+          a.style.color = '#007BFF';
+          a.style.textDecoration = 'none';
+
+          li.appendChild(a);
+
+          const extra =
+            item.category ? ' (' + item.category + ')' :
+            (item.type ? ' - ' + item.type : '');
+          if (extra) {
+            const span = document.createElement('span');
+            span.textContent = extra;
+            li.appendChild(span);
+          }
+
+          ul.appendChild(li);
+        });
+      })
+      .catch((err) => {
+        console.warn(err.message || err);
+        ul.innerHTML = '<li>Could not load: ' + file + '</li>';
+      });
+  }
+
+  // Load lists
+  fetchData('attractions-list', 'Fukuoka_Attractions.json');
+  fetchData('shopping-list', 'Fukuoka_Shopping.json');
+  fetchData('restaurants-list', 'Fukuoka_Restaurants.json');
+</script>
+</body>
+</html>

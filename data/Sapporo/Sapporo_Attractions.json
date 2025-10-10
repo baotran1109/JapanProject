@@ -1,0 +1,104 @@
+[
+    {
+      "name": "Sapporo Art Park",
+      "lat": 42.9420205,
+      "lng": 141.3423619,
+      "google_map_url":"https://maps.google.com/?cid=4599706555401825608"
+    },
+    {
+      "name": "Open-air Museum of Sapporo Art Forest",
+      "lat": 42.9394467,
+      "lng": 141.3389635,
+      "google_map_url":"https://maps.google.com/?cid=6826916474559698916"
+    },
+    {
+      "name": "Stonehenge",
+      "lat": 42.922852,
+      "lng": 141.3667215,
+      "google_map_url":"https://maps.google.com/?cid=7849347567303181976"
+    },
+    {
+      "name": "Takino Suzuran Hillside Park",
+      "lat": 42.9115157,
+      "lng": 141.3801515,
+      "google_map_url":"https://maps.google.com/?cid=1460591819198715042"
+    },
+    {
+      "name": "Historical Village of Hokkaido Town Area",
+      "lat": 43.0482247,
+      "lng": 141.4969925,
+      "google_map_url":"https://maps.google.com/?cid=16719694036548473575"
+    },
+    {
+      "name": "Sapporo Shiryokan (Former Sapporo Court of Appeal)",
+      "lat": 43.058542,
+      "lng": 141.3375733,
+      "google_map_url":"https://maps.google.com/?cid=5009312541105669351"
+    },
+    {
+      "name": "Hokkaido Museum of Modern Art",
+      "lat": 43.0602675,
+      "lng": 141.3303854,
+      "google_map_url":"https://maps.google.com/?cid=18259948463732202366"
+    },
+    {
+      "name": "Sapporo City Maruyama Zoo",
+      "lat": 43.0515126,
+      "lng": 141.3078572,
+      "google_map_url":"https://maps.google.com/?cid=8408867319269789478"
+    },
+    {
+      "name": "Hokkaido Jingu",
+      "lat": 43.054333,
+      "lng": 141.3077928,
+      "google_map_url":"https://maps.google.com/?cid=17045528883461805832"
+    },
+    {
+      "name": "Sapporo Olympic Museum",
+      "lat": 43.0518127,
+      "lng": 141.2910103,
+      "google_map_url":"https://maps.google.com/?cid=4088512293247655573"
+    },
+    {
+      "name": "Botanic Garden Hokkaidō University",
+      "lat": 43.0639,
+      "lng": 141.3426372,
+      "google_map_url":"https://maps.google.com/?cid=13469157996243469416"
+    },
+    {
+      "name": "Sapporo Clock Tower",
+      "lat": 43.0625768,
+      "lng": 141.3534927,
+      "google_map_url":"https://maps.google.com/?cid=1989368697453858283"
+    },
+    {
+      "name": "Odori Park",
+      "lat": 43.0607521,
+      "lng": 141.3544308,
+      "google_map_url":"https://maps.google.com/?cid=1039401562992074910"
+    },
+    {
+      "name": "Sapporo TV Tower",
+      "lat": 43.0611047,
+      "lng": 141.3564246,
+      "google_map_url":"https://maps.google.com/?cid=16286171258450747441"
+    },
+    {
+      "name": "Sapporo Beer Museum",
+      "lat": 43.0714671,
+      "lng": 141.3689124,
+      "google_map_url":"https://maps.google.com/?cid=1396334665551701963"
+    },
+    {
+      "name": "The Hokkaido University Museum",
+      "lat": 43.0726371,
+      "lng": 141.3421809,
+      "google_map_url":"https://maps.google.com/?cid=10018503641282148361"
+    },
+    {
+      "name": "Moerenuma Park",
+      "lat": 43.1231335,
+      "lng": 141.4266536,
+      "google_map_url":"https://maps.google.com/?cid=6613355776250148977"
+    }
+]

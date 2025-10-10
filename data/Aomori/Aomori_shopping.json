@@ -1,0 +1,50 @@
+[
+    {
+      "name": "Article",
+      "lat": 40.8258988,
+      "lng": 140.7384705,
+      "google_maps_url": "https://maps.google.com/?cid=4380046503649618327"
+    },
+    {
+      "name": "BLIND（ブラインド）",
+      "lat": 40.8254257,
+      "lng": 140.73766,
+      "google_maps_url": "https://maps.google.com/?cid=15052836696078447658"
+    },
+    {
+      "name":"PLACE -プレイス-",
+      "lat": 40.82475, 
+      "lng": 140.73733,
+      "google_maps_url": "https://maps.google.com/?cid=5395951873383740897"
+    },
+    {
+      "name":"THREE",
+      "lat": 40.82592, 
+      "lng": 140.7376,
+      "google_maps_url": "https://maps.google.com/?cid=6566585734725794392"
+    },
+    {
+      "name":"LOVINA",
+      "lat": 40.82771, 
+      "lng": 140.7341,
+      "google_maps_url": "https://maps.google.com/?cid=17579649810870928744"
+    },
+    {
+      "name":"Sunroad Aomori",
+      "lat": 40.80707, 
+      "lng": 140.7533,
+      "google_maps_url": "https://maps.google.com/?cid=11438495185975835704"
+    },
+    {
+      "name":"Aomori Prefecture Tourism Information Center ASPAM",
+      "lat": 40.82978,
+      "lng": 140.74114,
+      "google_maps_url": "https://maps.google.com/?cid=3166284938787718651"
+    },
+    {
+      "name":"Sakurano Department Store Aomori",
+      "lat": 40.82604,
+      "lng": 140.73922,
+      "google_maps_url": "https://maps.google.com/?cid=7140311479158782207"
+    }
+]

@@ -1,0 +1,56 @@
+[
+    {
+      "name": "The Hakone Open-Air Museum",
+      "lat": 35.2448447,
+      "lng": 139.0513547,
+      "google_map_url":"https://maps.google.com/?cid=6381101115362667615"
+    },
+    {
+      "name": "Picasso Pavilion",
+      "lat": 35.2438353,
+      "lng": 139.0540386,
+      "google_map_url":"https://maps.google.com/?cid=16589341597890882686"
+    },
+    {
+      "name": "Pola Museum of Art",
+      "lat": 35.2567066,
+      "lng": 139.0212014,
+      "google_map_url":"https://maps.google.com/?cid=10271533556959221983"
+    },
+    {
+      "name": "Hakone Venetian Glass Museum (Glass Forest)",
+      "lat": 35.2662046,
+      "lng": 139.0177385,
+      "google_map_url":"https://maps.google.com/?cid=839950920752152752"
+    },
+    {
+      "name": "Owakudani",
+      "lat": 35.2436011,
+      "lng": 139.0197304,
+      "google_map_url":"https://maps.google.com/?cid=11648650901084789898"
+    },
+    {
+      "name": "Hakone Shrine",
+      "lat": 35.2048263,
+      "lng": 139.0253782,
+      "google_map_url":"https://maps.google.com/?cid=12314146949413986458"
+    },
+    {
+      "name": "Peace Torii",
+      "lat": 35.202783,
+      "lng": 139.0257419,
+      "google_map_url":"https://maps.google.com/?cid=8019591696458570810"
+    },
+    {
+      "name": "Narukawa Art Museum",
+      "lat": 35.2,
+      "lng": 139.0311111,
+      "google_map_url":"https://maps.google.com/?cid=2440341088183127387"
+    },
+    {
+      "name": "Hakone Sightseeing Cruise",
+      "lat": 35.1899925,
+      "lng": 139.0245259,
+      "google_map_url":"https://maps.google.com/?cid=806095273379524720"
+    }
+]

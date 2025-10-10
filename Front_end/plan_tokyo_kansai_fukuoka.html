@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Plan Tokyo + Kansai + Fukuoka · Explore Japan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Firebase init -->
+  <script type="module" src="/static/js/firebase-init.js?v=3"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 selection:bg-blue-100 selection:text-blue-900">
+
+  <!-- NAV (black) -->
+  <nav class="sticky top-0 z-50 bg-[#222] text-white">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+      <div class="flex flex-wrap items-center gap-3">
+        <a href="index.html" class="font-semibold tracking-wide">Home</a>
+        <a href="itineraries.html" class="hover:underline">Recommended Itineraries</a>
+        <a href="cities.html" class="hover:underline">Explore Cities</a>
+        <a href="tips.html" class="hover:underline">Travel Tips</a>
+        <a href="my_itineraries.html" class="hover:underline">My Itineraries</a>
+      </div>
+
+      <div id="auth-mini" class="text-sm">
+        <span id="auth-name" class="font-medium">Not signed in</span>
+        <span class="text-white/60">·</span>
+        <a href="/auth.html" id="auth-link"
+           class="ml-1 inline-block rounded-md bg-white px-2.5 py-1 font-semibold text-blue-600 hover:bg-slate-100">
+          Sign in
+        </a>
+      </div>
+    </div>
+
+    <!-- Auth state logic -->
+    <script type="module">
+      import { auth } from "/static/js/firebase-init.js?v=3";
+      import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+      const nameEl = document.getElementById("auth-name");
+      const linkEl = document.getElementById("auth-link");
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          nameEl.textContent = user.displayName || user.email;
+          linkEl.textContent = "Sign out";
+          linkEl.href = "#";
+          linkEl.onclick = async (e) => { e.preventDefault(); await signOut(auth); };
+          linkEl.className = "ml-1 inline-block rounded-md bg-white px-2.5 py-1 font-semibold text-slate-800 hover:bg-slate-100";
+        } else {
+          nameEl.textContent = "Not signed in";
+          linkEl.textContent = "Sign in";
+          linkEl.href = "/auth.html";
+          linkEl.onclick = null;
+          linkEl.className = "ml-1 inline-block rounded-md bg-white px-2.5 py-1 font-semibold text-blue-600 hover:bg-slate-100";
+        }
+      });
+    </script>
+  </nav>
+
+  <!-- HERO -->
+  <header class="relative">
+    <img src="static/Image/japan.jpg" alt=""
+         class="absolute inset-0 -z-10 h-56 w-full object-cover object-center md:h-64" />
+    <div class="absolute inset-0 -z-10 bg-black/35"></div>
+    <div class="mx-auto flex h-56 max-w-6xl items-center px-4 md:h-64">
+      <div class="text-white">
+        <h1 class="text-2xl font-bold tracking-tight drop-shadow md:text-4xl">
+          Plan Tokyo + Kansai + Fukuoka
+        </h1>
+        <p class="mt-1 text-white/90">Build your trip day by day. Save to your account and edit anytime.</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="mx-auto grid max-w-6xl gap-8 px-4 py-8 lg:grid-cols-[1.3fr_0.7fr]">
+    <!-- LEFT: Planner -->
+    <section class="space-y-6">
+      <!-- TOKYO -->
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="flex items-center justify-between gap-3">
+          <h2 class="text-xl font-semibold">🗼 Tokyo</h2>
+          <button onclick="addDay('tokyo')" class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700">
+            + Add Tokyo Day
+          </button>
+        </div>
+        <div id="tokyo-days" class="mt-4 space-y-4"></div>
+      </div>
+
+      <!-- KYOTO -->
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="flex items-center justify-between gap-3">
+          <h2 class="text-xl font-semibold">⛩️ Kyoto</h2>
+          <button onclick="addDay('kyoto')" class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700">
+            + Add Kyoto Day
+          </button>
+        </div>
+        <div id="kyoto-days" class="mt-4 space-y-4"></div>
+      </div>
+
+      <!-- OSAKA -->
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="flex items-center justify-between gap-3">
+          <h2 class="text-xl font-semibold">🎡 Osaka</h2>
+          <button onclick="addDay('osaka')" class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700">
+            + Add Osaka Day
+          </button>
+        </div>
+        <div id="osaka-days" class="mt-4 space-y-4"></div>
+      </div>
+
+      <!-- FUKUOKA -->
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="flex items-center justify-between gap-3">
+          <h2 class="text-xl font-semibold">🍜 Fukuoka</h2>
+          <button onclick="addDay('fukuoka')" class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700">
+            + Add Fukuoka Day
+          </button>
+        </div>
+        <div id="fukuoka-days" class="mt-4 space-y-4"></div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex flex-wrap items-center gap-3">
+        <button onclick="saveTrip()" class="rounded-lg bg-emerald-600 px-5 py-2.5 font-semibold text-white hover:bg-emerald-700">
+          💾 Save Trip
+        </button>
+        <button id="ask-ai" class="rounded-lg border border-slate-300 bg-white px-4 py-2 font-semibold text-slate-800 hover:bg-slate-50">
+          🤖 Ask AI to review
+        </button>
+        <span id="save-message" class="text-emerald-700 font-medium"></span>
+        <button id="toggle-info" class="ml-auto rounded-lg bg-slate-900 px-4 py-2 font-medium text-white hover:bg-black lg:hidden">
+          🗺️ View Recommendations
+        </button>
+      </div>
+
+      <!-- AI Review Panel -->
+      <aside id="ai-panel" class="hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-semibold">AI Review</h3>
+          <span class="text-sm text-slate-500">Score: <span id="ai-score">—</span>/10</span>
+        </div>
+        <div class="mt-3 grid gap-6 md:grid-cols-3">
+          <div>
+            <h4 class="font-semibold">✅ Strengths</h4>
+            <ul id="ai-strengths" class="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-700"></ul>
+          </div>
+          <div>
+            <h4 class="font-semibold">⚠️ Risks</h4>
+            <ul id="ai-risks" class="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-700"></ul>
+          </div>
+          <div class="md:col-span-1"></div>
+        </div>
+        <div class="mt-4">
+          <h4 class="font-semibold">💡 Suggestions</h4>
+          <div id="ai-suggestions" class="mt-2 grid gap-3"></div>
+        </div>
+      </aside>
+    </section>
+
+    <!-- RIGHT: Recommendations -->
+    <aside id="recommendation-panel" class="hidden h-fit rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:block">
+      <div class="space-y-6">
+        <!-- TOKYO -->
+        <div>
+          <h3 class="text-lg font-semibold">Tokyo Recommendations</h3>
+          <details class="mt-2">
+            <summary class="cursor-pointer text-blue-700 hover:underline">Top Attractions</summary>
+            <ul id="tokyo-attractions" class="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700"></ul>
+          </details>
+          <details class="mt-2">
+            <summary class="cursor-pointer text-blue-700 hover:underline">Shopping</summary>
+            <ul id="tokyo-shopping" class="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700"></ul>
+          </details>
+          <div class="mt-3 border-t border-slate-200 pt-3">
+            <h4 class="font-medium">Restaurants by Area</h4>
+            <div class="mt-1 space-y-2">
+              <details><summary class="cursor-pointer text-blue-700 hover:underline">Akihabara</summary><ul id="akihabara-list" class="mt-1 list-disc space-y-1 pl-5 text-sm"></ul></details>
+              <details><summary class="cursor-pointer text-blue-700 hover:underline">Asakusa</summary><ul id="asakusa-list" class="mt-1 list-disc space-y-1 pl-5 text-sm"></ul></details>
+              <details><summary class="cursor-pointer text-blue-700 hover:underline">Ginza</summary><ul id="ginza-list" class="mt-1 list-disc space-y-1 pl-5 text-sm"></ul></details>
+              <details><summary class="cursor-pointer text-blue-700 hover:underline">Ikebukuro</summary><ul id="ikebukuro-list" class="mt-1 list-disc space-y-1 pl-5 text-sm"></ul></details>
+              <details><summary class="cursor-pointer text-blue-700 hover:underline">Meguro</summary><ul id="meguro-list" class="mt-1 list-disc space-y-1 pl-5 text-sm"></ul></details>
+              <details><summary class="cursor-pointer text-blue-700 hover:underline">Roppongi</summary><ul id="roppongi-list" class="mt-1 list-disc space-y-1 pl-5 text-sm"></ul></details>
+              <details><summary class="cursor-pointer text-blue-700 hover:underline">Shibuya</summary><ul id="shibuya-list" class="mt-1 list-disc space-y-1 pl-5 text-sm"></ul></details>
+              <details><summary class="cursor-pointer text-blue-700 hover:underline">Shinjuku</summary><ul id="shinjuku-list" class="mt-1 list-disc space-y-1 pl-5 text-sm"></ul></details>
+              <details><summary class="cursor-pointer text-blue-700 hover:underline">Other Areas</summary><ul id="other-area-list" class="mt-1 list-disc space-y-1 pl-5 text-sm"></ul></details>
+            </div>
+          </div>
+          <div class="mt-3 border-t border-slate-200 pt-3">
+            <h4 class="font-medium">Tokyo Day Trips</h4>
+            <details><summary class="cursor-pointer text-blue-700 hover:underline">Yokohama</summary><ul id="Yokohama-list" class="list-disc pl-5 text-sm"></ul></details>
+            <details><summary class="cursor-pointer text-blue-700 hover:underline">Nikko</summary><ul id="Nikko-list" class="list-disc pl-5 text-sm"></ul></details>
+            <details><summary class="cursor-pointer text-blue-700 hover:underline">Kamakura</summary><ul id="Kamakura-list" class="list-disc pl-5 text-sm"></ul></details>
+            <details><summary class="cursor-pointer text-blue-700 hover:underline">Kawagoe</summary><ul id="Kawagoe-list" class="list-disc pl-5 text-sm"></ul></details>
+            <details><summary class="cursor-pointer text-blue-700 hover:underline">Hakone</summary><ul id="Hakone-list" class="list-disc pl-5 text-sm"></ul></details>
+            <details><summary class="cursor-pointer text-blue-700 hover:underline">Mount Fuji</summary><ul id="MountFuji-list" class="list-disc pl-5 text-sm"></ul></details>
+          </div>
+        </div>
+
+        <!-- KYOTO -->
+        <div>
+          <h3 class="text-lg font-semibold">Kyoto Recommendations</h3>
+          <details class="mt-2">
+            <summary class="cursor-pointer text-blue-700 hover:underline">Top Attractions</summary>
+            <ul id="kyoto-attractions-list" class="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700"></ul>
+          </details>
+          <details class="mt-2">
+            <summary class="cursor-pointer text-blue-700 hover:underline">Shopping</summary>
+            <ul id="kyoto-shopping-list" class="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700"></ul>
+          </details>
+          <details class="mt-2">
+            <summary class="cursor-pointer text-blue-700 hover:underline">Restaurants</summary>
+            <ul id="kyoto-restaurants-list" class="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700"></ul>
+          </details>
+        </div>
+
+        <!-- OSAKA -->
+        <div>
+          <h3 class="text-lg font-semibold">Osaka Recommendations</h3>
+          <details class="mt-2">
+            <summary class="cursor-pointer text-blue-700 hover:underline">Top Attractions</summary>
+            <ul id="osaka-attractions-list" class="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700"></ul>
+          </details>
+          <details class="mt-2">
+            <summary class="cursor-pointer text-blue-700 hover:underline">Shopping</summary>
+            <ul id="osaka-shopping-list" class="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700"></ul>
+          </details>
+          <details class="mt-2">
+            <summary class="cursor-pointer text-blue-700 hover:underline">Restaurants</summary>
+            <ul id="osaka-restaurants-list" class="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700"></ul>
+          </details>
+          <div class="mt-3 border-t border-slate-200 pt-3">
+            <h4 class="font-medium">Day Trips</h4>
+            <details><summary class="cursor-pointer text-blue-700 hover:underline">Nara</summary><ul id="nara-list" class="list-disc pl-5 text-sm"></ul></details>
+            <details>
+              <summary class="cursor-pointer text-blue-700 hover:underline">Kobe</summary>
+              <ul id="kobe-attractions-list" class="list-disc pl-5 text-sm"></ul>
+              <ul id="kobe-shopping-list" class="mt-2 list-disc pl-5 text-sm"></ul>
+              <ul id="kobe-restaurants-list" class="mt-2 list-disc pl-5 text-sm"></ul>
+            </details>
+          </div>
+        </div>
+
+        <!-- FUKUOKA -->
+        <div>
+          <h3 class="text-lg font-semibold">Fukuoka Recommendations</h3>
+          <details class="mt-2">
+            <summary class="cursor-pointer text-blue-700 hover:underline">Attractions</summary>
+            <ul id="fukuoka-attractions-list" class="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700"></ul>
+          </details>
+          <details class="mt-2">
+            <summary class="cursor-pointer text-blue-700 hover:underline">Shopping</summary>
+            <ul id="fukuoka-shopping-list" class="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700"></ul>
+          </details>
+          <details class="mt-2">
+            <summary class="cursor-pointer text-blue-700 hover:underline">Restaurants</summary>
+            <ul id="fukuoka-restaurants-list" class="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700"></ul>
+          </details>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="py-10 text-center text-sm text-slate-500">&copy; 2025 Explore Japan · Bao Tran</footer>
+
+  <!-- Planner UI (Tailwind-only) -->
+  <script>
+    const counters = { tokyo: 0, kyoto: 0, osaka: 0, fukuoka: 0 };
+    const cityEl = (c)=>document.getElementById(`${c}-days`);
+
+    function renumberCity(city){
+      const boxes = cityEl(city).querySelectorAll(".day-box");
+      counters[city] = 0;
+      boxes.forEach((box, idx)=>{
+        const n = idx + 1;
+        counters[city] = n;
+        box.setAttribute("data-day", n);
+        box.querySelector("[data-day-label]").textContent = `Day ${n}`;
+        box.querySelector(`[id^="${city}-place-"]`).id   = `${city}-place-${n}`;
+        box.querySelector(`[id^="${city}-notes-"]`).id   = `${city}-notes-${n}`;
+      });
+    }
+
+    function removeDay(btn, city){
+      const box = btn.closest(".day-box");
+      if(!box) return;
+      box.remove();
+      renumberCity(city);
+    }
+
+    function dayCard(city, n){
+      return `
+        <div class="day-box rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-semibold" data-day-label>Day ${n}</h3>
+            <button type="button"
+              onclick="removeDay(this,'${city}')"
+              class="rounded-md bg-rose-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-rose-700">Delete day</button>
+          </div>
+
+          <label class="mt-3 block text-sm font-medium text-slate-700">Where to go</label>
+          <input id="${city}-place-${n}" type="text"
+                 placeholder="e.g., Shibuya / Gion / Dotonbori / Nakasu…"
+                 class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-blue-200" />
+
+          <label class="mt-4 block text-sm font-medium text-slate-700">Activities / Notes</label>
+          <textarea id="${city}-notes-${n}" rows="3"
+                    placeholder="e.g., Meiji Shrine, Fushimi Inari, Kuromon Market, yatai stalls…"
+                    class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-blue-200"></textarea>
+        </div>`;
+    }
+
+    function addDay(city){
+      counters[city]++; const n = counters[city];
+      const wrap = document.createElement("div");
+      wrap.innerHTML = dayCard(city, n);
+      cityEl(city).appendChild(wrap.firstElementChild);
+    }
+    window.addDay = addDay; window.removeDay = removeDay;
+
+    // Mobile: toggle recommendations
+    document.getElementById("toggle-info")?.addEventListener("click", () => {
+      const p = document.getElementById("recommendation-panel");
+      const show = p.classList.contains("hidden");
+      p.classList.toggle("hidden", !show);
+      if (show) window.scrollTo({ top: p.offsetTop - 80, behavior: "smooth" });
+    });
+
+    // Initial (create mode)
+    window.addEventListener("load", () => {
+      const params = new URLSearchParams(location.search);
+      if (params.get("itineraryId")) return; // edit mode handled by Firestore script below
+      ["tokyo","kyoto","osaka","fukuoka"].forEach(c=>{
+        cityEl(c).innerHTML = "";
+        counters[c] = 0;
+        addDay(c);
+      });
+    });
+
+    // Fetch helpers (recommendation lists)
+    const fetchList = async (id, file) => {
+      try{
+        const res = await fetch(`/data/${file}`);
+        if(!res.ok) throw new Error(`${file}: ${res.status}`);
+        const data = await res.json();
+        const ul = document.getElementById(id);
+        if(!ul) return;
+        for(const item of data){
+          const li = document.createElement("li");
+          const a  = document.createElement("a");
+          a.href = item.google_map_url || item.google_maps_url || "#";
+          a.target = "_blank";
+          a.rel = "noopener";
+          a.textContent = item.name || "(Unnamed)";
+          a.className = "text-blue-700 hover:underline";
+          li.appendChild(a);
+          ul.appendChild(li);
+        }
+      }catch(e){ console.log("Fetch failed:", e.message||e); }
+    };
+
+    // Tokyo
+    fetchList("tokyo-attractions", "Tokyo/Tokyo Attractions.json");
+    fetchList("tokyo-shopping", "Tokyo/Tokyo shopping.json");
+    fetchList("akihabara-list", "Tokyo/Akihabara_restaurants.json");
+    fetchList("asakusa-list", "Tokyo/Asakusa_restaurants.json");
+    fetchList("ginza-list", "Tokyo/Ginza_restaurants.json");
+    fetchList("ikebukuro-list", "Tokyo/Ikebukuro_restaurants.json");
+    fetchList("meguro-list", "Tokyo/meguro_restaurants.json");
+    fetchList("roppongi-list", "Tokyo/roppongi_restaurants.json");
+    fetchList("shibuya-list", "Tokyo/shibuya_restaurants.json");
+    fetchList("shinjuku-list", "Tokyo/Shinjuku_restaurants.json");
+    fetchList("other-area-list", "Tokyo/tokyo_other_area_restaurants.json");
+    fetchList("Yokohama-list", "Tokyo/Yokohama_daytrip.json");
+    fetchList("Nikko-list", "Tokyo/Nikko_daytrip.json");
+    fetchList("Kamakura-list", "Tokyo/Kamakura_daytrip.json");
+    fetchList("Kawagoe-list", "Tokyo/Kawagoe_daytrip.json");
+    fetchList("Hakone-list", "Tokyo/Hakone_daytrip.json");
+    fetchList("MountFuji-list", "Tokyo/Fujimount_daytrip.json");
+
+    // Kyoto
+    fetchList("kyoto-attractions-list", "Kyoto/Kyoto_Attractions.json");
+    fetchList("kyoto-shopping-list", "Kyoto/Kyoto_Shopping.json");
+    fetchList("kyoto-restaurants-list", "Kyoto/Kyoto_Restaurants.json");
+
+    // Osaka
+    fetchList("osaka-attractions-list", "Osaka/Osaka_Attractions.json");
+    fetchList("osaka-shopping-list", "Osaka/Osaka_Shopping.json");
+    fetchList("osaka-restaurants-list", "Osaka/Osaka_Restaurants.json");
+    fetchList("nara-list", "Osaka/Nara_day_trip.json");
+    fetchList("kobe-attractions-list", "Osaka/Kobe_Attractions.json");
+    fetchList("kobe-shopping-list", "Osaka/Kobe_Shopping.json");
+    fetchList("kobe-restaurants-list", "Osaka/Kobe_restaurants.json");
+
+    // Fukuoka
+    fetchList("fukuoka-attractions-list", "Fukuoka/Fukuoka_Attractions.json");
+    fetchList("fukuoka-shopping-list", "Fukuoka/Fukuoka_Shopping.json");
+    fetchList("fukuoka-restaurants-list", "Fukuoka/Fukuoka_Restaurants.json");
+  </script>
+
+  <!-- ==== AI Review (Tailwind-only UI; uses /ai/review backend) ==== -->
+  <script>
+    // Collect current plan in the shape expected by backend AI:
+    // { city:[{day, location, activities}], ... }
+    function collectPlanForAI(){
+      const cities = ["tokyo","kyoto","osaka","fukuoka"];
+      const out = {};
+      cities.forEach(city=>{
+        const boxes = document.querySelectorAll(`#${city}-days .day-box`);
+        const days = [];
+        boxes.forEach((box,i)=>{
+          const loc = box.querySelector(`[id^="${city}-place-"]`)?.value.trim() || "";
+          const act = box.querySelector(`[id^="${city}-notes-"]`)?.value.trim() || "";
+          if (loc || act){
+            days.push({ day:i+1, location:loc, activities:act });
+          }
+        });
+        if (days.length) out[city] = days;
+      });
+      return out;
+    }
+
+    // ---- Suggestion appliers (move / swap / trim) ----
+    function safeRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+
+    function findFields(region, day){
+      return {
+        loc: document.getElementById(`${region}-place-${day}`),
+        act: document.getElementById(`${region}-notes-${day}`),
+      };
+    }
+    function removeOnce(text, item){
+      if(!text || !item) return text||"";
+      const re = new RegExp(safeRe(item), "i");
+      return text.replace(re, "").replace(/\s{2,}/g, " ").replace(/[\/|;,]\s*(?=\/|$)/g,"").trim();
+    }
+
+    function applyMove(region, item, fromDay, toDay){
+      // ensure target exists
+      while(!document.getElementById(`${region}-notes-${toDay}`)){
+        addDay(region);
+      }
+      const from = findFields(region, fromDay);
+      const to   = findFields(region, toDay);
+      if(!from.act || !to.act) return alert("Day not found.");
+
+      // remove from source (try notes then place)
+      if (new RegExp(safeRe(item), "i").test(from.act.value)){
+        from.act.value = removeOnce(from.act.value, item);
+      } else if (from.loc && new RegExp(safeRe(item), "i").test(from.loc.value)){
+        from.loc.value = removeOnce(from.loc.value, item);
+      }
+
+      // append to target notes
+      const glue = to.act.value.trim() ? " / " : "";
+      to.act.value = `${to.act.value.trim()}${glue}${item}`.trim();
+    }
+
+    function applySwap(region, a, b, day){
+      const {act, loc} = findFields(region, day);
+      if(!act) return alert("Day not found.");
+      const reA = new RegExp(safeRe(a), "i");
+      const reB = new RegExp(safeRe(b), "i");
+      let t = act.value;
+      if (reA.test(t) && reB.test(t)){
+        t = t.replace(reA, "__TMP__");
+        t = t.replace(reB, a);
+        t = t.replace(/__TMP__/g, b);
+        act.value = t;
+      }
+      if (loc){
+        const hasA = reA.test(loc.value), hasB = reB.test(loc.value);
+        if (hasA && !hasB) loc.value = loc.value.replace(reA, b);
+        else if (hasB && !hasA) loc.value = loc.value.replace(reB, a);
+      }
+    }
+
+    function applyTrim(region, item, day){
+      const {act, loc} = findFields(region, day);
+      if(!act) return alert("Day not found.");
+      act.value = removeOnce(act.value, item);
+      if(loc) loc.value = removeOnce(loc.value, item);
+    }
+
+    function applySuggestion(s){
+      const region = String(s.region||"").toLowerCase();
+      const day = parseInt(s.day, 10);
+      const d = s.details || {};
+      if(!region || !day || !d) return alert("Invalid suggestion.");
+      if (s.action === "move")  return applyMove(region, d.item, day, d.toDay);
+      if (s.action === "swap")  return applySwap(region, d.a, d.b, day);
+      if (s.action === "trim")  return applyTrim(region, d.item, day);
+      alert("Unsupported suggestion.");
+    }
+
+    // ---- Render AI review ----
+    function renderReview(r){
+      const panel = document.getElementById("ai-panel");
+      panel.classList.remove("hidden");
+
+      document.getElementById("ai-score").textContent =
+        (typeof r.overallScore === "number" ? r.overallScore : "—");
+
+      const strengthsEl = document.getElementById("ai-strengths");
+      const risksEl = document.getElementById("ai-risks");
+      const suggsEl = document.getElementById("ai-suggestions");
+      strengthsEl.innerHTML = ""; risksEl.innerHTML = ""; suggsEl.innerHTML = "";
+
+      (r.strengths||[]).forEach(t=>{
+        const li = document.createElement("li"); li.textContent = t; strengthsEl.appendChild(li);
+      });
+      (r.risks||[]).forEach(t=>{
+        const li = document.createElement("li"); li.textContent = t; risksEl.appendChild(li);
+      });
+
+      (r.suggestions||[]).forEach((s)=>{
+        const card = document.createElement("div");
+        card.className = "rounded-xl border border-slate-200 p-4";
+
+        const header = document.createElement("div");
+        header.className = "flex items-start justify-between gap-3";
+        const h = document.createElement("div");
+        h.innerHTML = `<div class="font-semibold">${s.title || "Suggested minor edit"}</div>
+                       <div class="text-xs text-slate-500">${(s.region||"").toUpperCase()} • Day ${s.day} • ${s.action}</div>`;
+        header.appendChild(h);
+
+        const conf = document.createElement("div");
+        conf.className = "text-xs text-slate-500";
+        const pct = Math.round((s.confidence ?? 0)*100);
+        conf.textContent = `${pct}%`;
+        header.appendChild(conf);
+        card.appendChild(header);
+
+        const reason = document.createElement("p");
+        reason.className = "mt-2 text-sm text-slate-700";
+        reason.textContent = s.reason || "";
+        card.appendChild(reason);
+
+        if (s.impact){
+          const imp = document.createElement("p");
+          imp.className = "mt-1 text-xs text-slate-500";
+          imp.textContent = `Impact: ${s.impact}`;
+          card.appendChild(imp);
+        }
+
+        const btn = document.createElement("button");
+        btn.className = "mt-3 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold hover:bg-slate-50";
+        btn.textContent = "Apply this suggestion";
+        btn.onclick = ()=> applySuggestion(s);
+        card.appendChild(btn);
+
+        suggsEl.appendChild(card);
+      });
+
+      if(!r.suggestions || r.suggestions.length===0){
+        const empty = document.createElement("div");
+        empty.className = "text-sm text-slate-500";
+        empty.textContent = "No concrete micro-edits needed.";
+        suggsEl.appendChild(empty);
+      }
+
+      panel.scrollIntoView({behavior:"smooth", block:"start"});
+    }
+
+    // Hook Ask AI
+    document.getElementById("ask-ai")?.addEventListener("click", async ()=>{
+      try{
+        const plan = collectPlanForAI();
+        if (Object.keys(plan).length === 0){
+          alert("Add at least one day with a location or activity before requesting an AI review.");
+          return;
+        }
+        const res = await fetch("/ai/review", {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ plan })
+        });
+        if (!res.ok){
+          let msg = `HTTP ${res.status}`;
+          try{ const j = await res.json(); if (j?.error) msg = j.error; }catch{}
+          throw new Error(msg);
+        }
+        const review = await res.json();
+        renderReview(review);
+      }catch(e){
+        console.error(e);
+        alert("AI review failed: " + (e?.message || e));
+      }
+    });
+  </script>
+
+  <!-- Firestore: save/edit -->
+  <script type="module">
+    import { auth, db } from "/static/js/firebase-init.js?v=3";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { doc, getDoc, updateDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    const msg = document.getElementById("save-message");
+    const params = new URLSearchParams(location.search);
+    const itineraryId = params.get("itineraryId");
+
+    function collectPlan(){
+      const plan = { tokyo:[], kyoto:[], osaka:[], fukuoka:[] };
+      ["tokyo","kyoto","osaka","fukuoka"].forEach(city=>{
+        const boxes = document.querySelectorAll(`#${city}-days .day-box`);
+        boxes.forEach((box, i)=>{
+          const place = box.querySelector(`[id^="${city}-place-"]`)?.value || "";
+          const notes = box.querySelector(`[id^="${city}-notes-"]`)?.value || "";
+          plan[city].push({ day:i+1, place, notes });
+        });
+      });
+      return plan;
+    }
+
+    function renderPlanMulti(p){
+      ["tokyo","kyoto","osaka","fukuoka"].forEach(city=>{
+        const cont = document.getElementById(`${city}-days`);
+        cont.innerHTML = "";
+        if (window.counters) window.counters[city] = 0;
+
+        const arr = p?.[city] || [];
+        if (arr.length === 0) { window.addDay?.(city); return; }
+        arr.forEach(()=> window.addDay?.(city));
+        arr.forEach((d, idx)=>{
+          const i = idx + 1;
+          const place = document.getElementById(`${city}-place-${i}`);
+          const notes = document.getElementById(`${city}-notes-${i}`);
+          if (place) place.value = d.place || "";
+          if (notes) notes.value = d.notes || "";
+        });
+      });
+    }
+
+    // expose for the Save button
+    window.saveTrip = ()=>{};
+
+    onAuthStateChanged(auth, async (user) => {
+      const readyUser = user || null;
+      if (!readyUser) return;
+
+      if (itineraryId){
+        // EDIT
+        const ref = doc(db, `users/${readyUser.uid}/itineraries/${itineraryId}`);
+        const snap = await getDoc(ref);
+        const data = snap.exists() ? (snap.data() || {}) : {};
+        const plan = data.plan || { tokyo:[], kyoto:[], osaka:[], fukuoka:[] };
+        renderPlanMulti(plan);
+
+        window.saveTrip = async ()=>{
+          const newPlan = collectPlan();
+          const totalDays = ["tokyo","kyoto","osaka","fukuoka"].reduce((n,c)=>n+(newPlan[c]?.length||0),0);
+          msg.textContent = "Saving…";
+          try{
+            await updateDoc(ref, {
+              plan: newPlan,
+              days: totalDays,
+              cities: ["Tokyo","Kyoto","Osaka","Fukuoka"].filter(c => (newPlan[c.toLowerCase()]||[]).length>0),
+              updatedAt: serverTimestamp()
+            });
+            alert("Changes saved.");
+            msg.textContent = "Changes saved.";
+          }catch(e){
+            console.error(e); alert(`Save failed: ${e.message||e}`); msg.textContent = "Save failed.";
+          }
+        };
+
+        // Save as Copy
+        const saveBtn = document.querySelector('button[onclick="saveTrip()"]');
+        const copyBtn = document.createElement("button");
+        copyBtn.textContent = "Save As Copy";
+        copyBtn.className = "ml-2 rounded-lg bg-slate-700 px-5 py-2.5 font-semibold text-white hover:bg-black";
+        saveBtn.after(copyBtn);
+        copyBtn.onclick = async ()=>{
+          const newPlan = collectPlan();
+          const totalDays = ["tokyo","kyoto","osaka","fukuoka"].reduce((n,c)=>n+(newPlan[c]?.length||0),0);
+          const title = prompt("Copy title?", `Tokyo + Kansai + Fukuoka Trip (Copy ${new Date().toLocaleDateString()})`)
+                     || `Tokyo + Kansai + Fukuoka Trip (${new Date().toLocaleDateString()})`;
+          try{
+            const colRef = collection(db, `users/${readyUser.uid}/itineraries`);
+            await addDoc(colRef, {
+              title, city:"Tokyo + Kansai + Fukuoka",
+              plan:newPlan, days:totalDays,
+              cities:["Tokyo","Kyoto","Osaka","Fukuoka"].filter(c => (newPlan[c.toLowerCase()]||[]).length>0),
+              createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+            });
+            alert("Saved a new copy!");
+          }catch(e){ console.error(e); alert(`Save-as-copy failed: ${e.message||e}`); }
+        };
+
+        return;
+      }
+
+      // CREATE
+      window.saveTrip = async ()=>{
+        const newPlan = collectPlan();
+        const totalDays = ["tokyo","kyoto","osaka","fukuoka"].reduce((n,c)=>n+(newPlan[c]?.length||0),0);
+        const title = prompt("Trip title?", `Tokyo + Kansai + Fukuoka Trip (${new Date().toLocaleDateString()})`)
+                   || `Tokyo + Kansai + Fukuoka Trip (${new Date().toLocaleDateString()})`;
+        msg.textContent = "Saving to the cloud…";
+        try{
+          const colRef = collection(db, `users/${readyUser.uid}/itineraries`);
+          await addDoc(colRef, {
+            title, city:"Tokyo + Kansai + Fukuoka",
+            plan:newPlan, days:totalDays,
+            cities:["Tokyo","Kyoto","Osaka","Fukuoka"].filter(c => (newPlan[c.toLowerCase()]||[]).length>0),
+            createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+          });
+          alert("Saved as a new itinerary!");
+          msg.textContent = "Saved as a new itinerary.";
+        }catch(e){
+          console.error(e); alert(`Cloud save failed: ${e.code||""} ${e.message||e}`);
+          msg.textContent = "Save failed. See console.";
+        }
+      };
+    });
+  </script>
+</body>
+</html>

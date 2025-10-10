@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aomori · Explore Japan</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Firebase init (auth mini like other pages) -->
+  <script type="module" src="/static/js/firebase-init.js?v=3"></script>
+
+  <link rel="icon" href="static/Image/ba0c71b9ba223cc6b60e120934337d1c.webp" />
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+
+  <!-- NAV (same as index/cities/itineraries) -->
+  <nav class="sticky top-0 z-50 bg-[#222] text-white">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+      <div class="flex flex-wrap items-center gap-3">
+        <a href="index.html" class="font-semibold tracking-wide">Home</a>
+        <a href="itineraries.html" class="hover:underline">Recommended Itineraries</a>
+        <a href="cities.html" class="hover:underline">Explore Cities</a>
+        <a href="tips.html" class="hover:underline">Travel Tips</a>
+        <a href="my_itineraries.html" class="hover:underline">My Itineraries</a>
+      </div>
+      <div id="auth-mini" class="text-sm">
+        <span id="auth-name" class="font-medium">Not signed in</span>
+        <span class="text-white/60">·</span>
+        <a href="/auth.html" id="auth-link"
+           class="ml-1 inline-block rounded-md bg-white px-2.5 py-1 font-semibold text-blue-600 hover:bg-slate-100">Sign in</a>
+      </div>
+    </div>
+    <script type="module">
+      import { auth } from "/static/js/firebase-init.js?v=3";
+      import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+      const nameEl = document.getElementById('auth-name');
+      const linkEl = document.getElementById('auth-link');
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          nameEl.textContent = user.displayName || user.email;
+          linkEl.textContent = 'Sign out';
+          linkEl.href = '#';
+          linkEl.onclick = async (e) => { e.preventDefault(); await signOut(auth); };
+          linkEl.className = 'ml-1 inline-block rounded-md bg-white px-2.5 py-1 font-semibold text-slate-800 hover:bg-slate-100';
+        } else {
+          nameEl.textContent = 'Not signed in';
+          linkEl.textContent = 'Sign in';
+          linkEl.href = '/auth.html';
+          linkEl.onclick = null;
+          linkEl.className = 'ml-1 inline-block rounded-md bg-white px-2.5 py-1 font-semibold text-blue-600 hover:bg-slate-100';
+        }
+      });
+    </script>
+  </nav>
+
+  <!-- Hero -->
+  <section id="top" class="mx-auto max-w-6xl px-4 pt-6">
+    <div class="overflow-hidden rounded-3xl shadow-lg">
+      <img
+        src="static/Image/ba0c71b9ba223cc6b60e120934337d1c.webp"
+        alt="Aomori coastline and city"
+        class="h-[44vh] w-full object-cover md:h-[56vh]"
+        loading="eager"
+      />
+    </div>
+
+    <div class="mx-auto max-w-3xl py-8">
+      <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 md:text-5xl">Aomori</h1>
+      <p class="mt-3 text-lg leading-relaxed text-slate-600">
+        At Honshū’s far north, Aomori blends wild coasts, <strong>Shirakami-Sanchi</strong> forests,
+        apple country, and the luminous floats of <strong>Nebuta Matsuri</strong>. Explore Jōmon sites like
+        <strong>Sannai-Maruyama</strong>, soak in onsen, and eat superb seafood year-round.
+      </p>
+
+      <!-- CTA chips -->
+      <div class="mt-6 flex flex-wrap gap-3">
+        <a href="#attractions" class="rounded-full bg-blue-600 px-5 py-2.5 text-white shadow hover:bg-blue-700">Top Attractions</a>
+        <a href="#restaurants" class="rounded-full border border-slate-300 bg-white px-5 py-2.5 hover:bg-slate-50">Restaurants</a>
+        <a href="#shopping" class="rounded-full border border-slate-300 bg-white px-5 py-2.5 hover:bg-slate-50">Shopping</a>
+        <a href="#daytrips" class="rounded-full border border-slate-300 bg-white px-5 py-2.5 hover:bg-slate-50">Day Trips</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main -->
+  <main class="mx-auto max-w-6xl space-y-16 px-4 pb-20">
+
+    <!-- Attractions -->
+    <section id="attractions">
+      <header class="mb-6">
+        <h2 class="text-2xl font-bold md:text-3xl">Top Attractions</h2>
+        <p class="mt-1 text-sm text-slate-600">Beaches, museums, ruins, and apple-country viewpoints.</p>
+      </header>
+
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
+          <img src="static/Image/asamushi-sunset-beach-aomori-japan-asamushi-sunset-beach-aomori-japan-357114251.webp" alt="Asamushi Sunset Beach" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <figcaption class="p-3 text-sm text-slate-700">Asamushi Sunset Beach</figcaption>
+        </figure>
+        <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
+          <img src="static/Image/4-1-ok.jpg" alt="Nebuta Museum WA RASSE" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <figcaption class="p-3 text-sm text-slate-700">Nebuta Museum WA RASSE</figcaption>
+        </figure>
+        <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
+          <img src="static/Image/3752_02.jpg" alt="Sannai-Maruyama Site" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <figcaption class="p-3 text-sm text-slate-700">Sannai-Maruyama Site</figcaption>
+        </figure>
+      </div>
+
+      <details class="group mt-6 rounded-xl border bg-white p-4 open:shadow-sm">
+        <summary class="flex cursor-pointer list-none items-center justify-between">
+          <span class="text-base font-semibold">Show Attractions</span>
+          <span class="ml-3 text-xs text-slate-500 group-open:hidden">(expand)</span>
+          <span class="ml-3 hidden text-xs text-slate-500 group-open:inline">(collapse)</span>
+        </summary>
+        <ul id="attractions-list" class="mt-4 grid gap-2 sm:grid-cols-2"></ul>
+      </details>
+    </section>
+
+    <!-- Shopping -->
+    <section id="shopping">
+      <header class="mb-6">
+        <h2 class="text-2xl font-bold md:text-3xl">Shopping Recommendations</h2>
+        <p class="mt-1 text-sm text-slate-600">Local crafts, markets, and easy souvenir stops.</p>
+      </header>
+
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <img src="static/Image/Screenshot 2025-09-06 135256.png" alt="A-FACTORY" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+        <img src="static/Image/Screenshot 2025-09-06 135455.png" alt="ASPAM" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+        <img src="static/Image/66596fc59c725.webp" alt="Fish market" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+      </div>
+
+      <details class="group mt-6 rounded-xl border bg-white p-4 open:shadow-sm">
+        <summary class="flex cursor-pointer list-none items-center justify-between">
+          <span class="text-base font-semibold">Explore Aomori Shopping spots</span>
+        </summary>
+        <ul id="shopping-list" class="mt-4 grid gap-2 sm:grid-cols-2"></ul>
+      </details>
+    </section>
+
+    <!-- Restaurants -->
+    <section id="restaurants">
+      <header class="mb-6">
+        <h2 class="text-2xl font-bold md:text-3xl">Restaurants</h2>
+        <p class="mt-1 text-sm text-slate-600">Seafood bowls, apple sweets, and cozy local spots.</p>
+      </header>
+
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <img src="static/Image/640x640_rect_111767112.jpg" alt="Aomori seafood" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+        <img src="static/Image/caption (3).jpg" alt="Local restaurant" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+        <img src="static/Image/f142ee72-0129-4f4f-8789-f1130edc34bd(2).webp" alt="Apple desserts" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+      </div>
+
+      <details class="group mt-6 rounded-xl border bg-white p-4 open:shadow-sm">
+        <summary class="flex cursor-pointer list-none items-center justify-between">
+          <span class="text-base font-semibold">See where to eat in Aomori</span>
+        </summary>
+        <ul id="restaurants-list" class="mt-4 grid gap-2 sm:grid-cols-2"></ul>
+      </details>
+    </section>
+
+    <!-- Day Trips -->
+    <section id="daytrips">
+      <header class="mb-6">
+        <h2 class="text-2xl font-bold md:text-3xl">Day Trip Suggestions</h2>
+      </header>
+
+      <!-- Hirosaki -->
+      <div class="space-y-6">
+        <h3 class="text-xl font-semibold">Hirosaki</h3>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <img src="static/Image/211_104_l.jpg" alt="Hirosaki Castle" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+          <img src="static/Image/213_112_l.jpg" alt="Hirosaki park" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+          <img src="static/Image/3700_01.jpg" alt="Hirosaki streets" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+        </div>
+        <details class="group rounded-xl border bg-white p-4 open:shadow-sm">
+          <summary class="flex cursor-pointer list-none items-center justify-between"><span class="font-medium">Show Hirosaki Attractions</span></summary>
+          <ul id="hirosaki-attractions" class="mt-4 grid gap-2 sm:grid-cols-2"></ul>
+        </details>
+        <details class="group rounded-xl border bg-white p-4 open:shadow-sm">
+          <summary class="flex cursor-pointer list-none items-center justify-between"><span class="font-medium">Show Hirosaki Restaurants</span></summary>
+          <ul id="hirosaki-restaurants" class="mt-4 grid gap-2 sm:grid-cols-2"></ul>
+        </details>
+      </div>
+
+      <!-- Hachinohe -->
+      <div class="mt-12 space-y-6">
+        <h3 class="text-xl font-semibold">Hachinohe</h3>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <img src="static/Image/蕪嶋神社の風景20210403-P1170273.jpg" alt="Kabushima Shrine" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+          <img src="static/Image/photo0jpg (1).jpg" alt="Hasshoku Center" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+          <img src="static/Image/20231127_120907_443f3938_w1920.webp" alt="Tanesashi Coast" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+        </div>
+        <details class="group rounded-xl border bg-white p-4 open:shadow-sm">
+          <summary class="flex cursor-pointer list-none items-center justify-between"><span class="font-medium">Show Hachinohe Restaurants</span></summary>
+          <ul id="hachinohe-restaurants" class="mt-4 grid gap-2 sm:grid-cols-2"></ul>
+        </details>
+        <details class="group rounded-xl border bg-white p-4 open:shadow-sm">
+          <summary class="flex cursor-pointer list-none items-center justify-between"><span class="font-medium">Show Hachinohe Attractions</span></summary>
+          <ul id="hachinohe-attractions" class="mt-4 grid gap-2 sm:grid-cols-2"></ul>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="py-8 text-center text-sm text-slate-500">
+    <div class="mx-auto max-w-6xl px-4">
+      &copy; 2025 Explore Japan · Bao Tran
+    </div>
+  </footer>
+
+  <!-- JS (simple fetch pattern, filenames with spaces handled) -->
+  <script>
+    function makeListItem(item) {
+      const li = document.createElement('li');
+      li.className = 'flex items-center justify-between gap-3 rounded-lg border p-3 text-sm hover:bg-slate-50';
+      const a = document.createElement('a');
+      a.href = item.google_map_url || item.google_maps_url || '#';
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.className = 'font-medium text-blue-600 hover:underline';
+      a.textContent = item.name || 'Untitled';
+      li.appendChild(a);
+      const extra = item.category || item.type || '';
+      if (extra) {
+        const badge = document.createElement('span');
+        badge.className = 'shrink-0 rounded-full border px-2.5 py-0.5 text-xs text-slate-600';
+        badge.textContent = extra;
+        li.appendChild(badge);
+      }
+      return li;
+    }
+
+    function fetchData(id, file) {
+      const ul = document.getElementById(id);
+      if (!ul) return;
+      const url = `/data/Aomori/${encodeURIComponent(file)}`;
+      fetch(url)
+        .then(res => res.ok ? res.json() : Promise.reject(`${file} missing`))
+        .then(data => {
+          ul.replaceChildren();
+          data.forEach(item => ul.appendChild(makeListItem(item)));
+          if (!data.length) {
+            const empty = document.createElement('div');
+            empty.className = 'text-sm text-slate-500';
+            empty.textContent = 'No items yet.';
+            ul.appendChild(empty);
+          }
+        })
+        .catch(err => {
+          ul.replaceChildren();
+          const msg = document.createElement('div');
+          msg.className = 'rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700';
+          msg.textContent = `Could not load: ${file}`;
+          ul.appendChild(msg);
+          console.warn(err);
+        });
+    }
+
+    // Load lists
+    fetchData('attractions-list', 'Aomori_attractions.json');
+    fetchData('shopping-list', 'Aomori_shopping.json');
+    fetchData('restaurants-list', 'Aomori_restaurants.json');
+    fetchData('hirosaki-attractions', 'Hirosaki Day Trip (Attractions + Shopping).json');
+    fetchData('hirosaki-restaurants', 'Hirosaki_Day_Trip (Restaurants).json');
+    fetchData('hachinohe-attractions', 'Hachinohe_Day_Trip_(Attractions).json');
+    fetchData('hachinohe-restaurants', 'Hachinohe_Day_Trip (Restaurants).json');
+  </script>
+</body>
+</html>

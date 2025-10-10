@@ -1,0 +1,44 @@
+[
+    {
+      "name": "Hirosaki City Apple Park",
+      "lat": 40.5892587,
+      "lng": 140.442092,
+      "google_maps_url": "https://maps.google.com/?cid=7413390945915836305"
+    },
+    {
+      "name": "Fujita Memorial Garden",
+      "lat": 40.6042254,
+      "lng": 140.4602667,
+      "google_maps_url": "https://maps.google.com/?cid=3615052377741390088"
+    },
+    {
+      "name": "YURAGI(ユラギ)",
+      "lat": 40.612126,
+      "lng": 140.470955,
+      "google_maps_url": "https://maps.google.com/?cid=16597717722752349250"
+    },
+    {
+      "name": "Hirosaki Castle",
+      "lat": 40.6079159,
+      "lng": 140.4636654,
+      "google_maps_url": "https://maps.google.com/?cid=5280905638001364720"
+    },
+    {
+      "name": "Hirosaki Park",
+      "lat": 40.6077066,
+      "lng": 140.4643675,
+      "google_maps_url": "https://maps.google.com/?cid=1957787315010999804"
+    },
+    {
+      "name": "Tsugaru-han Neputa-mura Village",
+      "lat": 40.6111536,
+      "lng": 140.4696017,
+      "google_maps_url": "https://maps.google.com/?cid=5945751848098990839"
+    },
+    {
+      "name": "Hirosaki Museum of Contemporary Art",
+      "lat": 40.5981774,
+      "lng": 140.4728875,
+      "google_maps_url": "https://maps.google.com/?cid=17597548545481767040"
+    }
+  ]

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Explore Japan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Firebase init -->
+  <script type="module" src="/static/js/firebase-init.js?v=3"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 selection:bg-blue-100 selection:text-blue-900">
+
+  <!-- NAV (black) -->
+  <nav class="sticky top-0 z-50 bg-[#222] text-white">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+      <div class="flex flex-wrap items-center gap-3">
+        <a href="index.html" class="font-semibold tracking-wide">Home</a>
+        <a href="itineraries.html" class="hover:underline">Recommended Itineraries</a>
+        <a href="cities.html" class="hover:underline">Explore Cities</a>
+        <a href="tips.html" class="hover:underline">Travel Tips</a>
+        <a href="my_itineraries.html" class="hover:underline">My Itineraries</a>
+      </div>
+
+      <!-- Auth mini -->
+      <div id="auth-mini" class="text-sm">
+        <span id="auth-name" class="font-medium">Not signed in</span>
+        <span class="text-white/60">·</span>
+        <a href="/auth.html" id="auth-link"
+           class="ml-1 inline-block rounded-md bg-white px-2.5 py-1 font-semibold text-blue-600 hover:bg-slate-100">
+          Sign in
+        </a>
+      </div>
+    </div>
+
+    <!-- Auth state logic -->
+    <script type="module">
+      import { auth } from "/static/js/firebase-init.js?v=3";
+      import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+      const nameEl = document.getElementById("auth-name");
+      const linkEl = document.getElementById("auth-link");
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          nameEl.textContent = user.displayName || user.email;
+          linkEl.textContent = "Sign out";
+          linkEl.href = "#";
+          linkEl.onclick = async (e) => { e.preventDefault(); await signOut(auth); };
+          linkEl.className = "ml-1 inline-block rounded-md bg-white px-2.5 py-1 font-semibold text-slate-800 hover:bg-slate-100";
+        } else {
+          nameEl.textContent = "Not signed in";
+          linkEl.textContent = "Sign in";
+          linkEl.href = "/auth.html";
+          linkEl.onclick = null;
+          linkEl.className = "ml-1 inline-block rounded-md bg-white px-2.5 py-1 font-semibold text-blue-600 hover:bg-slate-100";
+        }
+      });
+    </script>
+  </nav>
+
+  <!-- HERO (image + overlay, Tailwind-only) -->
+  <header class="relative">
+    <!-- Background image -->
+    <img src="static/Image/Japan-2107x1406.jpg" alt="" class="absolute inset-0 -z-10 h-96 w-full object-cover object-center md:h-[420px]" />
+    <!-- Overlay -->
+    <div class="absolute inset-0 -z-10 bg-black/45"></div>
+
+    <div class="mx-auto flex h-96 max-w-6xl flex-col items-center justify-center px-4 text-center text-white md:h-[420px]">
+      <h1 class="text-3xl font-bold tracking-tight drop-shadow md:text-5xl">Welcome to Explore Japan</h1>
+      <p class="mt-3 max-w-2xl text-sm text-white/90 md:text-base">
+        Welcome to Explore Japan-a travel guide built from experience. Every spot on this site, from local restaurants to unique shops and must-see attractions, comes from my own time exploring Japan. Along the way, I’ve also gathered travel tips, practical advice, and sample itineraries to help you plan with ease. Whether you’re visiting for the first time or returning to see more, my goal is to share the places and ideas that made my journeys memorable, so they can inspire yours too.
+      </p>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="mx-auto max-w-6xl space-y-16 px-4 py-12">
+
+    <!-- WHY JAPAN (image cards; static look, no hover “click” vibe) -->
+    <section>
+      <h2 class="text-center text-2xl font-semibold md:text-3xl">Why You Should Travel to Japan</h2>
+      <p class="mx-auto mt-2 max-w-2xl text-center text-slate-600">
+        Food worth crossing town for, neighborhoods with history, and a style scene you won’t find elsewhere.
+      </p>
+
+      <div class="mt-8 grid gap-6 md:grid-cols-3">
+        <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <img src="static/Image/omakase-sushi-maguro.webp" alt="Sushi in Japan" class="h-44 w-full object-cover" />
+          <div class="p-5">
+            <h3 class="font-semibold">Food &amp; Drink</h3>
+            <p class="mt-1 text-sm text-slate-600">Counter sushi, back-alley ramen, cozy kissaten.</p>
+          </div>
+        </article>
+
+        <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <img src="static/Image/tokyo-zojoji-temple-220177.jpg" alt="Temple in Japan" class="h-44 w-full object-cover" />
+          <div class="p-5">
+            <h3 class="font-semibold">Culture &amp; Tradition</h3>
+            <p class="mt-1 text-sm text-slate-600">Temples, tea, and neighborhoods with centuries of history.</p>
+          </div>
+        </article>
+
+        <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <img src="static/Image/kapital-gqstyle-fall-13.webp" alt="Japanese fashion" class="h-44 w-full object-cover" />
+          <div class="p-5">
+            <h3 class="font-semibold">Shopping &amp; Style</h3>
+            <p class="mt-1 text-sm text-slate-600">Niche select shops, vintage finds, thoughtful design.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- BEST TIME (image cards) -->
+    <section>
+      <h2 class="text-center text-2xl font-semibold md:text-3xl">Best Time to Visit Japan</h2>
+      <p class="mx-auto mt-2 max-w-2xl text-center text-slate-600">
+        Every season has a different mood—pick the one that fits your trip.
+      </p>
+
+      <div class="mt-8 grid gap-6 md:grid-cols-2">
+        <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <img src="static/Image/content.jpg" alt="Cherry blossoms" class="h-44 w-full object-cover" />
+          <div class="p-5">
+            <h3 class="font-semibold">Spring (Mar–May)</h3>
+            <p class="mt-1 text-sm text-slate-600">Cherry blossoms, hanami picnics, mild weather.</p>
+          </div>
+        </article>
+
+        <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <img src="static/Image/e86ebe2670890cc476c21d36229fd5ac.jpg" alt="Autumn leaves" class="h-44 w-full object-cover" />
+          <div class="p-5">
+            <h3 class="font-semibold">Autumn (Oct–Nov)</h3>
+            <p class="mt-1 text-sm text-slate-600">Red-gold leaves across gardens, hills, and shrines.</p>
+          </div>
+        </article>
+
+        <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <img src="static/Image/december_1.jpg" alt="Winter in Japan" class="h-44 w-full object-cover" />
+          <div class="p-5">
+            <h3 class="font-semibold">Winter (Dec–Feb)</h3>
+            <p class="mt-1 text-sm text-slate-600">Snow festivals, onsen trips, Hokkaidō powder.</p>
+          </div>
+        </article>
+
+        <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <img src="static/Image/image.jpg" alt="Summer fireworks" class="h-44 w-full object-cover" />
+          <div class="p-5">
+            <h3 class="font-semibold">Summer (Jun–Aug)</h3>
+            <p class="mt-1 text-sm text-slate-600">Fireworks, matsuri, island escapes—lively but warm.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="text-center">
+      <h2 class="text-2xl font-semibold">Start Your Journey</h2>
+      <p class="mt-2 text-slate-600">Explore a city or begin planning your itinerary.</p>
+      <div class="mt-5 flex justify-center gap-4">
+        <a href="cities.html" class="rounded-lg bg-blue-600 px-5 py-3 font-medium text-white shadow hover:bg-blue-700">
+          Explore Cities
+        </a>
+        <a href="itineraries.html" class="rounded-lg border border-slate-300 bg-white px-5 py-3 font-medium hover:bg-slate-50">
+          Plan Itineraries
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="py-8 text-center text-sm text-slate-500">
+    &copy; 2025 Explore Japan Web App by Bao Tran
+  </footer>
+</body>
+</html>

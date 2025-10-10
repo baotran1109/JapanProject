@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Explore Cities · Explore Japan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Firebase init (auth mini) -->
+  <script type="module" src="/static/js/firebase-init.js?v=3"></script>
+
+  <style>
+    /* Tiny custom CSS ONLY for precise map pins and small tokens */
+    :root { --line:#e5e7eb; }
+    .city-button {
+      position: absolute; transform: translate(-50%, -50%);
+      background: #0d6efd; color: #fff; border: 0; border-radius: 10px;
+      font-weight: 700; font-size: 14px; letter-spacing: .2px;
+      padding: 10px 14px; cursor: pointer;
+      box-shadow: 0 8px 18px rgba(13,110,253,.25);
+      transition: transform .15s ease, filter .15s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .city-button:hover { transform: translate(-50%, -50%) scale(1.03); filter: brightness(1.03); }
+
+    /* Coordinates (keep your original positions) */
+    .tokyo   { top:62%; left:53%; }
+    .kyoto   { top:62%; left:42%; }
+    .osaka   { top:67%; left:42%; }
+    .fukuoka { top:69%; left:26%; }
+    .sapporo { top:21%; left:58%; }
+    .hakodate{ top:28%; left:55%; }
+    .aomori  { top:35%; left:55%; }
+    .okinawa { top:93%; left:20%; }
+
+    /* Slightly smaller touch targets on very small screens if needed */
+    @media (max-width: 380px) {
+      .city-button { font-size: 13px; padding: 8px 10px; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 selection:bg-blue-100 selection:text-blue-900">
+
+  <!-- NAV (same black header as index.html) -->
+  <nav class="sticky top-0 z-50 bg-[#222] text-white">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+      <div class="flex flex-wrap items-center gap-3">
+        <a href="index.html" class="font-semibold tracking-wide">Home</a>
+        <a href="itineraries.html" class="hover:underline">Recommended Itineraries</a>
+        <a href="cities.html" class="hover:underline">Explore Cities</a>
+        <a href="tips.html" class="hover:underline">Travel Tips</a>
+        <a href="my_itineraries.html" class="hover:underline">My Itineraries</a>
+      </div>
+
+      <!-- Auth mini -->
+      <div id="auth-mini" class="text-sm">
+        <span id="auth-name" class="font-medium">Not signed in</span>
+        <span class="text-white/60">·</span>
+        <a href="/auth.html" id="auth-link"
+           class="ml-1 inline-block rounded-md bg-white px-2.5 py-1 font-semibold text-blue-600 hover:bg-slate-100">
+          Sign in
+        </a>
+      </div>
+    </div>
+
+    <!-- Auth state logic -->
+    <script type="module">
+      import { auth } from "/static/js/firebase-init.js?v=3";
+      import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+      const nameEl = document.getElementById("auth-name");
+      const linkEl = document.getElementById("auth-link");
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          nameEl.textContent = user.displayName || user.email;
+          linkEl.textContent = "Sign out";
+          linkEl.href = "#";
+          linkEl.onclick = async (e) => { e.preventDefault(); await signOut(auth); };
+          linkEl.className = "ml-1 inline-block rounded-md bg-white px-2.5 py-1 font-semibold text-slate-800 hover:bg-slate-100";
+        } else {
+          nameEl.textContent = "Not signed in";
+          linkEl.textContent = "Sign in";
+          linkEl.href = "/auth.html";
+          linkEl.onclick = null;
+          linkEl.className = "ml-1 inline-block rounded-md bg-white px-2.5 py-1 font-semibold text-blue-600 hover:bg-slate-100";
+        }
+      });
+    </script>
+  </nav>
+
+  <!-- HERO -->
+  <header class="mx-auto max-w-6xl px-4 pt-8 pb-3 text-center">
+    <h1 class="text-3xl font-bold tracking-tight md:text-4xl">Explore Cities in Japan</h1>
+    <p class="mx-auto mt-2 max-w-2xl text-slate-600">
+      From Tokyo’s energy to Kyoto’s calm—open a city to see curated restaurants, select shops, and attractions.
+      Tap the map or use the quick links below.
+    </p>
+  </header>
+
+  <!-- MAP CARD -->
+  <main class="mx-auto max-w-6xl px-4 pb-12">
+    <section class="rounded-2xl border border-slate-200 bg-white p-3 shadow-md">
+      <div class="relative overflow-hidden rounded-xl">
+        <img
+          src="static/Image/62e07c8c-ef4b-448b-8554-200e7cec0995.png"
+          alt="Map of Japan"
+          class="w-full"
+        />
+
+        <!-- City buttons (same positions) -->
+        <button class="city-button tokyo"   onclick="location.href='tokyo.html'">Tokyo</button>
+        <button class="city-button kyoto"   onclick="location.href='kyoto.html'">Kyoto</button>
+        <button class="city-button osaka"   onclick="location.href='osaka.html'">Osaka</button>
+        <button class="city-button fukuoka" onclick="location.href='fukuoka.html'">Fukuoka</button>
+        <button class="city-button sapporo" onclick="location.href='sapporo.html'">Sapporo</button>
+        <button class="city-button hakodate"onclick="location.href='hakodate.html'">Hakodate</button>
+        <button class="city-button aomori"  onclick="location.href='aomori.html'">Aomori</button>
+        <button class="city-button okinawa" onclick="location.href='okinawa.html'">Okinawa</button>
+      </div>
+    </section>
+
+    <!-- QUICK LINK CHIPS -->
+    <section class="mt-4">
+      <div class="flex flex-wrap items-center justify-center gap-2">
+        <a class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm hover:bg-slate-50" href="tokyo.html">Tokyo</a>
+        <a class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm hover:bg-slate-50" href="kyoto.html">Kyoto</a>
+        <a class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm hover:bg-slate-50" href="osaka.html">Osaka</a>
+        <a class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm hover:bg-slate-50" href="sapporo.html">Sapporo</a>
+        <a class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm hover:bg-slate-50" href="hakodate.html">Hakodate</a>
+        <a class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm hover:bg-slate-50" href="aomori.html">Aomori</a>
+        <a class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm hover:bg-slate-50" href="fukuoka.html">Fukuoka</a>
+        <a class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm hover:bg-slate-50" href="okinawa.html">Okinawa</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="py-8 text-center text-sm text-slate-500">
+    &copy; 2025 Explore Japan · Cities map by Bao Tran
+  </footer>
+</body>
+</html>

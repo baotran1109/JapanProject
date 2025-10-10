@@ -1,0 +1,104 @@
+[
+    {
+      "name": "Sakurai Shrine Futamigaura Torii",
+      "lat": 33.6395325,
+      "lng": 130.1969992,
+      "google_map_url":"https://maps.google.com/?cid=12452503795033004583"
+    },
+    {
+      "name": "Shiomi Park Observatory",
+      "lat": 33.6745187,
+      "lng": 130.3071421,
+      "google_map_url":"https://maps.google.com/?cid=6082646286305809767"
+    },
+    {
+      "name": "Shikaumi Shrine",
+      "lat": 33.6679005,
+      "lng": 130.3132267,
+      "google_map_url":"https://maps.google.com/?cid=654311874145332869"
+    },
+    {
+      "name": "Uminonakamichi Seaside Park",
+      "lat": 33.6642785,
+      "lng": 130.3616,
+      "google_map_url":"https://maps.google.com/?cid=13681811987032125839"
+    },
+    {
+      "name": "Kyushu National Museum",
+      "lat": 33.5182578,
+      "lng": 130.5381224,
+      "google_map_url":"https://maps.google.com/?cid=13484939705097553820"
+    },
+    {
+      "name": "Dazaifu-tenmangu Shrine",
+      "lat": 33.5213697,
+      "lng": 130.5348239,
+      "google_map_url":"https://maps.google.com/?cid=13268960937318002327"
+    },
+    {
+      "name": "Nanzoin Temple",
+      "lat": 33.619838,
+      "lng": 130.5729783,
+      "google_map_url":"https://maps.google.com/?cid=15558845831406787965"
+    },
+    {
+      "name": "Tochoji Temple",
+      "lat": 33.5949498,
+      "lng": 130.4143877,
+      "google_map_url":"https://maps.google.com/?cid=15633986162349195200"
+    },
+    {
+      "name": "CANAL CITY HAKATA",
+      "lat": 33.5896305,
+      "lng": 130.4109478,
+      "google_map_url":"https://maps.google.com/?cid=16207815243977726417"
+    },
+    {
+      "name": "Fukuoka Asian Art Museum",
+      "lat": 33.595182,
+      "lng": 130.4058401,
+      "google_map_url":"https://maps.google.com/?cid=7785245574822476952"
+    },
+    {
+      "name": "Fukuoka Zoo and Botanical Garden",
+      "lat": 33.5728036,
+      "lng": 130.3910108,
+      "google_map_url":"https://maps.google.com/?cid=6585801530175202716"
+    },
+    {
+      "name": "Fukuoka Castle Ruins",
+      "lat": 33.5852452,
+      "lng": 130.3832159,
+      "google_map_url":"https://maps.google.com/?cid=6880122656175948426"
+    },
+    {
+      "name": "Fukuoka Art Museum",
+      "lat": 33.5841636,
+      "lng": 130.3796718,
+      "google_map_url":"https://maps.google.com/?cid=3802253567045886050"
+    },
+    {
+      "name": "Ohori Park",
+      "lat": 33.5862065,
+      "lng": 130.3764646,
+      "google_map_url":"https://maps.google.com/?cid=14839213291318671256"
+    },
+    {
+      "name": "Fukuoka City Museum",
+      "lat": 33.589786,
+      "lng": 130.353064,
+      "google_map_url":"https://maps.google.com/?cid=12240725636333052901"
+    },
+    {
+      "name": "Fukuoka Tower",
+      "lat": 33.5932846,
+      "lng": 130.35151,
+      "google_map_url":"https://maps.google.com/?cid=17975057117492187437"
+    },
+    {
+      "name": "Momochi Seaside Park",
+      "lat": 33.5945933,
+      "lng": 130.3512594,
+      "google_map_url":"https://maps.google.com/?cid=15036658446480202708"
+    }
+]

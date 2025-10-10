@@ -1,0 +1,98 @@
+[
+    {
+      "name": "Cup Noodles Museum",
+      "lat": 35.4554755,
+      "lng": 139.6388669,
+      "google_map_url":"https://maps.google.com/?cid=8316009374312643262"
+    },
+    {
+      "name": "Yokohama Red Brick Warehouse",
+      "lat": 35.4526321,
+      "lng": 139.6428944,
+      "google_map_url":"https://maps.google.com/?cid=338496384588480150"
+    },
+    {
+      "name": "Osanbashi Hall",
+      "lat": 35.4527872,
+      "lng": 139.6485472,
+      "google_map_url":"https://maps.google.com/?cid=11495528829506229018"
+    },
+    {
+      "name": "NYK Hikawa Maru",
+      "lat": 35.4466661,
+      "lng": 139.6513128,
+      "google_map_url":"https://maps.google.com/?cid=7580515786913685527"
+    },
+    {
+      "name": "Yamashita Park",
+      "lat": 35.4457655,
+      "lng": 139.6497793,
+      "google_map_url":"https://maps.google.com/?cid=16409509493365421932"
+    },
+    {
+      "name": "Coffee House The CAFE",
+      "lat": 35.4448182,
+      "lng": 139.6500125,
+      "google_map_url":"https://maps.google.com/?cid=16608722101114804279"
+    },
+    {
+      "name": "Yokohama Chinatown",
+      "lat":35.4434459,
+      "lng":139.6460909,
+      "google_map_url":"https://maps.google.com/?cid=10424689788304133941"
+    },
+    {
+      "name": "Nan Etsu Bishoku",
+      "lat": 35.4437494,
+      "lng": 139.6469279,
+      "google_map_url":"https://maps.google.com/?cid=961851022101513642"
+    },
+    {
+      "name": "Saikoushinkan",
+      "lat": 35.4431281,
+      "lng": 139.6468506,
+      "google_map_url":"https://maps.google.com/?cid=12091748071798608198"
+    },
+    {
+      "name": "Daisangen",
+      "lat": 35.442274,
+      "lng": 139.6478505,
+      "google_map_url":"https://maps.google.com/?cid=7654813825681916299"
+    },
+    {
+      "name": "台湾菜館(タイワンサイカン)",
+      "lat": 35.4424363,
+      "lng": 139.6465576,
+      "google_map_url":"https://maps.google.com/?cid=15688372247333999183"
+    },
+    {
+      "name": "青葉新館(アオバシンカン)",
+      "lat": 35.4428729,
+      "lng": 139.6481905,
+      "google_map_url":"https://maps.google.com/?cid=8106365719069241614"
+    },
+    {
+      "name": "ONtheCORNER",
+      "lat": 35.4420124,
+      "lng": 139.6497725,
+      "google_map_url":"https://maps.google.com/?cid=13813452392986870364"
+    },
+    {
+      "name": "Yamate Italian Garden",
+      "lat": 35.4366667,
+      "lng": 139.6433333,
+      "google_map_url":"https://maps.google.com/?cid=8340261610200641320"
+    },
+    {
+      "name": "Sankeien Garden",
+      "lat": 35.4170511,
+      "lng": 139.6588267,
+      "google_map_url":"https://maps.google.com/?cid=3843009332287043938"
+    },
+    {
+      "name": "Yokohama Port Symbol Tower",
+      "lat": 35.4389973,
+      "lng": 139.6896205,
+      "google_map_url":"https://maps.google.com/?cid=13873782347776653565"
+    }
+]

@@ -1,0 +1,62 @@
+[
+    {
+      "name": "San'nai-Maruyama iseki Special Historical Site",
+      "lat": 40.8105931,
+      "lng": 140.6967257,
+      "google_maps_url": "https://maps.google.com/?cid=8269265531925629705"
+    },
+    {
+      "name": "Aomori Museum of Art",
+      "lat": 40.8074165,
+      "lng": 140.7008597,
+      "google_maps_url": "https://maps.google.com/?cid=15031888563163862848"
+    },
+    {
+      "name": "Seikan Train Ferry Memorial Ship Hakkōda-maru",
+      "lat": 40.8315295,
+      "lng": 140.7362873,
+      "google_maps_url": "https://maps.google.com/?cid=5843222137270243718"
+    },
+    {
+      "name": "Nebuta Museum WA RASSE",
+      "lat": 40.829495,
+      "lng": 140.7356284,
+      "google_maps_url": "https://maps.google.com/?cid=14282572961377107010"
+    },
+    {
+      "name": "Aomori Machinaka Onsen",
+      "lat": 40.824661,
+      "lng": 140.7353734,
+      "google_maps_url": "https://maps.google.com/?cid=6860015407036389360"
+    },
+    {
+      "name": "Gappo Park",
+      "lat": 40.8301251,
+      "lng": 140.7791627,
+      "google_maps_url": "https://maps.google.com/?cid=12566668590254035878"
+    },
+    {
+      "name": "Showa Daibutsu Buddha",
+      "lat": 40.8221012,
+      "lng": 140.8184483,
+      "google_maps_url": "https://maps.google.com/?cid=17690535980948521161"
+    },
+    {
+      "name": "Sunset beach Asamushi",
+      "lat": 40.8953213,
+      "lng": 140.8597831,
+      "google_maps_url": "https://maps.google.com/?cid=6283957458063184123"
+    },
+    {
+      "name": "Aquarium Asamushi",
+      "lat": 40.8975,
+      "lng": 140.8627778,
+      "google_maps_url": "https://maps.google.com/?cid=17170327963319060340"
+    },
+    {
+      "name": "Aomori Nebuta Festival",
+      "lat":40.82302, 
+      "lng":140.74639,
+      "google_maps_url": "https://maps.google.com/?cid=3617309508321444760"
+    }
+]

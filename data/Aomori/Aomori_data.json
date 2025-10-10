@@ -1,0 +1,541 @@
+{
+  "Aomori Shopping": [
+    {
+      "name": "Article",
+      "lat": 40.8258988,
+      "lng": 140.7384705
+    },
+    {
+      "name": "BLIND（ブラインド）",
+      "lat": 40.8254257,
+      "lng": 140.73766
+    }
+  ],
+  "Aomori Restaurants": [
+    {
+      "name": "Fish Restaurant Den - Shin Aomori Branch",
+      "lat": 40.8279573,
+      "lng": 140.6934054
+    },
+    {
+      "name": "SAPPORO Kan",
+      "lat": 40.8277127,
+      "lng": 140.707208
+    },
+    {
+      "name": "Galetteria Da Sasino",
+      "lat": 40.8303818,
+      "lng": 140.7352488
+    },
+    {
+      "name": "gelato natura due",
+      "lat": 40.8301977,
+      "lng": 140.7350376
+    },
+    {
+      "name": "Skip Egg",
+      "lat": 40.8303471,
+      "lng": 140.7351463
+    },
+    {
+      "name": "Osanai",
+      "lat": 40.8279769,
+      "lng": 140.7359841
+    },
+    {
+      "name": "丸青食堂",
+      "lat": 40.827274,
+      "lng": 140.7357002
+    },
+    {
+      "name": "Gelato Natur",
+      "lat": 40.8266286,
+      "lng": 140.736186
+    },
+    {
+      "name": "Aomori Gyosai Center (Aomori Nokkedon)",
+      "lat": 40.8258967,
+      "lng": 140.7359117
+    },
+    {
+      "name": "Ajino Sapporo Oonishi",
+      "lat": 40.8247609,
+      "lng": 140.7368301
+    },
+    {
+      "name": "Izakaya Restaurant ROKUBE",
+      "lat": 40.8255275,
+      "lng": 140.7379452
+    },
+    {
+      "name": "Viennese Sweets Strauss",
+      "lat": 40.8265093,
+      "lng": 140.7387131
+    },
+    {
+      "name": "Sushi Restaurant ASUKA Shinmachi Store",
+      "lat": 40.8269969,
+      "lng": 140.7385094
+    },
+    {
+      "name": "Ramen Ajino-Sapporo",
+      "lat": 40.8274922,
+      "lng": 140.7386122
+    },
+    {
+      "name": "Taru",
+      "lat": 40.8269803,
+      "lng": 140.7397979
+    },
+    {
+      "name": "Ippachi Sushi",
+      "lat": 40.8273573,
+      "lng": 140.7396431
+    },
+    {
+      "name": "Izakaya Fukuro",
+      "lat": 40.8280501,
+      "lng": 140.740048
+    },
+    {
+      "name": "Marukai Ramen",
+      "lat": 40.8285454,
+      "lng": 140.7408088
+    },
+    {
+      "name": "Sweets Factory pampam ASPAM Store",
+      "lat": 40.8295708,
+      "lng": 140.7411111
+    },
+    {
+      "name": "Tugaru Kappou Mirai",
+      "lat": 40.827921,
+      "lng": 140.740757
+    },
+    {
+      "name": "Coffee Marron",
+      "lat": 40.827135,
+      "lng": 140.741518
+    },
+    {
+      "name": "Hatazen",
+      "lat": 40.826454,
+      "lng": 140.7444595
+    },
+    {
+      "name": "Al Centro",
+      "lat": 40.8218846,
+      "lng": 140.7422253
+    },
+    {
+      "name": "Kawayoshi",
+      "lat": 40.8286204,
+      "lng": 140.7465735
+    },
+    {
+      "name": "Tsugaru Joppari Isariya Sakaba",
+      "lat": 40.8256843,
+      "lng": 140.7467049
+    },
+    {
+      "name": "Jiraiya",
+      "lat": 40.8257025,
+      "lng": 140.7468112
+    },
+    {
+      "name": "Kicchou",
+      "lat": 40.827082,
+      "lng": 140.7479173
+    },
+    {
+      "name": "Dining villa",
+      "lat": 40.8279976,
+      "lng": 140.7486351
+    },
+    {
+      "name": "Cyuka-Soba NISHI",
+      "lat": 40.8221725,
+      "lng": 140.7496335
+    },
+    {
+      "name": "Restaurant Casa di Yamauchi",
+      "lat": 40.8203064,
+      "lng": 140.7501475
+    },
+    {
+      "name": "Isojima",
+      "lat": 40.8261849,
+      "lng": 140.75245
+    },
+    {
+      "name": "Shichibei ya",
+      "lat": 40.826125,
+      "lng": 140.7534713
+    },
+    {
+      "name": "Kawashou",
+      "lat": 40.8232284,
+      "lng": 140.7572296
+    },
+    {
+      "name": "Hide Zushi",
+      "lat": 40.8250436,
+      "lng": 140.7574499
+    },
+    {
+      "name": "Daijun",
+      "lat": 40.823555,
+      "lng": 140.7595427
+    },
+    {
+      "name": "Sushi BAR Gonpachi",
+      "lat": 40.8290685,
+      "lng": 140.7587143
+    },
+    {
+      "name": "Bouquet de France",
+      "lat": 40.8115809,
+      "lng": 140.7934329
+    },
+    {
+      "name": "Chuukasoba Hirako Shop Kiboshi",
+      "lat": 40.8054762,
+      "lng": 140.7411597
+    },
+    {
+      "name": "Menya Zetton",
+      "lat": 40.8058207,
+      "lng": 140.7482291
+    },
+    {
+      "name": "Masadate Shokudo",
+      "lat": 40.9019844,
+      "lng": 140.8562403
+    },
+    {
+      "name": "Moriya Shoten",
+      "lat": 40.9014046,
+      "lng": 140.8564495
+    },
+    {
+      "name": "Tsurukameya Shokudo",
+      "lat": 40.8943278,
+      "lng": 140.8610203
+    },
+    {
+      "name": "Cafe 4 Cats",
+      "lat": 40.8070094,
+      "lng": 140.7013099
+    }
+  ],
+  "Aomori Attractions": [
+    {
+      "name": "San'nai-Maruyama iseki Special Historical Site",
+      "lat": 40.8105931,
+      "lng": 140.6967257
+    },
+    {
+      "name": "Aomori Museum of Art",
+      "lat": 40.8074165,
+      "lng": 140.7008597
+    },
+    {
+      "name": "Seikan Train Ferry Memorial Ship Hakkōda-maru",
+      "lat": 40.8315295,
+      "lng": 140.7362873
+    },
+    {
+      "name": "Nebuta Museum WA RASSE",
+      "lat": 40.829495,
+      "lng": 140.7356284
+    },
+    {
+      "name": "Aomori Machinaka Onsen",
+      "lat": 40.824661,
+      "lng": 140.7353734
+    },
+    {
+      "name": "Gappo Park",
+      "lat": 40.8301251,
+      "lng": 140.7791627
+    },
+    {
+      "name": "Showa Daibutsu Buddha",
+      "lat": 40.8221012,
+      "lng": 140.8184483
+    },
+    {
+      "name": "Sunset beach Asamushi",
+      "lat": 40.8953213,
+      "lng": 140.8597831
+    },
+    {
+      "name": "Aquarium Asamushi",
+      "lat": 40.8975,
+      "lng": 140.8627778
+    }
+  ],
+  "Hirosaki Day Trip (Restaurants)": [
+    {
+      "name": "Chez-Moi French Dining Room",
+      "lat": 40.5992091,
+      "lng": 140.4942488
+    },
+    {
+      "name": "French Cuisine Che Ange",
+      "lat": 40.59889,
+      "lng": 140.495204
+    },
+    {
+      "name": "Ikkyū Sushi Hirosaki Store",
+      "lat": 40.5987818,
+      "lng": 140.4903977
+    },
+    {
+      "name": "PePe Kitchen",
+      "lat": 40.6023281,
+      "lng": 140.4888294
+    },
+    {
+      "name": "Tsugaru no Sakedokoro Watami",
+      "lat": 40.598038,
+      "lng": 140.4832653
+    },
+    {
+      "name": "Three Bridge",
+      "lat": 40.5991,
+      "lng": 140.4824893
+    },
+    {
+      "name": "Takahashi Chuka Soba",
+      "lat": 40.6201195,
+      "lng": 140.4955988
+    },
+    {
+      "name": "GRAND MERCI",
+      "lat": 40.6075466,
+      "lng": 140.4798633
+    },
+    {
+      "name": "Izakaya Domon",
+      "lat": 40.6039292,
+      "lng": 140.4797043
+    },
+    {
+      "name": "Hasuya",
+      "lat": 40.5992698,
+      "lng": 140.4755682
+    },
+    {
+      "name": "PÂTISSERIE LE CHOCOLAT",
+      "lat": 40.6037409,
+      "lng": 140.4731377
+    },
+    {
+      "name": "Trattria Lipagio",
+      "lat": 40.6058603,
+      "lng": 140.4731022
+    },
+    {
+      "name": "石と肴 地雷也 弘前店",
+      "lat": 40.6028133,
+      "lng": 140.4717285
+    },
+    {
+      "name": "Sushi Uehara",
+      "lat": 40.6021576,
+      "lng": 140.4715284
+    },
+    {
+      "name": "Restaurant Yamazaki",
+      "lat": 40.6023879,
+      "lng": 140.4702922
+    },
+    {
+      "name": "Yamazaki",
+      "lat": 48.8583294,
+      "lng": 2.2737567
+    },
+    {
+      "name": "Takasago Soba",
+      "lat": 40.6020942,
+      "lng": 140.4686301
+    },
+    {
+      "name": "Yakiniku & Reimen Nakamichi Honchō Store",
+      "lat": 40.6008864,
+      "lng": 140.4690349
+    },
+    {
+      "name": "OSTERIA ENOTECA DA SASINO",
+      "lat": 40.6009719,
+      "lng": 140.4670084
+    },
+    {
+      "name": "La Porte Blanche",
+      "lat": 40.601133,
+      "lng": 140.465628
+    },
+    {
+      "name": "Oryouri Narumi",
+      "lat": 40.6013671,
+      "lng": 140.4646864
+    },
+    {
+      "name": "Taishō Roman Tea Room",
+      "lat": 40.603496,
+      "lng": 140.461388
+    }
+  ],
+  "Hirosaki Day Trip (Attractions + Shopping)": [
+    {
+      "name": "Hirosaki City Apple Park",
+      "lat": 40.5892587,
+      "lng": 140.442092
+    },
+    {
+      "name": "Fujita Memorial Garden",
+      "lat": 40.6042254,
+      "lng": 140.4602667
+    },
+    {
+      "name": "YURAGI(ユラギ)",
+      "lat": 40.612126,
+      "lng": 140.470955
+    },
+    {
+      "name": "Hirosaki Castle",
+      "lat": 40.6079159,
+      "lng": 140.4636654
+    },
+    {
+      "name": "Hirosaki Park",
+      "lat": 40.6077066,
+      "lng": 140.4643675
+    },
+    {
+      "name": "Tsugaru-han Neputa-mura Village",
+      "lat": 40.6111536,
+      "lng": 140.4696017
+    },
+    {
+      "name": "Hirosaki Museum of Contemporary Art",
+      "lat": 40.5981774,
+      "lng": 140.4728875
+    }
+  ],
+  "Hachinohe Day Trip (Restaurants)": [
+    {
+      "name": "Kaiseki ryōridokoro Kofunato",
+      "lat": 40.5422353,
+      "lng": 141.5738235
+    },
+    {
+      "name": "尾崎商店 (鮮魚販売 ) 魚まる食堂",
+      "lat": 40.5262928,
+      "lng": 141.5296108
+    },
+    {
+      "name": "Minato Shokudō",
+      "lat": 40.52397,
+      "lng": 141.5289448
+    },
+    {
+      "name": "Fruit Parlor Odawara",
+      "lat": 40.5133731,
+      "lng": 141.4899145
+    },
+    {
+      "name": "Banya",
+      "lat": 40.5096027,
+      "lng": 141.492212
+    },
+    {
+      "name": "炭火焼 海ごはん サカナヨロコブ",
+      "lat": 40.5079437,
+      "lng": 141.492463
+    },
+    {
+      "name": "Sushi Boteju",
+      "lat": 40.5080756,
+      "lng": 141.4925176
+    },
+    {
+      "name": "酒肴だるま",
+      "lat": 40.5084642,
+      "lng": 141.4920353
+    },
+    {
+      "name": "Saba no Eki",
+      "lat": 40.5091421,
+      "lng": 141.4912466
+    },
+    {
+      "name": "Uminosachi MIMI",
+      "lat": 40.5091527,
+      "lng": 141.4909897
+    },
+    {
+      "name": "焚久味",
+      "lat": 40.5082129,
+      "lng": 141.4897251
+    },
+    {
+      "name": "Porta Otto",
+      "lat": 40.5087038,
+      "lng": 141.4883743
+    },
+    {
+      "name": "Marui",
+      "lat": 40.5027468,
+      "lng": 141.4746343
+    },
+    {
+      "name": "八食市場寿司",
+      "lat": 40.5265789,
+      "lng": 141.4535826
+    },
+    {
+      "name": "Shichirinmura 七厘村",
+      "lat": 40.5265966,
+      "lng": 141.4530636
+    },
+    {
+      "name": "Hamakoya",
+      "lat": 40.5093069,
+      "lng": 141.4332698
+    },
+    {
+      "name": "Homura",
+      "lat": 40.508433,
+      "lng": 141.432385
+    }
+  ],
+  "Hachinohe Day Trip (Attractions)": [
+    {
+      "name": "Tatehana Wharf Morning Market",
+      "lat": 40.5278596,
+      "lng": 141.5294053
+    },
+    {
+      "name": "Ashigezaki tenbōdai Observatory",
+      "lat": 40.5390678,
+      "lng": 141.5803351
+    },
+    {
+      "name": "Kabushima Shrine",
+      "lat": 40.5385428,
+      "lng": 141.5575712
+    },
+    {
+      "name": "Hasshoku Center",
+      "lat": 40.5264414,
+      "lng": 141.4529163
+    },
+    {
+      "name": "Kushihiki Hachimangu shrine",
+      "lat": 40.4900174,
+      "lng": 141.4347971
+    }
+  ]
+}

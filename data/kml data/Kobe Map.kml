@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Kobe Map</name>
+    <description/>
+    <Style id="icon-1899-0288D1-nodesc-normal">
+      <IconStyle>
+        <color>ffd18802</color>
+        <scale>1</scale>
+        <Icon>
+          <href>https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+        <hotSpot x="32" xunits="pixels" y="64" yunits="insetPixels"/>
+      </IconStyle>
+      <LabelStyle>
+        <scale>0</scale>
+      </LabelStyle>
+      <BalloonStyle>
+        <text><![CDATA[<h3>$[name]</h3>]]></text>
+      </BalloonStyle>
+    </Style>
+    <Style id="icon-1899-0288D1-nodesc-highlight">
+      <IconStyle>
+        <color>ffd18802</color>
+        <scale>1</scale>
+        <Icon>
+          <href>https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+        <hotSpot x="32" xunits="pixels" y="64" yunits="insetPixels"/>
+      </IconStyle>
+      <LabelStyle>
+        <scale>1</scale>
+      </LabelStyle>
+      <BalloonStyle>
+        <text><![CDATA[<h3>$[name]</h3>]]></text>
+      </BalloonStyle>
+    </Style>
+    <StyleMap id="icon-1899-0288D1-nodesc">
+      <Pair>
+        <key>normal</key>
+        <styleUrl>#icon-1899-0288D1-nodesc-normal</styleUrl>
+      </Pair>
+      <Pair>
+        <key>highlight</key>
+        <styleUrl>#icon-1899-0288D1-nodesc-highlight</styleUrl>
+      </Pair>
+    </StyleMap>
+    <Folder>
+      <name>Kobe Restaurants</name>
+      <Placemark>
+        <name>Lao Fuu Tsaii</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.2743459,34.7197834,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Steak Teppanyaki Daiei</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.2260184,34.7139117,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>担担麺専門店ENISHI 神戸総本店</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.2165857,34.7042269,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Freundlieb</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1951618,34.7007993,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Marutaka Chukasoba Ninomiya Shop</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1949836,34.6985942,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Grill Suematsu</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1935472,34.6991403,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Bar Ciccia</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1935864,34.6987767,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name><![CDATA[L'avenue]]></name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1868723,34.6959252,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Kafareru Kobekitano Honten</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1869687,34.6960135,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Zen Yakiniku</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1891306,34.6957533,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Sumi Yakiniku ISHIDAYA Main-Shop</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.192644,34.694562,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Kobe Beef Steak Ishida.Main-Shop</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1925201,34.6941624,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Kobe Plaisir</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1900641,34.6932052,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Mon</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1912767,34.6927381,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Kobe Gyudon Hiroshige</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1921083,34.6977409,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Cantonese Restaurant Juntoku</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1886257,34.6910883,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Rakkanki</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1881194,34.6912511,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Motomachi Santos</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1874503,34.6884526,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Yoshoku Quattro</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1859196,34.6884735,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Patisserie Mont Plus</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1868326,34.6861976,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Yakiniku Mangetsu</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1792453,34.6852997,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Asahi</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1788188,34.6850988,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Itō Grill</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1880674,34.688432,0
+          </coordinates>
+        </Point>
+      </Placemark>
+    </Folder>
+    <Folder>
+      <name>Kobe Shopping</name>
+      <Placemark>
+        <name>ISSEY MIYAKE KOBE</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1905185,34.6871633,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Chrome Hearts クロムハーツ</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.191717,34.68791,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Daimaru Kobe</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1900346,34.688689,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>kindal kobe second hand store</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1907638,34.6900987,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Ron Herman Kobe Store</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1901536,34.6897331,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Edition Kobe BAL</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1901622,34.6898603,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>ANEX -KOBE-</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1864917,34.6864872,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>RAGTAG</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1894983,34.6914744,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Mukta / Sal</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1935097,34.7001029,0
+          </coordinates>
+        </Point>
+      </Placemark>
+    </Folder>
+    <Folder>
+      <name>Kobe Attractions</name>
+      <Placemark>
+        <name>Nunobiki Waterfalls (Ontaki / Meotodaki)</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1938164,34.7097005,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name><![CDATA[Kobe Nunobiki Herb Gardens & Ropeway]]></name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1938755,34.7044275,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Kitano Tenman Shrine</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.189591,34.7019583,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Kobe Kitano Ijinkan-Gai</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1907906,34.7007283,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Kobe Chinatown Nankin-machi</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1881104,34.6882142,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Kobe City Hall Observation Lobby</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1958333,34.6894444,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Kobe Port Tower</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1866995,34.68263,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Meriken Park</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1886448,34.6822937,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>átoa</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1936194,34.6832222,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Sorakuen Garden</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1817844,34.6926239,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Kobe Harborland umie Mosaic</name>
+        <styleUrl>#icon-1899-0288D1-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            135.1846182,34.6799788,0
+          </coordinates>
+        </Point>
+      </Placemark>
+    </Folder>
+  </Document>
+</kml>

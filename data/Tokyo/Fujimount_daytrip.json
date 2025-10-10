@@ -1,0 +1,44 @@
+[
+        {
+      "name": "Arakurayama Sengen Park",
+      "lat": 35.5013908,
+      "lng": 138.8016313,
+      "google_map_url":"https://maps.google.com/?cid=10371357274634952829"
+    },
+    {
+      "name": "MIMASU Restaurant",
+      "lat": 35.4912341,
+      "lng": 138.8025353,
+      "google_map_url":"https://maps.google.com/?cid=7830820368553758678"
+    },
+    {
+      "name": "十駕",
+      "lat": 35.4657741,
+      "lng": 138.8052348,
+      "google_map_url":"https://maps.google.com/?cid=3130841060128418166"
+    },
+    {
+      "name": "Oshino hakkai",
+      "lat": 35.4600675,
+      "lng": 138.8324741,
+      "google_map_url":"https://maps.google.com/?cid=1601773399916388209"
+    },
+    {
+      "name": "Yamanakako Hana no Miyako Park",
+      "lat": 35.4392429,
+      "lng": 138.8512632,
+      "google_map_url":"https://maps.google.com/?cid=9477295170798197094"
+    },
+    {
+      "name": "THE PARK",
+      "lat": 35.4276322,
+      "lng": 138.8680675,
+      "google_map_url":"https://maps.google.com/?cid=2799664911570874512"
+    },
+    {
+      "name": "Yamanakako Communication Plaza Kirara",
+      "lat": 35.4204484,
+      "lng": 138.9009377,
+      "google_map_url":"https://maps.google.com/?cid=633137610743814398"
+    }
+]

@@ -1,0 +1,68 @@
+[
+    {
+      "name": "Harukas 300 (Observatory)",
+      "lat": 34.6463062,
+      "lng": 135.5133091,
+      "google_map_url":"https://maps.google.com/?cid=17457951089637678730"
+    },
+    {
+      "name": "Umeda Sky Building",
+      "lat": 34.7052872,
+      "lng": 135.4896527,
+      "google_map_url":"https://maps.google.com/?cid=6323866581023509245"
+    },
+    {
+      "name": "Universal Studios Japan",
+      "lat": 34.6656768,
+      "lng": 135.4323185,
+      "google_map_url":"https://maps.google.com/?cid=3892796888607511210"
+    },
+    {
+      "name": "Osaka Castle",
+      "lat": 34.6872571,
+      "lng": 135.5258546,
+      "google_map_url":"https://maps.google.com/?cid=1081374622389182017"
+    },
+    {
+      "name": "Hozenji Yokocho",
+      "lat": 34.668208,
+      "lng": 135.5026287,
+      "google_map_url":"https://maps.google.com/?cid=1940503935653472466"
+    },
+    {
+      "name": "Glico Sign Dotonbori",
+      "lat": 34.6689076,
+      "lng": 135.5010568,
+      "google_map_url":"https://maps.google.com/?cid=6582327784679221695"
+    },
+    {
+      "name": "Shitennō-ji",
+      "lat": 34.6544581,
+      "lng": 135.5165239,
+      "google_map_url":"https://maps.google.com/?cid=13162475560152948781"
+    },
+    {
+      "name": "Nipponbashi Denden Town",
+      "lat": 34.6604299,
+      "lng": 135.5058817,
+      "google_map_url":"https://maps.google.com/?cid=8625282502509816351"
+    },
+    {
+      "name": "GRAND GREEN OSAKA",
+      "lat": 34.7024579,
+      "lng": 135.4913958,
+      "google_map_url":"https://maps.google.com/?cid=7593428275278623927"
+    },
+    {
+      "name": "Minoh Falls",
+      "lat": 34.8538281,
+      "lng": 135.4719911,
+      "google_map_url":"https://maps.google.com/?cid=5537097326964975776"
+    },
+    {
+      "name": "Osaka Aquarium Kaiyukan",
+      "lat": 34.6546382,
+      "lng": 135.4280932,
+      "google_map_url":"https://maps.google.com/?cid=8035482904308493516"
+    }
+]

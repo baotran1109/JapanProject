@@ -1,0 +1,68 @@
+[
+    {
+      "name": "Kotoku-in",
+      "lat": 35.3168145,
+      "lng": 139.5357442,
+      "google_map_url":"https://maps.google.com/?cid=2216777826481991500"
+    },
+    {
+      "name": "Hasedera",
+      "lat": 35.3124645,
+      "lng": 139.5330634,
+      "google_map_url":"https://maps.google.com/?cid=6335264300188806609"
+    },
+    {
+      "name": "Kaedena",
+      "lat": 35.313242,
+      "lng": 139.5350659,
+      "google_map_url":"https://maps.google.com/?cid=3610156308679342481"
+    },
+    {
+      "name": "Sangoshō",
+      "lat": 35.3091029,
+      "lng": 139.5166015,
+      "google_map_url":"https://maps.google.com/?cid=17026598447157155796"
+    },
+    {
+      "name": "Shichirigahama Beach",
+      "lat": 35.3043891,
+      "lng": 139.513901,
+      "google_map_url":"https://maps.google.com/?cid=11344940212826062752"
+    },
+    {
+      "name": "Ristorante Amalfi",
+      "lat": 35.3058994,
+      "lng": 139.5075183,
+      "google_map_url":"https://maps.google.com/?cid=9669574904091451538"
+    },
+    {
+      "name": "Enoshima Uomi-tei",
+      "lat": 35.2990494,
+      "lng": 139.4752808,
+      "google_map_url":"https://maps.google.com/?cid=15664261647288573288"
+    },
+    {
+      "name": "Enoshima Sea Candle",
+      "lat": 35.2997417,
+      "lng": 139.478425,
+      "google_map_url":"https://maps.google.com/?cid=3849556319847112627"
+    },
+    {
+      "name": "Chigogafuchi Abyss",
+      "lat": 35.2987385,
+      "lng": 139.4744322,
+      "google_map_url":"https://maps.google.com/?cid=18283030465167032276"
+    },
+    {
+      "name": "Enoshima Iwaya Cave",
+      "lat": 35.2984071,
+      "lng": 139.4755886,
+      "google_map_url":"https://maps.google.com/?cid=900027599560337280"
+    },
+    {
+      "name":"bills (Shichirigahama)",
+      "lat": 35.3056685,
+      "lng": 139.5102614,
+      "google_map_url": "https://maps.google.com/?cid=37952588250377000"
+    }
+]
