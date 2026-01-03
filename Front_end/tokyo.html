@@ -10,10 +10,10 @@
     
 
     <!-- Firebase init (auth mini like other pages) -->
-    <script type="module" src="/static/js/firebase-init.js?v=3"></script>
+    <script type="module" src="/static/js/firebase-init.js?v=4"></script>
 
     <!-- Favicon (optional) -->
-    <link rel="icon" href="static/Image/Tokyo-GettyImages-1131743616-1000x3000.jpg" />
+    <link rel="icon" href="/static/Image/Tokyo-GettyImages-1131743616-1000x3000.jpg" />
   </head>
   <body class="bg-neutral-50 text-neutral-800 antialiased">
 
@@ -21,11 +21,11 @@
     <nav class="sticky top-0 z-50 bg-[#222] text-white">
       <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         <div class="flex flex-wrap items-center gap-3">
-          <a href="index.html" class="font-semibold tracking-wide">Home</a>
-          <a href="itineraries.html" class="hover:underline">Recommended Itineraries</a>
-          <a href="cities.html" class="hover:underline">Explore Cities</a>
-          <a href="tips.html" class="hover:underline">Travel Tips</a>
-          <a href="my_itineraries.html" class="hover:underline">My Itineraries</a>
+          <a href="/index.html" class="font-semibold tracking-wide">Home</a>
+          <a href="/itineraries.html" class="hover:underline">Recommended Itineraries</a>
+          <a href="/cities.html" class="hover:underline">Explore Cities</a>
+          <a href="/tips.html" class="hover:underline">Travel Tips</a>
+          <a href="/my_itineraries.html" class="hover:underline">My Itineraries</a>
         </div>
         <div id="auth-mini" class="text-sm">
           <span id="auth-name" class="font-medium">Not signed in</span>
@@ -35,7 +35,7 @@
         </div>
       </div>
       <script type="module">
-        import { auth } from "/static/js/firebase-init.js?v=3";
+        import { auth } from "/static/js/firebase-init.js?v=4";
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         const nameEl = document.getElementById('auth-name');
         const linkEl = document.getElementById('auth-link');
@@ -62,7 +62,7 @@
   <!-- Image card (no dark overlay) -->
   <div class="overflow-hidden rounded-3xl shadow-lg">
     <img
-      src="static/Image/Tokyo-GettyImages-1131743616-1000x3000.jpg"
+      src="/static/Image/Tokyo-GettyImages-1131743616-1000x3000.jpg"
       alt="Tokyo skyline with Mount Fuji"
       class="h-[44vh] w-full object-cover md:h-[56vh]"
       loading="eager"
@@ -113,15 +113,15 @@
         </header>
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
-            <img src="static/Image/00teamLab-Borderless-cjlw-articleLarge.webp" alt="teamLab Borderless" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+            <img src="/static/Image/00teamLab-Borderless-cjlw-articleLarge.webp" alt="teamLab Borderless" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
             <figcaption class="p-3 text-sm text-neutral-700">teamLab Borderless</figcaption>
           </figure>
           <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
-            <img src="static/Image/47dca845-东京半日团-.jpg" alt="Meiji Jingu & Omotesandō" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+            <img src="/static/Image/47dca845-东京半日团-.jpg" alt="Meiji Jingu & Omotesandō" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
             <figcaption class="p-3 text-sm text-neutral-700">Meiji Jingu / Harajuku</figcaption>
           </figure>
           <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
-            <img src="static/Image/skytree_2_480x480.webp" alt="Tokyo Skytree" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+            <img src="/static/Image/skytree_2_480x480.webp" alt="Tokyo Skytree" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
             <figcaption class="p-3 text-sm text-neutral-700">Tokyo Skytree</figcaption>
           </figure>
         </div>
@@ -143,15 +143,15 @@
         </header>
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
-            <img src="static/Image/cull-nguyen-1260535-unsplash.jpg" alt="Harajuku Boutique" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+            <img src="/static/Image/cull-nguyen-1260535-unsplash.jpg" alt="Harajuku Boutique" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
             <figcaption class="p-3 text-sm text-neutral-700">Harajuku / Ura‑Harajuku</figcaption>
           </figure>
           <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
-            <img src="static/Image/gm-aoyama-03.png" alt="Aoyama Flagships" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+            <img src="/static/Image/gm-aoyama-03.png" alt="Aoyama Flagships" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
             <figcaption class="p-3 text-sm text-neutral-700">Aoyama Flagships</figcaption>
           </figure>
           <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
-            <img src="static/Image/image (2).jpg" alt="Ginza Arcades" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+            <img src="/static/Image/image (2).jpg" alt="Ginza Arcades" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
             <figcaption class="p-3 text-sm text-neutral-700">Ginza / Marunouchi</figcaption>
           </figure>
         </div>
@@ -175,54 +175,54 @@
           <div>
             <h3 class="text-xl font-semibold">Yokohama</h3>
             <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <img src="static/Image/1701682359-yokohama-sankeien-garden.avif" alt="Sankeien Garden" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-              <img src="static/Image/china-town-in-yokohama_myqghp.webp" alt="Yokohama Chinatown" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-              <img src="static/Image/things-to-do-in-yokohama.jpg" alt="Yokohama Bay" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+              <img src="/static/Image/1701682359-yokohama-sankeien-garden.avif" alt="Sankeien Garden" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+              <img src="/static/Image/china-town-in-yokohama_myqghp.webp" alt="Yokohama Chinatown" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+              <img src="/static/Image/things-to-do-in-yokohama.jpg" alt="Yokohama Bay" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
             </div>
             <details class="group mt-4 rounded-xl border bg-white p-4"><summary class="flex cursor-pointer list-none items-center justify-between"><span class="font-medium">Things to do in Yokohama</span></summary><ul id="Yokohama-list" class="mt-4 grid gap-2 sm:grid-cols-2"></ul></details>
           </div>
           <div>
             <h3 class="text-xl font-semibold">Hakone</h3>
             <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <img src="static/Image/1366x0_topslidesen_12270753_122707535.jpg" alt="Hakone Lake Ashi" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-              <img src="static/Image/content (1).jpg" alt="Hakone ropeway" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-              <img src="static/Image/winter-in-hakone.jpg" alt="Winter in Hakone" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+              <img src="/static/Image/1366x0_topslidesen_12270753_122707535.jpg" alt="Hakone Lake Ashi" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+              <img src="/static/Image/content (1).jpg" alt="Hakone ropeway" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+              <img src="/static/Image/winter-in-hakone.jpg" alt="Winter in Hakone" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
             </div>
             <details class="group mt-4 rounded-xl border bg-white p-4"><summary class="flex cursor-pointer list-none items-center justify-between"><span class="font-medium">Things to do in Hakone</span></summary><ul id="Hakone-list" class="mt-4 grid gap-2 sm:grid-cols-2"></ul></details>
           </div>
           <div>
             <h3 class="text-xl font-semibold">Nikkō</h3>
             <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <img src="static/Image/images (2).jpg" alt="Nikkō" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-              <img src="static/Image/7d58f877b41d425c91f67341fb2b0ccb_cut_600x550_458_1739531959.webp" alt="Shrines of Nikkō" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-              <img src="static/Image/AdobeStock_128063649-scaled-scaled.jpeg" alt="Waterfalls in Nikkō" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+              <img src="/static/Image/images (2).jpg" alt="Nikkō" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+              <img src="/static/Image/7d58f877b41d425c91f67341fb2b0ccb_cut_600x550_458_1739531959.webp" alt="Shrines of Nikkō" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+              <img src="/static/Image/AdobeStock_128063649-scaled-scaled.jpeg" alt="Waterfalls in Nikkō" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
             </div>
             <details class="group mt-4 rounded-xl border bg-white p-4"><summary class="flex cursor-pointer list-none items-center justify-between"><span class="font-medium">Things to do in Nikkō</span></summary><ul id="Nikko-list" class="mt-4 grid gap-2 sm:grid-cols-2"></ul></details>
           </div>
           <div>
             <h3 class="text-xl font-semibold">Kamakura</h3>
             <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <img src="static/Image/enoshima-plateau.jpg" alt="Enoshima Plateau" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-              <img src="static/Image/kamakura-japan-featured-1244x700.jpg" alt="Kamakura streets" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-              <img src="static/Image/kamakuratop.jpg" alt="Great Buddha of Kamakura" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+              <img src="/static/Image/enoshima-plateau.jpg" alt="Enoshima Plateau" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+              <img src="/static/Image/kamakura-japan-featured-1244x700.jpg" alt="Kamakura streets" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+              <img src="/static/Image/kamakuratop.jpg" alt="Great Buddha of Kamakura" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
             </div>
             <details class="group mt-4 rounded-xl border bg-white p-4"><summary class="flex cursor-pointer list-none items-center justify-between"><span class="font-medium">Things to do in Kamakura</span></summary><ul id="Kamakura-list" class="mt-4 grid gap-2 sm:grid-cols-2"></ul></details>
           </div>
           <div>
             <h3 class="text-xl font-semibold">Mount Fuji Area</h3>
             <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <img src="static/Image/b80e89481bf4ed_Yamanaka lake flower park.jpeg" alt="Yamanakako Flower Park" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-              <img src="static/Image/oshino-hakkai-kv_bzvsix.webp" alt="Oshino Hakkai" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-              <img src="static/Image/caption (2).jpg" alt="Fuji views" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+              <img src="/static/Image/b80e89481bf4ed_Yamanaka lake flower park.jpeg" alt="Yamanakako Flower Park" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+              <img src="/static/Image/oshino-hakkai-kv_bzvsix.webp" alt="Oshino Hakkai" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+              <img src="/static/Image/caption (2).jpg" alt="Fuji views" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
             </div>
             <details class="group mt-4 rounded-xl border bg-white p-4"><summary class="flex cursor-pointer list-none items-center justify-between"><span class="font-medium">Things to do around Mount Fuji</span></summary><ul id="MountFuji-list" class="mt-4 grid gap-2 sm:grid-cols-2"></ul></details>
           </div>
           <div>
             <h3 class="text-xl font-semibold">Kawagoe</h3>
             <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <img src="static/Image/6501_02.jpg" alt="Kawagoe warehouse district" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-              <img src="static/Image/20231207_190715_734ef4d0_w1920.webp" alt="Kurazukuri streets" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-              <img src="static/Image/kawagoe-hikawa-jinja-8.jpg" alt="Hikawa Shrine" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+              <img src="/static/Image/6501_02.jpg" alt="Kawagoe warehouse district" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+              <img src="/static/Image/20231207_190715_734ef4d0_w1920.webp" alt="Kurazukuri streets" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+              <img src="/static/Image/kawagoe-hikawa-jinja-8.jpg" alt="Hikawa Shrine" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
             </div>
             <details class="group mt-4 rounded-xl border bg-white p-4"><summary class="flex cursor-pointer list-none items-center justify-between"><span class="font-medium">Things to do in Kawagoe</span></summary><ul id="Kawagoe-list" class="mt-4 grid gap-2 sm:grid-cols-2"></ul></details>
           </div>
@@ -236,9 +236,9 @@
           <p class="mt-1 text-sm text-neutral-600">Browse places and open Google Maps in a new tab.</p>
         </header>
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <img src="static/Image/22c1d433e42c4b0ba73aea130dfb3783.webp" alt="Sushi" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-          <img src="static/Image/iruka21.jpg" alt="Ramen" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-          <img src="static/Image/aoki_tonkatsu_2.jpg" alt="Tonkatsu" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+          <img src="/static/Image/22c1d433e42c4b0ba73aea130dfb3783.webp" alt="Sushi" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+          <img src="/static/Image/iruka21.jpg" alt="Ramen" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+          <img src="/static/Image/aoki_tonkatsu_2.jpg" alt="Tonkatsu" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
         </div>
         <div class="mt-6 grid gap-4 md:grid-cols-2">
           <details class="rounded-xl border bg-white p-4"><summary class="cursor-pointer list-none font-semibold">Akihabara</summary><ul id="akihabara-list" class="mt-3 space-y-2"></ul></details>
@@ -272,77 +272,120 @@
 </section>
 
 
-    <!-- Scripts (kept from your version) -->
-    <script>
-  function fetchData(id, file) {
-    const ul = document.getElementById(id);
-    if (!ul) return;
-
-    fetch('/data/Tokyo/' + file)
-      .then((res) => {
-        if (!res.ok) throw new Error(file + ' missing');
-        return res.json();
-      })
-      .then((data) => {
-        ul.innerHTML = '';
-        data.forEach((item) => {
-          const li = document.createElement('li');
-          const a  = document.createElement('a');
-
-          a.href = item.google_map_url || item.google_maps_url || '#';
-          a.target = '_blank';
-          a.rel = 'noopener';
-          a.textContent = item.name || 'Untitled';
-          a.style.color = '#007BFF';
-          a.style.textDecoration = 'none';
-
-          li.appendChild(a);
-
-          const extra = item.category
-            ? ' (' + item.category + ')'
-            : (item.type ? ' - ' + item.type : '');
-          if (extra) {
-            const span = document.createElement('span');
-            span.textContent = extra;
-            li.appendChild(span);
-          }
-
-          ul.appendChild(li);
-        });
-
-        // Optional: show a simple empty state
-        if (!data.length) {
-          const li = document.createElement('li');
-          li.textContent = 'No items yet.';
-          ul.appendChild(li);
-        }
-      })
-      .catch((err) => {
-        console.warn(err.message || err);
-        ul.innerHTML = '<li>Could not load: ' + file + '</li>';
-      });
+    <!-- Scripts - MongoDB API -->
+    <script type="module">
+  // MongoDB API - Use relative URLs (works with any IP/hostname)
+  async function fetchFromAPI(endpoint, params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    const url = `https://japan-travel-backend-587601512996.us-central1.run.app/${endpoint}${queryString ? '?' + queryString : ''}`;
+    
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    const json = await res.json();
+    return json.data || [];
   }
 
-  // Load lists (filenames kept exactly as your data folder uses)
-  fetchData('attractions-list', 'Tokyo Attractions.json');
-  fetchData('shopping-list', 'Tokyo shopping.json');
-  fetchData('Yokohama-list', 'Yokohama_daytrip.json');
-  fetchData('Hakone-list', 'Hakone_daytrip.json');
-  fetchData('Nikko-list', 'Nikko_daytrip.json');
-  fetchData('Kamakura-list', 'Kamakura_daytrip.json');
-  fetchData('MountFuji-list', 'Fujimount_daytrip.json');
-  fetchData('Kawagoe-list', 'Kawagoe_daytrip.json');
+  // Render list with loading state
+  function renderList(ulId, items) {
+    const ul = document.getElementById(ulId);
+    if (!ul) return;
 
-  // Restaurants
-  fetchData('akihabara-list', 'Akihabara_restaurants.json');
-  fetchData('asakusa-list', 'Asakusa_restaurants.json');
-  fetchData('ginza-list', 'Ginza_restaurants.json');
-  fetchData('ikebukuro-list', 'Ikebukuro_restaurants.json');
-  fetchData('meguro-list', 'meguro_restaurants.json');
-  fetchData('roppongi-list', 'roppongi_restaurants.json');
-  fetchData('shibuya-list', 'shibuya_restaurants.json');
-  fetchData('shinjuku-list', 'Shinjuku_restaurants.json');
-  fetchData('other-list', 'tokyo_other_restaurants.json');
+    ul.innerHTML = '';
+
+    if (!items || items.length === 0) {
+      const li = document.createElement('li');
+      li.textContent = 'No items found.';
+      li.className = 'text-slate-500';
+      ul.appendChild(li);
+      return;
+    }
+
+    items.forEach((item) => {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+
+      a.href = item.google_map_url || item.google_maps_url || '#';
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.textContent = item.name || 'Untitled';
+      a.className = 'text-blue-600 hover:underline';
+
+      li.appendChild(a);
+
+      const extra = item.category
+        ? ' (' + item.category + ')'
+        : (item.type ? ' - ' + item.type : '');
+      if (extra) {
+        const span = document.createElement('span');
+        span.textContent = extra;
+        span.className = 'text-slate-600 text-sm';
+        li.appendChild(span);
+      }
+
+      ul.appendChild(li);
+    });
+  }
+
+  // Load all data
+  async function loadAllData() {
+    try {
+      // Attractions
+      const attractions = await fetchFromAPI('attractions', { city: 'Tokyo', limit: 200 });
+      renderList('attractions-list', attractions);
+
+      // Shopping
+      const shopping = await fetchFromAPI('shopping', { city: 'Tokyo', limit: 300 });
+      renderList('shopping-list', shopping);
+
+      // Day trips by area
+      const daytrips = await fetchFromAPI('daytrips', { city: 'Tokyo', limit: 100 });
+      const daytripsByArea = daytrips.reduce((acc, item) => {
+        const area = item.area || 'Other';
+        if (!acc[area]) acc[area] = [];
+        acc[area].push(item);
+        return acc;
+      }, {});
+
+      // Render day trips
+      renderList('Yokohama-list', daytripsByArea['Yokohama'] || []);
+      renderList('Hakone-list', daytripsByArea['Hakone'] || []);
+      renderList('Nikko-list', daytripsByArea['Nikko'] || []);
+      renderList('Kamakura-list', daytripsByArea['Kamakura'] || []);
+      renderList('MountFuji-list', daytripsByArea['Fujimount'] || []);
+      renderList('Kawagoe-list', daytripsByArea['Kawagoe'] || []);
+
+      // Restaurants by area
+      const restaurants = await fetchFromAPI('restaurants', { city: 'Tokyo', limit: 800 });
+      const restaurantsByArea = restaurants.reduce((acc, item) => {
+        const area = (item.area || 'Other').toLowerCase();
+        if (!acc[area]) acc[area] = [];
+        acc[area].push(item);
+        return acc;
+      }, {});
+
+      renderList('akihabara-list', restaurantsByArea['akihabara'] || []);
+      renderList('asakusa-list', restaurantsByArea['asakusa'] || []);
+      renderList('ginza-list', restaurantsByArea['ginza'] || []);
+      renderList('ikebukuro-list', restaurantsByArea['ikebukuro'] || []);
+      renderList('meguro-list', restaurantsByArea['meguro'] || []);
+      renderList('roppongi-list', restaurantsByArea['roppongi'] || []);
+      renderList('shibuya-list', restaurantsByArea['shibuya'] || []);
+      renderList('shinjuku-list', restaurantsByArea['shinjuku'] || []);
+      renderList('other-list', restaurantsByArea['tokyo'] || restaurantsByArea['other'] || []);
+
+      console.log('✅ All Tokyo data loaded from MongoDB!');
+    } catch (error) {
+      console.error('❌ Error loading data:', error);
+      console.log('💡 Make sure MongoDB API is running: python Back_end/app_mongodb.py');
+    }
+  }
+
+  // Load on page ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadAllData);
+  } else {
+    loadAllData();
+  }
 </script>
 </body>
 </html>

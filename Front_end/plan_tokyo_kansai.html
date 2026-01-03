@@ -7,38 +7,35 @@
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Firebase init -->
-  <script type="module" src="/static/js/firebase-init.js?v=3"></script>
-  <style>
-    :root{ --brand:#0e6efd; --ink:#222; --bg:#f7f9fb; --line:#e5e7eb; }
-    /* BLACK NAV (match index/cities) */
-    nav{background:#222;color:#fff;position:sticky;top:0;z-index:1000}
-    .nav-wrap{max-width:1100px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
-    nav a{color:#fff;text-decoration:none;margin:0 10px;font-weight:600}
-    nav a:hover{text-decoration:underline}
-    #auth-mini{color:#fff;font-size:14px}
-    #auth-mini a{color:var(--brand);background:#fff;padding:4px 8px;border-radius:6px;text-decoration:none;margin-left:6px;font-weight:600}
-    #auth-mini a:hover{background:#f3f4f6;color:#0b58c9}
-  </style>
+  <script type="module" src="/static/js/firebase-init.js?v=4"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 selection:bg-blue-100 selection:text-blue-900">
 
   <!-- NAV -->
-  <nav>
-    <div class="nav-wrap">
-      <div>
-        <a href="index.html">Home</a>
-        <a href="itineraries.html">Recommended Itineraries</a>
-        <a href="cities.html">Explore Cities</a>
-        <a href="tips.html">Travel Tips</a>
-        <a href="my_itineraries.html">My Itineraries</a>
+  <nav class="sticky top-0 z-50 bg-[#222] text-white">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+      <div class="flex flex-wrap items-center gap-3">
+        <a href="/index.html" class="font-semibold tracking-wide">Home</a>
+        <a href="/itineraries.html" class="hover:underline">Recommended Itineraries</a>
+        <a href="/cities.html" class="hover:underline">Explore Cities</a>
+        <a href="/tips.html" class="hover:underline">Travel Tips</a>
+        <a href="/my_itineraries.html" class="hover:underline">My Itineraries</a>
       </div>
-      <div id="auth-mini">
-        <span id="auth-name">Not signed in</span>
-        <a href="/auth.html" id="auth-link">Sign in</a>
+
+      <!-- Auth mini -->
+      <div id="auth-mini" class="text-sm">
+        <span id="auth-name" class="font-medium">Not signed in</span>
+        <span class="text-white/60">·</span>
+        <a href="/auth.html" id="auth-link"
+           class="ml-1 inline-block rounded-md bg-white px-2.5 py-1 font-semibold text-blue-600 hover:bg-slate-100">
+          Sign in
+        </a>
       </div>
     </div>
+
+    <!-- Auth state logic -->
     <script type="module">
-      import { auth } from "/static/js/firebase-init.js?v=3";
+      import { auth } from "/static/js/firebase-init.js?v=4";
       import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
       const nameEl = document.getElementById("auth-name");
       const linkEl = document.getElementById("auth-link");
@@ -48,11 +45,13 @@
           linkEl.textContent = "Sign out";
           linkEl.href = "#";
           linkEl.onclick = async (e) => { e.preventDefault(); await signOut(auth); };
+          linkEl.className = "ml-1 inline-block rounded-md bg-white px-2.5 py-1 font-semibold text-slate-800 hover:bg-slate-100";
         } else {
           nameEl.textContent = "Not signed in";
           linkEl.textContent = "Sign in";
           linkEl.href = "/auth.html";
           linkEl.onclick = null;
+          linkEl.className = "ml-1 inline-block rounded-md bg-white px-2.5 py-1 font-semibold text-blue-600 hover:bg-slate-100";
         }
       });
     </script>
@@ -60,7 +59,7 @@
 
   <!-- HERO -->
   <header class="relative">
-    <img src="static/Image/japan.jpg" alt="" class="absolute inset-0 -z-10 h-56 w-full object-cover md:h-64" />
+    <img src="/static/Image/japan.jpg" alt="" class="absolute inset-0 -z-10 h-56 w-full object-cover md:h-64" />
     <div class="absolute inset-0 -z-10 bg-black/35"></div>
     <div class="mx-auto max-w-6xl px-4 h-56 md:h-64 flex items-center">
       <div class="text-white">
@@ -101,6 +100,63 @@
         <div id="osaka-days" class="mt-4 space-y-4"></div>
       </div>
 
+      <!-- Custom Places (for places not in database) -->
+      <div id="custom-places-section" class="rounded-2xl border border-purple-200 bg-purple-50 shadow-sm p-5">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-semibold text-purple-900">➕ Add Custom Place</h2>
+            <p class="text-sm text-purple-700 mt-1">Add places not in our database (hotels, friend's houses, local spots)</p>
+          </div>
+          <button onclick="toggleCustomPlaceForm()" class="rounded-lg bg-purple-600 px-4 py-2 text-white font-medium hover:bg-purple-700">+ New Place</button>
+        </div>
+        
+        <!-- Add Custom Place Form -->
+        <div id="custom-place-form" class="mt-4 hidden rounded-lg bg-white p-4 space-y-3">
+          <div>
+            <label class="block text-sm font-medium text-slate-700">Place Name *</label>
+            <input id="custom-name" type="text" placeholder="e.g., Kenji's Apartment, Hidden Ramen Shop" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" required />
+          </div>
+          
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-sm font-medium text-slate-700">Latitude *</label>
+              <input id="custom-lat" type="number" step="0.000001" placeholder="35.6895" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" required />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700">Longitude *</label>
+              <input id="custom-lng" type="number" step="0.000001" placeholder="139.6917" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" required />
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-slate-700">City *</label>
+            <select id="custom-city" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" required>
+              <option value="Tokyo">Tokyo</option>
+              <option value="Kyoto">Kyoto</option>
+              <option value="Osaka">Osaka</option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-slate-700">Notes (optional)</label>
+            <textarea id="custom-notes" placeholder="Personal notes..." class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 h-20"></textarea>
+          </div>
+          
+          <div class="flex gap-2">
+            <button onclick="saveCustomPlace()" class="flex-1 rounded-lg bg-purple-600 px-4 py-2 text-white font-medium hover:bg-purple-700">💾 Save Place</button>
+            <button onclick="toggleCustomPlaceForm()" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-700 font-medium hover:bg-slate-50">Cancel</button>
+          </div>
+          
+          <p class="text-xs text-slate-500">💡 Tip: Get GPS coordinates from Google Maps (right-click → coordinates)</p>
+        </div>
+        
+        <!-- List of User's Custom Places -->
+        <div id="custom-places-list" class="mt-4 hidden">
+          <h3 class="text-sm font-semibold text-purple-900 mb-2">Your Custom Places:</h3>
+          <div id="custom-places-items" class="space-y-2"></div>
+        </div>
+      </div>
+
       <!-- Save + Ask AI -->
       <div class="flex flex-wrap items-center gap-3">
         <button onclick="savePlan()" class="rounded-lg bg-emerald-600 px-5 py-2.5 text-white font-semibold hover:bg-emerald-700">💾 Save Entire Plan</button>
@@ -108,6 +164,10 @@
         <!-- NEW: Ask AI button -->
         <button id="ask-ai" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-800 font-semibold hover:bg-slate-50">
           🤖 Ask AI to review
+        </button>
+        
+        <button id="optimize-route-btn" class="rounded-lg bg-gradient-to-r from-green-600 to-teal-600 px-4 py-2 font-semibold text-white hover:from-green-700 hover:to-teal-700">
+          🚀 Optimize Route
         </button>
 
         <span id="save-msg" class="text-emerald-600 font-medium"></span>
@@ -139,6 +199,37 @@
           <h4 class="font-semibold">💡 Suggestions</h4>
           <div id="ai-suggestions" class="mt-2 grid gap-3"><!-- cards injected here --></div>
         </div>
+      </aside>
+
+      <!-- Route Optimization Panel -->
+      <aside id="route-panel" class="mt-6 hidden rounded-2xl border-2 border-green-200 bg-gradient-to-br from-green-50 to-teal-50 p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-semibold text-green-900">🚀 Optimized Route</h3>
+          <div class="text-sm text-green-700">Time saved: <span id="time-saved" class="font-bold">—</span></div>
+        </div>
+        <div class="mt-4 grid gap-4 md:grid-cols-2">
+          <div class="rounded-lg bg-white p-4 shadow-sm">
+            <h4 class="font-semibold text-slate-700">⏱️ Time Breakdown</h4>
+            <div class="mt-2 space-y-1 text-sm">
+              <div class="flex justify-between"><span>Activities:</span> <span id="activity-time" class="font-medium">—</span></div>
+              <div class="flex justify-between"><span>Travel:</span> <span id="travel-time" class="font-medium">—</span></div>
+              <div class="flex justify-between border-t pt-1"><span class="font-semibold">Total:</span> <span id="total-time" class="font-bold">—</span></div>
+            </div>
+          </div>
+          <div class="rounded-lg bg-white p-4 shadow-sm">
+            <h4 class="font-semibold text-slate-700">💴 Cost Estimate</h4>
+            <div class="mt-2 space-y-1 text-sm">
+              <div class="flex justify-between"><span>Train fares:</span> <span id="cost-total" class="font-medium">—</span></div>
+              <div class="flex justify-between"><span>With JR Pass:</span> <span id="cost-jr-pass" class="font-medium text-green-600">—</span></div>
+              <div id="jr-pass-tip" class="mt-2 rounded bg-yellow-50 p-2 text-xs text-yellow-800"></div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4">
+          <h4 class="font-semibold text-slate-700">📍 Step-by-Step Route</h4>
+          <div id="route-steps" class="mt-2 space-y-2"></div>
+        </div>
+        <button id="apply-optimized-route" class="mt-4 w-full rounded-lg bg-green-600 px-4 py-2 font-medium text-white hover:bg-green-700">✅ Apply This Optimized Route</button>
       </aside>
     </section>
 
@@ -248,6 +339,9 @@
           <input id="${city}-location-${n}" type="text" placeholder="e.g., Shibuya, Gion, Dotonbori…" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" />
           <label class="mt-4 text-sm font-medium text-slate-700">Activities / Notes</label>
           <textarea id="${city}-activities-${n}" placeholder="e.g., Fushimi Inari, Namba walk, Meiji Shrine…" class="mt-1 w-full min-h-[110px] rounded-md border border-slate-300 px-3 py-2"></textarea>
+          <label class="mt-3 text-sm font-medium text-slate-700">⏱️ Duration for each (minutes, comma-separated)</label>
+          <input id="${city}-durations-${n}" type="text" placeholder="e.g., 90, 120, 60 (default: 60 per activity)" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          <p class="mt-1 text-xs text-slate-500">💡 Separate with commas to match your activities. Leave blank for default 60 min each.</p>
         </div>`;
     }
 
@@ -532,11 +626,202 @@
         alert("AI review failed: " + (e?.message || e));
       }
     });
+
+    // Route Optimization with DP
+    let optimizedRouteData = null;
+    document.getElementById("optimize-route-btn")?.addEventListener("click", async () => {
+      try {
+        // Group locations by city (don't mix cities!)
+        const locationsByCity = {Tokyo: [], Kyoto: [], Osaka: []};
+        const cityMap = {tokyo: 'Tokyo', kyoto: 'Kyoto', osaka: 'Osaka'};
+        
+        for (const [cityKey, cityName] of Object.entries(cityMap)) {
+          const boxes = document.querySelectorAll(`#${cityKey}-days .day-box`);
+          boxes.forEach(box => {
+            const location = box.querySelector(`input[id^="${cityKey}-location-"]`)?.value.trim();
+            const activities = box.querySelector(`textarea[id^="${cityKey}-activities-"]`)?.value.trim();
+            const durationsInput = box.querySelector(`input[id^="${cityKey}-durations-"]`)?.value.trim();
+            
+            // Parse durations (comma-separated)
+            const durationValues = durationsInput 
+              ? durationsInput.split(',').map(d => parseInt(d.trim()) || 60)
+              : [];
+            
+            // Add main location with first duration
+            if (location) {
+              locationsByCity[cityName].push({
+                name: location, 
+                duration: durationValues[0] || 60, 
+                city: cityName
+              });
+            }
+            
+            // Add activities with their corresponding durations
+            if (activities) {
+              const acts = activities.split(/[/,;\n]/).map(a => a.trim()).filter(a => a);
+              acts.forEach((act, actIndex) => {
+                // Get duration for this activity (offset by 1 if location exists)
+                const durationIndex = location ? actIndex + 1 : actIndex;
+                locationsByCity[cityName].push({
+                  name: act, 
+                  duration: durationValues[durationIndex] || 60, 
+                  city: cityName
+                });
+              });
+            }
+          });
+        }
+        
+        // Optimize each city separately
+        const cityResults = [];
+        for (const [cityName, locs] of Object.entries(locationsByCity)) {
+          if (locs.length === 0) continue;
+          
+          // Enrich with GPS from MongoDB
+          const enriched = [];
+          console.log(`🔍 Searching for locations in ${cityName}:`, locs.map(l => l.name));
+          
+          for (const loc of locs) {
+            try {
+              // Use /search/combined to include user's custom places
+              const searchUrl = `/search/combined?q=${encodeURIComponent(loc.name)}&limit=10`;
+              const searchHeaders = currentUserId ? { "X-User-ID": currentUserId } : {};
+              const searchRes = await fetch(searchUrl, { headers: searchHeaders });
+              const searchData = await searchRes.json();
+              
+              let allResults = [
+                ...(searchData.attractions || []), 
+                ...(searchData.restaurants || []), 
+                ...(searchData.shopping || [])
+              ];
+              
+              console.log(`  📍 "${loc.name}" - Found ${allResults.length} total results`);
+              
+              // Filter to correct city
+              allResults = allResults.filter(r => r.city === loc.city);
+              console.log(`  ✓ After city filter (${loc.city}): ${allResults.length} results`);
+              
+              if (allResults.length > 0 && allResults[0].lat && allResults[0].lng) {
+                enriched.push({name: loc.name, lat: allResults[0].lat, lng: allResults[0].lng, duration: loc.duration});
+                console.log(`  ✅ Added: ${loc.name} at (${allResults[0].lat}, ${allResults[0].lng})`);
+              } else {
+                console.warn(`  ⚠️ No coordinates found for "${loc.name}" in ${loc.city}`);
+              }
+            } catch (err) {
+              console.error(`  ❌ Error searching for ${loc.name}:`, err);
+            }
+          }
+          
+          console.log(`✅ ${cityName}: ${enriched.length}/${locs.length} locations have coordinates`);
+          
+          // Only optimize if we have 2+ locations with coordinates
+          if (enriched.length >= 2) {
+            const res = await fetch("/optimize-route", {
+              method: "POST", 
+              headers: {"Content-Type": "application/json"}, 
+              body: JSON.stringify({locations: enriched, start_index: 0, has_jr_pass: true})  // Always calculate JR Pass
+            });
+            
+            if (res.ok) {
+              const optimized = await res.json();
+              cityResults.push({city: cityName, ...optimized});
+              console.log(`✅ ${cityName} optimized:`, optimized);
+            } else {
+              console.error(`❌ ${cityName} optimization failed: HTTP ${res.status}`);
+            }
+          } else {
+            console.warn(`⚠️ ${cityName}: Not enough locations with coordinates (need 2+, have ${enriched.length})`);
+            if (enriched.length === 1) {
+              alert(`${cityName}: Only found 1 location with GPS. Need at least 2 to optimize.\nMissing: ${locs.filter(l => !enriched.find(e => e.name === l.name)).map(l => l.name).join(', ')}`);
+            } else if (enriched.length === 0) {
+              alert(`${cityName}: No locations found in database. Try:\n- "Senso-ji Temple" (not just "Senso-ji")\n- "Tokyo Skytree"\n- "Shibuya Crossing"`);
+            }
+          }
+        }
+        
+        if (cityResults.length === 0) {
+          alert("Could not find GPS coordinates for your locations. Try using specific place names like 'Senso-ji Temple' or 'Tokyo Skytree'.");
+          return;
+        }
+        
+        // Combine results and render
+        optimizedRouteData = cityResults;
+        
+        const panel = document.getElementById("route-panel");
+        panel.classList.remove("hidden");
+        
+        // Calculate totals across all cities
+        const totalTimeSaved = cityResults.reduce((sum, city) => sum + city.time_saved, 0);
+        const totalActivityTime = cityResults.reduce((sum, city) => sum + city.total_activity_time, 0);
+        const totalTravelTime = cityResults.reduce((sum, city) => sum + city.total_travel_time, 0);
+        const totalTime = totalActivityTime + totalTravelTime;
+        // Calculate totals with new accurate cost structure
+        const totalCost = cityResults.reduce((sum, city) => sum + city.cost_estimate.total_without_pass, 0);
+        const totalCostJR = cityResults.reduce((sum, city) => sum + city.cost_estimate.total_with_pass, 0);
+        const totalSavings = totalCost - totalCostJR;
+        const isWorthIt = cityResults.some(city => city.cost_estimate.is_worth_it);
+        
+        // Update summary stats
+        document.getElementById("time-saved").textContent = `${totalTimeSaved} min`;
+        document.getElementById("activity-time").textContent = `${totalActivityTime} min`;
+        document.getElementById("travel-time").textContent = `${totalTravelTime} min`;
+        document.getElementById("total-time").textContent = `${totalTime} min`;
+        document.getElementById("cost-total").textContent = `¥${totalCost.toLocaleString()}`;
+        document.getElementById("cost-jr-pass").textContent = `¥${totalCostJR.toLocaleString()}`;
+        
+        // Display JR Pass recommendation
+        const jrTip = document.getElementById("jr-pass-tip");
+        if (isWorthIt) {
+          jrTip.innerHTML = `<strong>✅ JR Pass saves you ¥${totalSavings.toLocaleString()}!</strong><br>
+            <span class="text-xs">7-day pass: ¥50,000 | Your JR fare value: ¥${cityResults.reduce((sum, c) => sum + c.cost_estimate.jr_fares_only, 0).toLocaleString()}</span>`;
+          jrTip.className = "mt-2 rounded bg-green-50 p-2 text-xs text-green-800";
+        } else {
+          jrTip.innerHTML = `<strong>❌ JR Pass costs ¥${Math.abs(totalSavings).toLocaleString()} more</strong><br>
+            <span class="text-xs">Better to pay per ride for this itinerary.</span>`;
+          jrTip.className = "mt-2 rounded bg-yellow-50 p-2 text-xs text-yellow-800";
+        }
+        
+        // Render routes by city
+        const stepsContainer = document.getElementById("route-steps");
+        stepsContainer.innerHTML = "";
+        
+        cityResults.forEach(cityData => {
+          // City header
+          const cityHeader = document.createElement("div");
+          cityHeader.className = "font-bold text-lg text-green-800 mt-4 first:mt-0";
+          cityHeader.textContent = `🏙️ ${cityData.city}`;
+          stepsContainer.appendChild(cityHeader);
+          
+          // Route steps for this city
+          cityData.route_details.forEach(step => {
+            const div = document.createElement("div");
+            div.className = "flex gap-3 rounded-lg bg-white p-3 shadow-sm";
+            const icon = step.transport_mode === 'walk' ? '🚶' : '🚃';
+            const distKm = step.distance_km || 0;
+            const warningClass = distKm > 50 ? 'text-red-600 font-bold' : 'text-slate-500';
+            const warningIcon = distKm > 50 ? '⚠️ ' : '';
+            
+            div.innerHTML = `
+              <div class="flex h-8 w-8 items-center justify-center rounded-full bg-green-600 text-sm font-bold text-white">${step.step}</div>
+              <div class="flex-1">
+                <div class="font-semibold">${step.location}</div>
+                <div class="text-sm text-slate-600">${step.time_at_location} min</div>
+                ${step.travel_from_previous ? `<div class="text-xs ${warningClass}">${warningIcon}${icon} ${step.travel_from_previous} min (${distKm.toFixed(2)} km)</div>` : ''}
+              </div>
+            `;
+            stepsContainer.appendChild(div);
+          });
+        });
+        
+        panel.scrollIntoView({behavior: "smooth"});
+      } catch (e) { console.error(e); alert("Route optimization failed: " + (e?.message || e)); }
+    });
+    document.getElementById("apply-optimized-route")?.addEventListener("click", () => { if (!optimizedRouteData) return; alert(`Optimized route:\n${optimizedRouteData.optimal_route.join(' → ')}\n\nManually reorder to match!`); });
   </script>
 
   <!-- Firebase Save/Load -->
   <script type="module">
-    import { auth, db } from "/static/js/firebase-init.js?v=3";
+    import { auth, db } from "/static/js/firebase-init.js?v=4";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
     import { doc, getDoc, updateDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
@@ -581,8 +866,128 @@
     // expose savePlan for the button
     window.savePlan = ()=>{};
 
+    // Track current user for custom places feature
+    let currentUserId = null;
+    
+    // Helper function to make authenticated requests
+    async function authenticatedFetch(url, options = {}) {
+      if (!currentUserId) {
+        throw new Error("Please sign in to use this feature");
+      }
+      
+      // Add user ID to headers
+      options.headers = {
+        ...options.headers,
+        "X-User-ID": currentUserId
+      };
+      
+      return fetch(url, options);
+    }
+    
+    // Toggle custom place form
+    window.toggleCustomPlaceForm = function() {
+      const form = document.getElementById("custom-place-form");
+      form.classList.toggle("hidden");
+    };
+    
+    // Save custom place
+    window.saveCustomPlace = async function() {
+      if (!currentUserId) {
+        alert("Please sign in to add custom places!");
+        window.location.href = "/auth.html";
+        return;
+      }
+      
+      const placeData = {
+        name: document.getElementById("custom-name").value.trim(),
+        lat: parseFloat(document.getElementById("custom-lat").value),
+        lng: parseFloat(document.getElementById("custom-lng").value),
+        city: document.getElementById("custom-city").value,
+        notes: document.getElementById("custom-notes").value.trim(),
+        category: "custom"
+      };
+      
+      // Validate
+      if (!placeData.name) {
+        alert("Please enter a place name");
+        return;
+      }
+      if (isNaN(placeData.lat) || isNaN(placeData.lng)) {
+        alert("Please enter valid GPS coordinates");
+        return;
+      }
+      
+      try {
+        const response = await authenticatedFetch("/user/places", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(placeData)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          alert(`✅ "${placeData.name}" saved! Now you can use it in your itinerary.`);
+          // Clear form
+          document.getElementById("custom-name").value = "";
+          document.getElementById("custom-lat").value = "";
+          document.getElementById("custom-lng").value = "";
+          document.getElementById("custom-notes").value = "";
+          toggleCustomPlaceForm();
+          loadUserCustomPlaces();
+        } else {
+          alert(`❌ Error: ${result.error || "Failed to save place"}`);
+        }
+      } catch (error) {
+        console.error("Error saving custom place:", error);
+        alert(`❌ Error: ${error.message}`);
+      }
+    };
+    
+    // Load user's custom places
+    async function loadUserCustomPlaces() {
+      if (!currentUserId) return;
+      
+      try {
+        const response = await authenticatedFetch("/user/places");
+        const data = await response.json();
+        
+        const listContainer = document.getElementById("custom-places-list");
+        const itemsContainer = document.getElementById("custom-places-items");
+        
+        if (data.places && data.places.length > 0) {
+          listContainer.classList.remove("hidden");
+          itemsContainer.innerHTML = data.places.map(place => `
+            <div class="rounded-lg bg-white p-3 border border-purple-200">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-medium text-purple-900">${place.name}</div>
+                  <div class="text-xs text-slate-600">${place.city} • ${place.lat.toFixed(4)}, ${place.lng.toFixed(4)}</div>
+                  ${place.notes ? `<div class="text-xs text-slate-500 mt-1">${place.notes}</div>` : ''}
+                </div>
+                <span class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">Custom</span>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          listContainer.classList.add("hidden");
+        }
+      } catch (error) {
+        console.error("Error loading custom places:", error);
+      }
+    }
+
     onAuthStateChanged(auth, async(user)=>{
       const readyUser = user || null;
+      
+      // Update currentUserId for custom places
+      currentUserId = readyUser ? readyUser.uid : null;
+      
+      // Load user's custom places if signed in
+      if (currentUserId) {
+        loadUserCustomPlaces();
+      }
+      
       if (!readyUser) return;
 
       if (itineraryId){
@@ -656,6 +1061,67 @@
         }
       };
     });
+  </script>
+
+  <!-- Load Recommendations from MongoDB -->
+  <script type="module">
+    async function fetchFromAPI(type, city) {
+      const url = `https://japan-travel-backend-587601512996.us-central1.run.app/${type}?city=${city}&limit=500`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`API error: ${res.status}`);
+      const json = await res.json();
+      return json.data || [];
+    }
+
+    function renderList(id, data) {
+      const ul = document.getElementById(id);
+      if (!ul) return;
+      ul.innerHTML = '';
+      (data || []).forEach(item => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = item.google_map_url || item.google_maps_url || "#";
+        a.textContent = item.name || "(Unnamed)";
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.className = "text-blue-700 hover:underline";
+        li.appendChild(a);
+        ul.appendChild(li);
+      });
+    }
+
+    (async () => {
+      try {
+        // Fetch data for Tokyo, Kyoto, Osaka
+        const [tokyoData, kyotoData, osakaData] = await Promise.all([
+          Promise.all([fetchFromAPI('attractions', 'Tokyo'), fetchFromAPI('shopping', 'Tokyo'), fetchFromAPI('restaurants', 'Tokyo'), fetchFromAPI('daytrips', 'Tokyo')]),
+          Promise.all([fetchFromAPI('attractions', 'Kyoto'), fetchFromAPI('shopping', 'Kyoto'), fetchFromAPI('restaurants', 'Kyoto')]),
+          Promise.all([fetchFromAPI('attractions', 'Osaka'), fetchFromAPI('shopping', 'Osaka'), fetchFromAPI('restaurants', 'Osaka'), fetchFromAPI('daytrips', 'Osaka')])
+        ]);
+
+        // TOKYO
+        renderList('tokyo-attractions', tokyoData[0]);
+        renderList('tokyo-shopping', tokyoData[1]);
+        const tokyoRestByArea = tokyoData[2].reduce((acc, item) => { const area = (item.area || '').toLowerCase(); if (!acc[area]) acc[area] = []; acc[area].push(item); return acc; }, {});
+        ['akihabara', 'asakusa', 'ginza', 'ikebukuro', 'meguro', 'roppongi', 'shibuya', 'shinjuku'].forEach(a => renderList(a + '-list', tokyoRestByArea[a] || []));
+        renderList('other-area-list', tokyoRestByArea['tokyo'] || []);
+        const tokyoDTByArea = tokyoData[3].reduce((acc, item) => { const area = item.area || 'Other'; if (!acc[area]) acc[area] = []; acc[area].push(item); return acc; }, {});
+        ['Yokohama', 'Nikko', 'Kamakura', 'Kawagoe', 'Hakone', 'Fujimount'].forEach(a => renderList(a + '-list', tokyoDTByArea[a] || []));
+
+        // KYOTO
+        renderList('kyoto-attractions', kyotoData[0]);
+        renderList('kyoto-shopping', kyotoData[1]);
+        renderList('kyoto-restaurants', kyotoData[2]);
+
+        // OSAKA
+        renderList('osaka-attractions', osakaData[0]);
+        renderList('osaka-shopping', osakaData[1]);
+        renderList('osaka-restaurants', osakaData[2]);
+        renderList('nara-list', osakaData[3].filter(d => (d.area || '').toLowerCase().includes('nara')));
+
+        console.log('✅ All Tokyo+Kansai recommendations loaded!');
+      } catch (err) { console.error('❌ Error:', err); }
+    })();
   </script>
 </body>
 </html>

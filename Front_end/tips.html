@@ -9,7 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Firebase init (auth mini) -->
-    <script type="module" src="/static/js/firebase-init.js?v=3"></script>
+    <script type="module" src="/static/js/firebase-init.js?v=4"></script>
 
     <style>
       /* responsive video wrapper */
@@ -38,7 +38,7 @@
         </div>
       </div>
       <script type="module">
-        import { auth } from "/static/js/firebase-init.js?v=3";
+        import { auth } from "/static/js/firebase-init.js?v=4";
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         const nameEl = document.getElementById('auth-name');
         const linkEl = document.getElementById('auth-link');
@@ -63,14 +63,14 @@
     <!-- HERO -->
     <section class="relative overflow-hidden bg-slate-900">
       <div class="absolute inset-0 opacity-20">
-        <img src="static/Image/Shinjuku-City-512910636.jpg" alt="" class="h-full w-full object-cover" />
+        <img src="/static/Image/Shinjuku-City-512910636.jpg" alt="" class="h-full w-full object-cover" />
       </div>
       <div class="relative mx-auto max-w-6xl px-4 py-16 text-center text-white">
         <span class="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium tracking-wide ring-1 ring-white/20">
           🇯🇵 First-timer friendly
         </span>
         <h1 class="mt-4 text-3xl font-bold tracking-tight md:text-5xl">Essential Travel Tips for Japan</h1>
-        <p class="mx-auto mt-3 max-w-2xl text-slate-200">No fluff—just practical things that save time, money, and headaches.</p>
+        <p class="mx-auto mt-3 max-w-2xl text-slate-200">Travel smart. Spend less. Enjoy more Japan.</p>
         <div class="mt-6 inline-flex flex-wrap justify-center gap-2 text-xs">
           <span class="rounded-full bg-white/10 px-3 py-1 ring-1 ring-white/20">Transit</span>
           <span class="rounded-full bg-white/10 px-3 py-1 ring-1 ring-white/20">Money</span>
@@ -109,23 +109,26 @@
               <!-- Suica/Pasmo -->
               <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <h3 class="text-base font-semibold text-blue-700">Use a Suica or Pasmo IC Card</h3>
-                <img src="static/Image/suicapasmoimage-1024x600.jpg" alt="IC cards" class="mt-3 w-full rounded-lg" />
-                <p class="mt-3 text-sm text-slate-700">Tap in/out on trains & buses. Add to Apple Wallet for dead-simple top-ups and gates.</p>
+                <img src="/static/Image/suicapasmoimage-1024x600.jpg" alt="IC cards" class="mt-3 w-full rounded-lg" />
+                <p class="mt-3 text-sm text-slate-700">Use a Suica or PASMO card to tap in and out of trains, buses, and even convenience stores. Add it to Apple Wallet for instant top-ups and smooth, contactless travel.</p>
               </article>
               <!-- Google Maps -->
               <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <h3 class="text-base font-semibold text-blue-700">Google Maps is Your Best Friend</h3>
-                <p class="mt-3 text-sm text-slate-700">Accurate train times, transfers, bus routes, and walking. Save places to custom lists.</p>
+                <img src="/static/Image/Google-Maps-App-1024x683.jpg" alt="IC cards" class="mt-3 w-full rounded-lg" />
+                <p class="mt-3 text-sm text-slate-700">Google Maps is your best travel buddy—real-time train schedules, transfer routes, buses, and walking directions. Save your favorite spots to custom lists for easy access.</p>
               </article>
               <!-- Last train -->
               <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <h3 class="text-base font-semibold text-blue-700">Don’t Miss the Last Train</h3>
-                <p class="mt-3 text-sm text-slate-700">Lines end earlier than you think—especially outside Tokyo. Always check the return.</p>
+                <img src="/static/Image/empty-shinjuku-shibuya-by-mikisuke-umeda-2.jpg" alt="Last train" class="mt-3 w-full rounded-lg" />
+                <p class="mt-3 text-sm text-slate-700">Japan’s trains stop running around midnight. Check the last departure before you head out—missing it can mean a long walk or an expensive taxi ride.</p>
               </article>
               <!-- Big stations -->
               <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <h3 class="text-base font-semibold text-blue-700">Big Stations are Mazes</h3>
-                <p class="mt-3 text-sm text-slate-700">Shinjuku & Umeda can be confusing. Follow signs; use indoor directions in Maps.</p>
+                <h3 class="text-base font-semibold text-blue-700">Major Stations Can Be Confusing</h3>
+                <img src="/static/Image/a0001085_main.webp" alt="Big stations" class="mt-3 w-full rounded-lg" />
+                <p class="mt-3 text-sm text-slate-700">Shinjuku and Umeda are massive—some travelers wander for nearly an hour trying to find the right exit. Follow signs closely and use indoor directions on Google Maps.</p>
               </article>
             </div>
           </section>
@@ -139,22 +142,25 @@
             <div class="grid gap-5 md:grid-cols-2">
               <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <h3 class="text-base font-semibold text-emerald-700">Always Carry Cash</h3>
-                <img src="static/Image/Japanese-Yen_1600x900.jpg" alt="Cash" class="mt-3 w-full rounded-lg" />
-                <p class="mt-3 text-sm text-slate-700">Some places are cash-only (even in Osaka). 7-Eleven ATMs work best for foreign cards.</p>
+                <img src="/static/Image/Japanese-Yen_1600x900.jpg" alt="Cash" class="mt-3 w-full rounded-lg" />
+                <p class="mt-3 text-sm text-slate-700">Cash is still king across Japan. Many restaurants, small shops, and rural spots don’t take cards. 7-Eleven ATMs are the most reliable for foreign cards.</p>
               </article>
               <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <h3 class="text-base font-semibold text-emerald-700">Exchange Smartly</h3>
-                <p class="mt-3 text-sm text-slate-700">Airports are fine. In Tokyo, <strong>外貨両替のインターバンク</strong> (Shinjuku) often has great rates.</p>
+                <img src="/static/Image/a448b257-12be-452a-8b16-c243f402097c.png" alt="Money exchange" class="mt-3 w-full rounded-lg" />
+                <p class="mt-3 text-sm text-slate-700">Airport exchange counters work, but city exchanges often have better rates.
+  Try <a href="https://maps.google.com/?cid=1529529802390885313" target="_blank" class="text-blue-600 hover:underline">
+  Interbank (外貨両替のインターバンク)</a> in Shinjuku for some of the best deals in Tokyo.</p>
               </article>
               <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <h3 class="text-base font-semibold text-emerald-700">Tax-Free? Bring Passport</h3>
-                <img src="static/Image/9c8c49a938a022d0ee39cd35d73fd4a0-724x1024-1.webp" alt="Tax free" class="mt-3 w-full rounded-lg" />
-                <p class="mt-3 text-sm text-slate-700">Save ~10% at participating stores. Bic Camera etc. may stack coupons.</p>
+                <h3 class="text-base font-semibold text-emerald-700">Tax-Free Shopping: Bring Your Passport</h3>
+                <img src="/static/Image/vg_taxfree_thumb.webp" alt="Tax free" class="mt-3 w-full rounded-lg" />
+                <p class="mt-3 text-sm text-slate-700">Bring your passport when shopping; many stores across Japan offer around 10% off for visitors. Some, like Bic Camera, allow coupon stacking for extra discounts.</p>
               </article>
               <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <h3 class="text-base font-semibold text-emerald-700">Don Quijote = One-Stop Shop</h3>
-                <img src="static/Image/donquijote-shibuya.jpg" alt="Donki" class="mt-3 w-full rounded-lg" />
-                <p class="mt-3 text-sm text-slate-700">Souvenirs, snacks, cosmetics, electronics—many stores open 24/7.</p>
+                <img src="/static/Image/iStock-1174421902-Marco_Piunti-1024x683.jpg" alt="Donki" class="mt-3 w-full rounded-lg" />
+                <p class="mt-3 text-sm text-slate-700">Don Quijote is Japan’s famous discount megastore, packed with souvenirs, snacks, cosmetics, and electronics—all at good prices. Many locations stay open 24 hours.</p>
               </article>
             </div>
           </section>
@@ -168,16 +174,17 @@
             <div class="grid gap-5 md:grid-cols-2">
               <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <h3 class="text-base font-semibold text-rose-700">Convenience Stores = Lifesavers</h3>
-                <img src="static/Image/conbini-tips-blog-thumbnail.jpg" alt="Conbini" class="mt-3 w-full rounded-lg" />
-                <p class="mt-3 text-sm text-slate-700">7-Eleven, FamilyMart, Lawson: hot meals, Wi-Fi, ATMs. Breakfast before 11am openings.</p>
+                <img src="/static/Image/conbini-tips-blog-thumbnail.jpg" alt="Conbini" class="mt-3 w-full rounded-lg" />
+                <p class="mt-3 text-sm text-slate-700">Japan’s convenience stores—7-Eleven, FamilyMart, and Lawson—are lifesavers. Fresh meals, drinks, Wi-Fi, and ATMs are available 24/7, perfect for an early breakfast before restaurants open.</p>
               </article>
               <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <h3 class="text-base font-semibold text-rose-700">Supermarket Bento Discounts</h3>
-                <p class="mt-3 text-sm text-slate-700">Evening markdowns in Aeon, Seijo Ishii, depachika basements = great cheap dinners.</p>
+                <p class="mt-3 text-sm text-slate-700">In the evening, supermarkets mark down ready-made meals like bentos (boxed dinners), sushi, and sides—often 30–50% off. Check stores like Aeon, Seijo Ishii, or department store food halls for delicious, high-quality dinners at a bargain.</p>
               </article>
               <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <h3 class="text-base font-semibold text-rose-700">Use Tabelog Scores</h3>
-                <p class="mt-3 text-sm text-slate-700">Japan’s top food app. 3.5+ is excellent by local standards.</p>
+                <img src="/static/Image/xgc2yhx0.udv.webp" alt="Tabelog" class="mt-3 w-32 rounded-lg" />
+                <p class="mt-3 text-sm text-slate-700">Locals rely on Tabelog, Japan’s top food app, for honest ratings. A score of 3.5+ signals an exceptional restaurant—4.0+ is extremely rare and often reservation-only.</p>
               </article>
               <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <h3 class="text-base font-semibold text-rose-700">Pack Light for Shopping</h3>
@@ -205,7 +212,7 @@
               </article>
               <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <h3 class="text-base font-semibold text-purple-700">Portable Chargers are Essential</h3>
-                <img src="static/Image/Japanese-train-stations-how-to-iPhone-Suica-pasmo-no-battery-what-to-do-process-photos-2.webp" alt="Phone battery" class="mt-3 w-full rounded-lg" />
+                <img src="/static/Image/Japanese-train-stations-how-to-iPhone-Suica-pasmo-no-battery-what-to-do-process-photos-2.webp" alt="Phone battery" class="mt-3 w-full rounded-lg" />
                 <p class="mt-3 text-sm text-slate-700">Maps, photos, tickets drain battery—carry a power bank.</p>
               </article>
             </div>
@@ -271,12 +278,12 @@
             <div class="grid gap-5 md:grid-cols-2">
               <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <h3 class="text-base font-semibold text-fuchsia-700">Use Luggage Forwarding</h3>
-                <img src="static/Image/shutterstock_1319842160-L.jpg" alt="Yamato" class="mt-3 w-full rounded-lg" />
+                <img src="/static/Image/shutterstock_1319842160-L.jpg" alt="Yamato" class="mt-3 w-full rounded-lg" />
                 <p class="mt-3 text-sm text-slate-700">Ship suitcases hotel-to-hotel via Yamato/Sagawa. Cheap, fast, painless.</p>
               </article>
               <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <h3 class="text-base font-semibold text-fuchsia-700">Crows in Hokkaidō</h3>
-                <img src="static/Image/Beware-of-Angry-Crow.jpg" alt="Crow" class="mt-3 w-full rounded-lg" />
+                <img src="/static/Image/Beware-of-Angry-Crow.jpg" alt="Crow" class="mt-3 w-full rounded-lg" />
                 <p class="mt-3 text-sm text-slate-700">They target food bags—don’t carry exposed plastic bags outside.</p>
               </article>
             </div>

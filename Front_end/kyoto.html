@@ -9,9 +9,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- Firebase init (auth mini like other pages) -->
-  <script type="module" src="/static/js/firebase-init.js?v=3"></script>
+  <script type="module" src="/static/js/firebase-init.js?v=4"></script>
 
-  <link rel="icon" href="static/Image/yasaka-pagoda-higashiyama-kyoto-japan.jpg" />
+  <link rel="icon" href="/static/Image/yasaka-pagoda-higashiyama-kyoto-japan.jpg" />
 </head>
 <body class="bg-neutral-50 text-neutral-800 antialiased">
 
@@ -19,11 +19,11 @@
   <nav class="sticky top-0 z-50 bg-[#222] text-white">
     <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
       <div class="flex flex-wrap items-center gap-3">
-        <a href="index.html" class="font-semibold tracking-wide">Home</a>
-        <a href="itineraries.html" class="hover:underline">Recommended Itineraries</a>
-        <a href="cities.html" class="hover:underline">Explore Cities</a>
-        <a href="tips.html" class="hover:underline">Travel Tips</a>
-        <a href="my_itineraries.html" class="hover:underline">My Itineraries</a>
+        <a href="/index.html" class="font-semibold tracking-wide">Home</a>
+        <a href="/itineraries.html" class="hover:underline">Recommended Itineraries</a>
+        <a href="/cities.html" class="hover:underline">Explore Cities</a>
+        <a href="/tips.html" class="hover:underline">Travel Tips</a>
+        <a href="/my_itineraries.html" class="hover:underline">My Itineraries</a>
       </div>
       <div id="auth-mini" class="text-sm">
         <span id="auth-name" class="font-medium">Not signed in</span>
@@ -33,7 +33,7 @@
       </div>
     </div>
     <script type="module">
-      import { auth } from "/static/js/firebase-init.js?v=3";
+      import { auth } from "/static/js/firebase-init.js?v=4";
       import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
       const nameEl = document.getElementById('auth-name');
       const linkEl = document.getElementById('auth-link');
@@ -59,7 +59,7 @@
   <section id="top" class="mx-auto max-w-6xl px-4 pt-6">
     <div class="overflow-hidden rounded-3xl shadow-lg">
       <img
-        src="static/Image/yasaka-pagoda-higashiyama-kyoto-japan.jpg"
+        src="/static/Image/yasaka-pagoda-higashiyama-kyoto-japan.jpg"
         alt="Kyoto, Yasaka Pagoda in Higashiyama"
         class="h-[44vh] w-full object-cover md:h-[56vh]"
         loading="eager"
@@ -69,9 +69,7 @@
     <div class="mx-auto max-w-3xl py-8">
       <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 md:text-5xl">Kyoto</h1>
       <p class="mt-3 text-lg leading-relaxed text-slate-600">
-        Once Japan’s imperial capital, Kyoto is a tapestry of <em>machiya</em> townhouses, moss gardens, and gilded pavilions.
-        Walk the vermilion gates of <strong>Fushimi Inari</strong>, reflect at <strong>Ryōan-ji</strong>, and savor seasonal <em>kaiseki</em> in the lantern-lit
-        lanes of <strong>Gion</strong>.
+        Kyoto was Japan’s imperial capital for over a thousand years, and it still feels like the heart of the country’s culture. The city moves at its own calm pace, where old wooden machiya houses, peaceful gardens, and golden temples sit comfortably alongside modern life. You can walk through the endless red gates of Fushimi Inari, admire the shimmering beauty of Kinkaku-ji, or pause to take in the quiet at Ryōan-ji. In Gion, lanterns light up narrow streets where you might spot a geisha passing by, and a seasonal kaiseki meal reminds you just how deeply tradition runs here.
       </p>
 
       <!-- Hero CTA chips (like Tokyo): Attractions / Restaurants / Shopping -->
@@ -95,15 +93,15 @@
 
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
-          <img src="static/Image/eleonora-albasi-TilwvULvpu0-unsplash-1-768x512.jpg" alt="Nijō Castle" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <img src="/static/Image/eleonora-albasi-TilwvULvpu0-unsplash-1-768x512.jpg" alt="Nijō Castle" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
           <figcaption class="p-3 text-sm text-neutral-700">Nijō Castle</figcaption>
         </figure>
         <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
-          <img src="static/Image/P1050308.webp" alt="Fushimi Inari Taisha" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <img src="/static/Image/P1050308.webp" alt="Fushimi Inari Taisha" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
           <figcaption class="p-3 text-sm text-neutral-700">Fushimi Inari Shrine</figcaption>
         </figure>
         <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
-          <img src="static/Image/pixta_36852833_M.jpg" alt="Kinkaku-ji" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <img src="/static/Image/pixta_36852833_M.jpg" alt="Kinkaku-ji" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
           <figcaption class="p-3 text-sm text-neutral-700">Kinkaku-ji (Golden Pavilion)</figcaption>
         </figure>
       </div>
@@ -127,15 +125,15 @@
 
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
-          <img src="static/Image/07_FY24-Q3_FSS_Kyoto_Main_Space_0133_16x9-1800x1013.jpg" alt="Le Labo Kyoto" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <img src="/static/Image/07_FY24-Q3_FSS_Kyoto_Main_Space_0133_16x9-1800x1013.jpg" alt="Le Labo Kyoto" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
           <figcaption class="p-3 text-sm text-neutral-700">Le Labo Kyoto</figcaption>
         </figure>
         <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
-          <img src="static/Image/045apcblkyt_25AUG21_045y-1280x0-c-default.jpg" alt="Issey Miyake Kyoto" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <img src="/static/Image/045apcblkyt_25AUG21_045y-1280x0-c-default.jpg" alt="Issey Miyake Kyoto" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
           <figcaption class="p-3 text-sm text-neutral-700">Issey Miyake Kyoto</figcaption>
         </figure>
         <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
-          <img src="static/Image/graphpaper_kyoto_2.webp" alt="Graphpaper Kyoto" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <img src="/static/Image/graphpaper_kyoto_2.webp" alt="Graphpaper Kyoto" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
           <figcaption class="p-3 text-sm text-neutral-700">Graphpaper Kyoto</figcaption>
         </figure>
       </div>
@@ -158,9 +156,9 @@
       </header>
 
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <img src="static/Image/ab6279506a27473da3c21cf44624ad4c.webp" alt="Chinese Noodles ROKU" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-        <img src="static/Image/slide-sp3.jpg" alt="Mishima-Tei" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-        <img src="static/Image/macchahouse3.jpeg" alt="Maccha House" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+        <img src="/static/Image/ab6279506a27473da3c21cf44624ad4c.webp" alt="Chinese Noodles ROKU" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+        <img src="/static/Image/slide-sp3.jpg" alt="Mishima-Tei" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+        <img src="/static/Image/macchahouse3.jpeg" alt="Maccha House" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
       </div>
 
       <details class="group mt-6 rounded-xl border bg-white p-4 open:shadow-sm">
@@ -180,45 +178,64 @@
     </div>
   </footer>
 
-  <!-- Your original Kyoto fetch JS (kept simple, no skeletons) -->
-  <script>
-    const fetchData = (id, file) => {
-      fetch(`/data/Kyoto/${file}`)
-        .then(res => {
-          if (!res.ok) throw new Error(`Missing file: ${file}`);
-          return res.json();
-        })
-        .then(data => {
-          const ul = document.getElementById(id);
-          data.forEach(item => {
-            const li = document.createElement('li');
-            li.className = 'rounded-lg border p-3 text-sm hover:bg-neutral-50'; // light styling only
+  <!-- MongoDB API Script -->
+  <script type="module">
+    async function fetchFromAPI(type) {
+      const url = `https://japan-travel-backend-587601512996.us-central1.run.app/${type}?city=Kyoto&limit=300`;
+      
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`API error: ${res.status}`);
+      const json = await res.json();
+      return json.data || [];
+    }
 
-            const link = document.createElement('a');
-            link.href = item.google_map_url || "#";
-            link.textContent = item.name;
-            link.target = "_blank";
-            link.className = 'font-medium text-blue-600 hover:underline';
-            li.appendChild(link);
+    function renderList(id, data) {
+      const ul = document.getElementById(id);
+      if (!ul) return;
 
-            const extra = item.category ? ` (${item.category})` : (item.type ? ` - ${item.type}` : '');
-            if (extra) {
-              const span = document.createElement('span');
-              span.textContent = extra;
-              span.className = 'ml-1 text-neutral-600';
-              li.appendChild(span);
-            }
+      ul.innerHTML = '';
+      data.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'rounded-lg border p-3 text-sm hover:bg-neutral-50';
 
-            ul.appendChild(li);
-          });
-        })
-        .catch(err => console.error(err.message));
-    };
+        const link = document.createElement('a');
+        link.href = item.google_map_url || item.google_maps_url || "#";
+        link.textContent = item.name;
+        link.target = "_blank";
+        link.className = 'font-medium text-blue-600 hover:underline';
+        li.appendChild(link);
 
-    // Load lists
-    fetchData("attractions-list", "Kyoto_Attractions.json");
-    fetchData("shopping-list", "Kyoto_Shopping.json");
-    fetchData("restaurants-list", "Kyoto_Restaurants.json");
+        const extra = item.category ? ` (${item.category})` : (item.type ? ` - ${item.type}` : '');
+        if (extra) {
+          const span = document.createElement('span');
+          span.textContent = extra;
+          span.className = 'ml-1 text-neutral-600';
+          li.appendChild(span);
+        }
+
+        ul.appendChild(li);
+      });
+    }
+
+    // Load all data
+    (async () => {
+      try {
+        const [attractions, shopping, restaurants] = await Promise.all([
+          fetchFromAPI('attractions'),
+          fetchFromAPI('shopping'),
+          fetchFromAPI('restaurants')
+        ]);
+
+        renderList("attractions-list", attractions);
+        renderList("shopping-list", shopping);
+        renderList("restaurants-list", restaurants);
+
+        console.log('✅ Kyoto data loaded from MongoDB!');
+      } catch (err) {
+        console.error('❌ Error:', err);
+        console.log('💡 Start MongoDB API: python Back_end/app_mongodb.py');
+      }
+    })();
   </script>
 </body>
 </html>

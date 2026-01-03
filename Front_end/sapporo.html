@@ -9,9 +9,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Firebase init (auth mini like other pages) -->
-    <script type="module" src="/static/js/firebase-init.js?v=3"></script>
+    <script type="module" src="/static/js/firebase-init.js?v=4"></script>
 
-    <link rel="icon" href="static/Image/Sapporo-Odori-Park-iStock-SeanPavonePhoto-1024x600.jpg" />
+    <link rel="icon" href="/static/Image/Sapporo-Odori-Park-iStock-SeanPavonePhoto-1024x600.jpg" />
   </head>
   <body class="bg-slate-50 text-slate-800">
 
@@ -19,11 +19,11 @@
     <nav class="sticky top-0 z-50 bg-[#222] text-white">
       <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         <div class="flex flex-wrap items-center gap-3">
-          <a href="index.html" class="font-semibold tracking-wide">Home</a>
-          <a href="itineraries.html" class="hover:underline">Recommended Itineraries</a>
-          <a href="cities.html" class="hover:underline">Explore Cities</a>
-          <a href="tips.html" class="hover:underline">Travel Tips</a>
-          <a href="my_itineraries.html" class="hover:underline">My Itineraries</a>
+          <a href="/index.html" class="font-semibold tracking-wide">Home</a>
+          <a href="/itineraries.html" class="hover:underline">Recommended Itineraries</a>
+          <a href="/cities.html" class="hover:underline">Explore Cities</a>
+          <a href="/tips.html" class="hover:underline">Travel Tips</a>
+          <a href="/my_itineraries.html" class="hover:underline">My Itineraries</a>
         </div>
         <div id="auth-mini" class="text-sm">
           <span id="auth-name" class="font-medium">Not signed in</span>
@@ -33,7 +33,7 @@
         </div>
       </div>
       <script type="module">
-        import { auth } from "/static/js/firebase-init.js?v=3";
+        import { auth } from "/static/js/firebase-init.js?v=4";
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         const nameEl = document.getElementById('auth-name');
         const linkEl = document.getElementById('auth-link');
@@ -59,7 +59,7 @@
     <section class="mx-auto max-w-6xl px-4 pt-6">
       <div class="overflow-hidden rounded-3xl shadow-lg">
         <img
-          src="static/Image/Sapporo-Odori-Park-iStock-SeanPavonePhoto-1024x600.jpg"
+          src="/static/Image/Sapporo-Odori-Park-iStock-SeanPavonePhoto-1024x600.jpg"
           alt="Sapporo, Odori Park"
           class="h-[44vh] w-full object-cover md:h-[56vh]"
           loading="eager"
@@ -95,15 +95,15 @@
 
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <figure class="overflow-hidden rounded-xl border bg-white shadow-sm">
-            <img src="static/Image/5300_01.jpg" alt="Sapporo Beer Museum" class="h-48 w-full object-cover" loading="lazy" />
+            <img src="/static/Image/5300_01.jpg" alt="Sapporo Beer Museum" class="h-48 w-full object-cover" loading="lazy" />
             <figcaption class="p-3 text-sm text-slate-700">Sapporo Beer Museum</figcaption>
           </figure>
           <figure class="overflow-hidden rounded-xl border bg-white shadow-sm">
-            <img src="static/Image/01.jpg" alt="Takino Suzuran Hillside Park" class="h-48 w-full object-cover" loading="lazy" />
+            <img src="/static/Image/01.jpg" alt="Takino Suzuran Hillside Park" class="h-48 w-full object-cover" loading="lazy" />
             <figcaption class="p-3 text-sm text-slate-700">Takino Suzuran Hillside Park</figcaption>
           </figure>
           <figure class="overflow-hidden rounded-xl border bg-white shadow-sm">
-            <img src="static/Image/126A3731-2.jpg" alt="Shiroi Koibito Park" class="h-48 w-full object-cover" loading="lazy" />
+            <img src="/static/Image/126A3731-2.jpg" alt="Shiroi Koibito Park" class="h-48 w-full object-cover" loading="lazy" />
             <figcaption class="p-3 text-sm text-slate-700">Shiroi Koibito Park</figcaption>
           </figure>
         </div>
@@ -125,15 +125,15 @@
 
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <figure class="overflow-hidden rounded-xl border bg-white shadow-sm">
-            <img src="static/Image/002_4.5_1024x1024.webp" alt="Human Made Sapporo" class="h-48 w-full object-cover" loading="lazy" />
+            <img src="/static/Image/002_4.5_1024x1024.webp" alt="Human Made Sapporo" class="h-48 w-full object-cover" loading="lazy" />
             <figcaption class="p-3 text-sm text-slate-700">Human Made Sapporo</figcaption>
           </figure>
           <figure class="overflow-hidden rounded-xl border bg-white shadow-sm">
-            <img src="static/Image/AcJnMuFFX5fUh92oP5VavDotpvh5T3CDsl8A4uQ7h8wihajalla_nfggsrB2f7hS1jbqF1oBLfSPn34UV98HHwGtQZCe_JQ-xVCllgB6tKU3uwoDS7o_rDBtDjbRxY8XcDGsy9oCSVCMQ0V7c3qRkClezZ3_O530PIKi0dHyIgd92sxU3gtw.jpeg" alt="KAPITAL Sapporo" class="h-48 w-full object-cover" loading="lazy" />
+            <img src="/static/Image/AcJnMuFFX5fUh92oP5VavDotpvh5T3CDsl8A4uQ7h8wihajalla_nfggsrB2f7hS1jbqF1oBLfSPn34UV98HHwGtQZCe_JQ-xVCllgB6tKU3uwoDS7o_rDBtDjbRxY8XcDGsy9oCSVCMQ0V7c3qRkClezZ3_O530PIKi0dHyIgd92sxU3gtw.jpeg" alt="KAPITAL Sapporo" class="h-48 w-full object-cover" loading="lazy" />
             <figcaption class="p-3 text-sm text-slate-700">KAPITAL Sapporo</figcaption>
           </figure>
           <figure class="overflow-hidden rounded-xl border bg-white shadow-sm">
-            <img src="static/Image/b89aa949-ce8f-47a2-95f3-3e14975e7bf6.jpg" alt="Moonrise" class="h-48 w-full object-cover" loading="lazy" />
+            <img src="/static/Image/b89aa949-ce8f-47a2-95f3-3e14975e7bf6.jpg" alt="Moonrise" class="h-48 w-full object-cover" loading="lazy" />
             <figcaption class="p-3 text-sm text-slate-700">Moonrise</figcaption>
           </figure>
         </div>
@@ -156,9 +156,9 @@
         <!-- Otaru -->
         <div>
           <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <img src="static/Image/10018_4_l.jpg" alt="LeTAO Main Store" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-            <img src="static/Image/a1000322_main.webp" alt="Otaru Music Box Museum" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-            <img src="static/Image/hokkaido.jpg" alt="Otaru canal" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+            <img src="/static/Image/10018_4_l.jpg" alt="LeTAO Main Store" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+            <img src="/static/Image/a1000322_main.webp" alt="Otaru Music Box Museum" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+            <img src="/static/Image/hokkaido.jpg" alt="Otaru canal" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
           </div>
           <details class="group mt-4 rounded-xl border bg-white p-4">
             <summary class="flex cursor-pointer list-none items-center justify-between">
@@ -171,9 +171,9 @@
         <!-- Noboribetsu -->
         <div class="mt-10">
           <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <img src="static/Image/Hokkaido_07.jpg" alt="Noboribetsu Onsen" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-            <img src="static/Image/2.jpg" alt="Noboribetsu Bear Park" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-            <img src="static/Image/M_00713_001.jpg" alt="Jigokudani (Hell Valley)" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+            <img src="/static/Image/Hokkaido_07.jpg" alt="Noboribetsu Onsen" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+            <img src="/static/Image/2.jpg" alt="Noboribetsu Bear Park" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+            <img src="/static/Image/M_00713_001.jpg" alt="Jigokudani (Hell Valley)" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
           </div>
           <details class="group mt-4 rounded-xl border bg-white p-4">
             <summary class="flex cursor-pointer list-none items-center justify-between">
@@ -192,9 +192,9 @@
         </header>
 
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <img src="static/Image/2ea62ff903b85f96497479afd56ccf38.jpg" alt="Jingisukan Daruma" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-          <img src="static/Image/チキン.jpg" alt="Soup Curry King" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-          <img src="static/Image/be9cee1b268e02c647dbd6885e806d2d.jpg" alt="Patisserie Toshi" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+          <img src="/static/Image/2ea62ff903b85f96497479afd56ccf38.jpg" alt="Jingisukan Daruma" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+          <img src="/static/Image/チキン.jpg" alt="Soup Curry King" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+          <img src="/static/Image/be9cee1b268e02c647dbd6885e806d2d.jpg" alt="Patisserie Toshi" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
         </div>
 
         <details class="group mt-6 rounded-xl border bg-white p-4">
@@ -213,7 +213,7 @@
           <h3 class="text-xl font-semibold text-slate-900">Planning Hokkaidō (Sapporo + Hakodate)?</h3>
           <p class="mt-1 text-sm text-slate-600">Use the combined planner to add days, drop in places, and save to your account.</p>
         </div>
-        <a href="plan_tokyo_hokkaido.html" class="mt-4 inline-flex rounded-lg bg-blue-600 px-5 py-2.5 font-medium text-white shadow hover:bg-blue-700 sm:mt-0">
+        <a href="/plan_tokyo_hokkaido.html" class="mt-4 inline-flex rounded-lg bg-blue-600 px-5 py-2.5 font-medium text-white shadow hover:bg-blue-700 sm:mt-0">
           Plan this route
         </a>
       </div>
@@ -225,55 +225,83 @@
       </div>
     </footer>
 
-    <!-- One-function loader (same pattern as your other pages) -->
-    <script>
-      function fetchData(id, file) {
+    <!-- MongoDB API Script -->
+    <script type="module">
+      async function fetchFromAPI(type) {
+        const url = `https://japan-travel-backend-587601512996.us-central1.run.app/${type}?city=Sapporo&limit=300`;
+        
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`API error: ${res.status}`);
+        const json = await res.json();
+        return json.data || [];
+      }
+
+      function renderList(id, data) {
         const ul = document.getElementById(id);
         if (!ul) return;
 
-        fetch('/data/Sapporo/' + file)
-          .then((res) => {
-            if (!res.ok) throw new Error(file + ' missing');
-            return res.json();
-          })
-          .then((data) => {
-            ul.innerHTML = '';
-            data.forEach((item) => {
-              const li = document.createElement('li');
-              const a  = document.createElement('a');
+        ul.innerHTML = '';
+        if (!data || data.length === 0) {
+          ul.innerHTML = '<li class="text-slate-500">No items found.</li>';
+          return;
+        }
 
-              a.href = item.google_map_url || item.google_maps_url || '#';
-              a.target = '_blank';
-              a.rel = 'noopener';
-              a.textContent = item.name || 'Untitled';
-              a.style.color = '#007BFF';
-              a.style.textDecoration = 'none';
+        data.forEach((item) => {
+          const li = document.createElement('li');
+          const a = document.createElement('a');
 
-              li.appendChild(a);
+          a.href = item.google_map_url || item.google_maps_url || '#';
+          a.target = '_blank';
+          a.rel = 'noopener';
+          a.textContent = item.name || 'Untitled';
+          a.className = 'text-blue-600 hover:underline';
 
-              const extra = item.category ? ' (' + item.category + ')' :
-                            item.type ? ' - ' + item.type : '';
-              if (extra) {
-                const span = document.createElement('span');
-                span.textContent = extra;
-                li.appendChild(span);
-              }
+          li.appendChild(a);
 
-              ul.appendChild(li);
-            });
-          })
-          .catch((err) => {
-            console.warn(err.message);
-            ul.innerHTML = '<li>Could not load: ' + file + '</li>';
-          });
+          const extra = item.category ? ' (' + item.category + ')' :
+                        item.type ? ' - ' + item.type : '';
+          if (extra) {
+            const span = document.createElement('span');
+            span.textContent = extra;
+            span.className = 'text-slate-600 text-sm ml-1';
+            li.appendChild(span);
+          }
+
+          ul.appendChild(li);
+        });
       }
 
-      // Load lists (keep your filenames)
-      fetchData('attractions-list', 'Sapporo_Attractions.json');
-      fetchData('shopping-list', 'Sapporo_Shopping.json');
-      fetchData('Otarudaytrip-list', 'Otaru_Day_Trip.json');
-      fetchData('Noboribetsudaytrip-list', 'Noboribetsu_Day_Trip.json');
-      fetchData('restaurants-list', 'Sapporo_Restaurants.json');
+      // Load all data
+      (async () => {
+        try {
+          const [attractions, shopping, daytrips, restaurants] = await Promise.all([
+            fetchFromAPI('attractions'),
+            fetchFromAPI('shopping'),
+            fetchFromAPI('daytrips'),
+            fetchFromAPI('restaurants')
+          ]);
+
+          renderList('attractions-list', attractions);
+          renderList('shopping-list', shopping);
+          renderList('restaurants-list', restaurants);
+
+          // Group day trips by area
+          const daytripsByArea = daytrips.reduce((acc, item) => {
+            const area = item.area || 'Other';
+            if (!acc[area]) acc[area] = [];
+            acc[area].push(item);
+            return acc;
+          }, {});
+
+          renderList('Otarudaytrip-list', daytripsByArea['Otaru'] || []);
+          renderList('Noboribetsudaytrip-list', daytripsByArea['Noboribetsu'] || []);
+
+          console.log('✅ Sapporo data loaded from MongoDB!');
+        } catch (err) {
+          console.error('❌ Error:', err);
+          console.log('💡 Start MongoDB API: python Back_end/app_mongodb.py');
+        }
+      })();
     </script>
   </body>
 </html>

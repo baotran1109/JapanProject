@@ -9,9 +9,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- Firebase init (auth mini like other pages) -->
-  <script type="module" src="/static/js/firebase-init.js?v=3"></script>
+  <script type="module" src="/static/js/firebase-init.js?v=4"></script>
 
-  <link rel="icon" href="static/Image/84406-Okinawa.webp" />
+  <link rel="icon" href="/static/Image/84406-Okinawa.webp" />
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
 
@@ -19,11 +19,11 @@
   <nav class="sticky top-0 z-50 bg-[#222] text-white">
     <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
       <div class="flex flex-wrap items-center gap-3">
-        <a href="index.html" class="font-semibold tracking-wide">Home</a>
-        <a href="itineraries.html" class="hover:underline">Recommended Itineraries</a>
-        <a href="cities.html" class="hover:underline">Explore Cities</a>
-        <a href="tips.html" class="hover:underline">Travel Tips</a>
-        <a href="my_itineraries.html" class="hover:underline">My Itineraries</a>
+        <a href="/index.html" class="font-semibold tracking-wide">Home</a>
+        <a href="/itineraries.html" class="hover:underline">Recommended Itineraries</a>
+        <a href="/cities.html" class="hover:underline">Explore Cities</a>
+        <a href="/tips.html" class="hover:underline">Travel Tips</a>
+        <a href="/my_itineraries.html" class="hover:underline">My Itineraries</a>
       </div>
       <div id="auth-mini" class="text-sm">
         <span id="auth-name" class="font-medium">Not signed in</span>
@@ -33,7 +33,7 @@
       </div>
     </div>
     <script type="module">
-      import { auth } from "/static/js/firebase-init.js?v=3";
+      import { auth } from "/static/js/firebase-init.js?v=4";
       import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
       const nameEl = document.getElementById('auth-name');
       const linkEl = document.getElementById('auth-link');
@@ -59,7 +59,7 @@
   <section id="top" class="mx-auto max-w-6xl px-4 pt-6">
     <div class="overflow-hidden rounded-3xl shadow-lg">
       <img
-        src="static/Image/84406-Okinawa.webp"
+        src="/static/Image/84406-Okinawa.webp"
         alt="Okinawa coast and turquoise sea"
         class="h-[44vh] w-full object-cover md:h-[56vh]"
         loading="eager"
@@ -135,53 +135,69 @@
     </div>
   </footer>
 
-  <!-- JS: simple fetch pattern (keeps your keys, handles google_map(s)_url) -->
-   <script>
-   function fetchData(id, file) {
-    const ul = document.getElementById(id);
-    if (!ul) return;
+  <!-- MongoDB API Script -->
+   <script type="module">
+   async function fetchFromAPI(type) {
+     const url = `https://japan-travel-backend-587601512996.us-central1.run.app/${type}?city=Okinawa&limit=300`;
+     
+     const res = await fetch(url);
+     if (!res.ok) throw new Error(`API error: ${res.status}`);
+     const json = await res.json();
+     return json.data || [];
+   }
 
-    fetch('/data/Okinawa/' + file)
-      .then((res) => {
-        if (!res.ok) throw new Error(file + ' missing');
-        return res.json();
-      })
-      .then((data) => {
-        ul.innerHTML = '';
-        data.forEach((item) => {
-          const li = document.createElement('li');
-          const a  = document.createElement('a');
+   function renderList(id, data) {
+     const ul = document.getElementById(id);
+     if (!ul) return;
 
-          a.href = item.google_map_url || item.google_maps_url || '#';
-          a.target = '_blank';
-          a.rel = 'noopener';
-          a.textContent = item.name || 'Untitled';
-          a.style.color = '#007BFF';
-          a.style.textDecoration = 'none';
+     ul.innerHTML = '';
+     if (!data || data.length === 0) {
+       ul.innerHTML = '<li class="text-slate-500">No items found.</li>';
+       return;
+     }
 
-          li.appendChild(a);
+     data.forEach((item) => {
+       const li = document.createElement('li');
+       const a = document.createElement('a');
 
-          const extra =
-            item.category ? ' (' + item.category + ')' :
-            (item.type ? ' - ' + item.type : '');
-          if (extra) {
-            const span = document.createElement('span');
-            span.textContent = extra;
-            li.appendChild(span);
-          }
+       a.href = item.google_map_url || item.google_maps_url || '#';
+       a.target = '_blank';
+       a.rel = 'noopener';
+       a.textContent = item.name || 'Untitled';
+       a.className = 'text-blue-600 hover:underline';
 
-          ul.appendChild(li);
-        });
-      })
-      .catch((err) => {
-        console.warn(err.message || err);
-        ul.innerHTML = '<li>Could not load: ' + file + '</li>';
-      });
-  }
+       li.appendChild(a);
 
-  // Load lists
-  fetchData('attractions-list', 'Okinawa_Attractions.json');
-  fetchData('restaurants-list', 'Okinawa_Restaurants.json');
+       const extra = item.category ? ' (' + item.category + ')' :
+                     item.type ? ' - ' + item.type : '';
+       if (extra) {
+         const span = document.createElement('span');
+         span.textContent = extra;
+         span.className = 'text-slate-600 text-sm ml-1';
+         li.appendChild(span);
+       }
+
+       ul.appendChild(li);
+     });
+   }
+
+   // Load all data
+   (async () => {
+     try {
+       const [attractions, restaurants] = await Promise.all([
+         fetchFromAPI('attractions'),
+         fetchFromAPI('restaurants')
+       ]);
+
+       renderList('attractions-list', attractions);
+       renderList('restaurants-list', restaurants);
+
+       console.log('✅ Okinawa data loaded from MongoDB!');
+     } catch (err) {
+       console.error('❌ Error:', err);
+       console.log('💡 Start MongoDB API: python Back_end/app_mongodb.py');
+     }
+   })();
 </script>
 </body>
 </html>

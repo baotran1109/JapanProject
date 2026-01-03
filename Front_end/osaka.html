@@ -9,7 +9,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- Firebase init (auth mini) -->
-  <script type="module" src="/static/js/firebase-init.js?v=3"></script>
+  <script type="module" src="/static/js/firebase-init.js?v=4"></script>
 
   <link rel="icon" href="static/Image/GettyImages-962650558.webp" />
 </head>
@@ -33,7 +33,7 @@
       </div>
     </div>
     <script type="module">
-      import { auth } from "/static/js/firebase-init.js?v=3";
+      import { auth } from "/static/js/firebase-init.js?v=4";
       import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
       const nameEl = document.getElementById('auth-name');
       const linkEl = document.getElementById('auth-link');
@@ -59,7 +59,7 @@
   <section id="top" class="mx-auto max-w-6xl px-4 pt-6">
     <div class="overflow-hidden rounded-3xl shadow-lg">
       <img
-        src="static/Image/GettyImages-962650558.webp"
+        src="/static/Image/GettyImages-962650558.webp"
         alt="Dōtonbori canal, Osaka at night"
         class="h-[44vh] w-full object-cover md:h-[56vh]"
         loading="eager"
@@ -69,9 +69,7 @@
     <div class="mx-auto max-w-3xl py-8">
       <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 md:text-5xl">Osaka</h1>
       <p class="mt-3 text-lg leading-relaxed text-slate-600">
-        Laid-back and lively, Osaka mixes street-food legends with historic icons like
-        <strong>Osaka Castle</strong>. Wander the glow of <strong>Dōtonbori</strong>, snack in
-        <strong>Shinsekai</strong>, and day-trip to <strong>Nara</strong> or <strong>Kobe</strong> with ease.
+         Osaka is one of Japan’s most vibrant and personality-filled cities—often called “Japan’s Kitchen” for its legendary food culture. It blends modern skyscrapers with rich historical landmarks like Osaka Castle, while neighborhoods like Dotonbori and Shinsekai overflow with color, flavor, and energy. With a laid-back vibe and friendly locals, Osaka feels more casual than Tokyo but just as exciting. It’s also a great base for day trips to Nara and Kobe, both easily reachable by train.
       </p>
 
       <!-- CTA chips (same pattern as Tokyo/Kyoto) -->
@@ -96,15 +94,15 @@
 
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
-          <img src="static/Image/caption.jpg" alt="Glico Sign, Dōtonbori" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <img src="/static/Image/caption.jpg" alt="Glico Sign, Dōtonbori" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
           <figcaption class="p-3 text-sm text-neutral-700">Glico Sign (Dōtonbori)</figcaption>
         </figure>
         <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
-          <img src="static/Image/hq720.jpg" alt="Osaka Aquarium Kaiyukan" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <img src="/static/Image/hq720.jpg" alt="Osaka Aquarium Kaiyukan" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
           <figcaption class="p-3 text-sm text-neutral-700">Osaka Aquarium Kaiyukan</figcaption>
         </figure>
         <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
-          <img src="static/Image/4000_top.jpg" alt="Osaka Castle" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <img src="/static/Image/4000_top.jpg" alt="Osaka Castle" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
           <figcaption class="p-3 text-sm text-neutral-700">Osaka Castle</figcaption>
         </figure>
       </div>
@@ -128,15 +126,15 @@
 
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
-          <img src="static/Image/AdCG2DN4BVx0QDSxnbseOY7QvWvQ7qEJjTV3fBrkw2lTZhtyyiFzHKmuIAONOiSAdfvDifLUop_wSNqNCbfimL_hEeuilzkK70kz48okDCdVM27ehBlEFQ834fsmgdBmA-WfhVxp61AngHXYUHlBevOQ_an74hDsmqOlzeMRhisW4ZEtmQYZ.jpeg" alt="RIZ Shinsaibashi" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <img src="/static/Image/AdCG2DN4BVx0QDSxnbseOY7QvWvQ7qEJjTV3fBrkw2lTZhtyyiFzHKmuIAONOiSAdfvDifLUop_wSNqNCbfimL_hEeuilzkK70kz48okDCdVM27ehBlEFQ834fsmgdBmA-WfhVxp61AngHXYUHlBevOQ_an74hDsmqOlzeMRhisW4ZEtmQYZ.jpeg" alt="RIZ Shinsaibashi" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
           <figcaption class="p-3 text-sm text-neutral-700">RIZ Shinsaibashi (Purchase Shop)</figcaption>
         </figure>
         <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
-          <img src="static/Image/ee3cf2c1af7cb602732b372aa3eeae3e.jpg" alt="BIOTOP Osaka" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <img src="/static/Image/ee3cf2c1af7cb602732b372aa3eeae3e.jpg" alt="BIOTOP Osaka" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
           <figcaption class="p-3 text-sm text-neutral-700">BIOTOP Osaka</figcaption>
         </figure>
         <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
-          <img src="static/Image/osaka2_1800x.webp" alt="NUBIAN Osaka" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <img src="/static/Image/osaka2_1800x.webp" alt="NUBIAN Osaka" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
           <figcaption class="p-3 text-sm text-neutral-700">NUBIAN Osaka</figcaption>
         </figure>
       </div>
@@ -157,9 +155,9 @@
       </header>
 
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <img src="static/Image/photo0jpg.jpg" alt="Hanadako Takoyaki" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-        <img src="static/Image/640x640_rect_41cb31a4b3569e09caa87e9196b41750.jpg" alt="Budo-tei" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-        <img src="static/Image/8063_ext_02_0.jpg" alt="Fukutaro Okonomiyaki" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+        <img src="/static/Image/photo0jpg.jpg" alt="Hanadako Takoyaki" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+        <img src="/static/Image/640x640_rect_41cb31a4b3569e09caa87e9196b41750.jpg" alt="Budo-tei" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+        <img src="/static/Image/8063_ext_02_0.jpg" alt="Fukutaro Okonomiyaki" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
       </div>
 
       <details class="group mt-6 rounded-xl border bg-white p-4 open:shadow-sm">
@@ -182,9 +180,9 @@
         <div>
           <h3 class="text-xl font-semibold">Nara</h3>
           <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <img src="static/Image/4100_11.jpg" alt="Tōdai-ji" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-            <img src="static/Image/10108_1_l.jpg" alt="Wakakusayama Hill" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-            <img src="static/Image/4100_02.jpg" alt="Nara deer" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+            <img src="/static/Image/4100_11.jpg" alt="Tōdai-ji" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+            <img src="/static/Image/10108_1_l.jpg" alt="Wakakusayama Hill" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+            <img src="/static/Image/4100_02.jpg" alt="Nara deer" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
           </div>
           <details class="group mt-4 rounded-xl border bg-white p-4">
             <summary class="flex cursor-pointer list-none items-center justify-between"><span class="font-medium">View Nara Day Trip 🦌</span></summary>
@@ -196,9 +194,9 @@
         <div>
           <h3 class="text-xl font-semibold">Kobe</h3>
           <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <img src="static/Image/kobe-rwc-fb.jpg" alt="Kobe Chinatown" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-            <img src="static/Image/kobe-port_Sean_Pavone_GettyImages-920466394.jpg" alt="Kobe Port" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-            <img src="static/Image/Kobe-Beef.jpg" alt="Kobe Beef" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+            <img src="/static/Image/kobe-rwc-fb.jpg" alt="Kobe Chinatown" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+            <img src="/static/Image/kobe-port_Sean_Pavone_GettyImages-920466394.jpg" alt="Kobe Port" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+            <img src="/static/Image/Kobe-Beef.jpg" alt="Kobe Beef" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
           </div>
           <details class="group mt-4 rounded-xl border bg-white p-4">
             <summary class="flex cursor-pointer list-none items-center justify-between"><span class="font-medium">Kobe Restaurants 🍽️</span></summary>
@@ -224,61 +222,80 @@
   </footer>
 
   <!-- Simple fetch JS (no skeletons) using your Osaka JSON files -->
-  <script>
+  <script type="module">
   // Pretty time
   document.getElementById('lastUpdated').textContent =
     new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 
-  function fetchData(id, file) {
+  // MongoDB API
+  async function fetchFromAPI(type, city, area = null) {
+    const params = new URLSearchParams({ city, limit: 300 });
+    if (area) params.append('area', area);
+    const url = `https://japan-travel-backend-587601512996.us-central1.run.app/${type}?${params}`;
+    
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    const json = await res.json();
+    return json.data || [];
+  }
+
+  function renderList(id, data) {
     const ul = document.getElementById(id);
     if (!ul) return;
 
-    fetch('/data/Osaka/' + file)
-      .then((res) => {
-        if (!res.ok) throw new Error(file + ' missing');
-        return res.json();
-      })
-      .then((data) => {
-        ul.innerHTML = '';
-        data.forEach((item) => {
-          const li = document.createElement('li');
-          const a  = document.createElement('a');
+    ul.innerHTML = '';
+    data.forEach((item) => {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
 
-          a.href = item.google_map_url || item.google_maps_url || '#';
-          a.target = '_blank';
-          a.rel = 'noopener';
-          a.textContent = item.name || 'Untitled';
-          a.style.color = '#007BFF';
-          a.style.textDecoration = 'none';
+      a.href = item.google_map_url || item.google_maps_url || '#';
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.textContent = item.name || 'Untitled';
+      a.className = 'text-blue-600 hover:underline';
 
-          li.appendChild(a);
+      li.appendChild(a);
 
-          const extra =
-            item.category ? ' (' + item.category + ')' :
-            (item.type ? ' - ' + item.type : '');
-          if (extra) {
-            const span = document.createElement('span');
-            span.textContent = extra;
-            li.appendChild(span);
-          }
+      const extra = item.category ? ' (' + item.category + ')' :
+        (item.type ? ' - ' + item.type : '');
+      if (extra) {
+        const span = document.createElement('span');
+        span.textContent = extra;
+        span.className = 'text-slate-600 text-sm ml-1';
+        li.appendChild(span);
+      }
 
-          ul.appendChild(li);
-        });
-      })
-      .catch((err) => {
-        console.warn(err.message || err);
-        ul.innerHTML = '<li>Could not load: ' + file + '</li>';
-      });
+      ul.appendChild(li);
+    });
   }
 
-  // Load lists
-  fetchData('attractions-list', 'Osaka_Attractions.json');
-  fetchData('shopping-list', 'Osaka_Shopping.json');
-  fetchData('restaurants-list', 'Osaka_Restaurants.json');
-  fetchData('Nara-list', 'Nara_day_trip.json');
-  fetchData('Kobe-restaurants-list', 'Kobe_restaurants.json');
-  fetchData('Kobe-attractions-list', 'Kobe_Attractions.json');
-  fetchData('Kobe-shopping-list', 'Kobe_Shopping.json');
+  // Load all data
+  (async () => {
+    try {
+      const [osakaAttr, osakaShopping, osakaRest, nara, kobeRest, kobeAttr, kobeShopping] = await Promise.all([
+        fetchFromAPI('attractions', 'Osaka'),
+        fetchFromAPI('shopping', 'Osaka'),
+        fetchFromAPI('restaurants', 'Osaka'),
+        fetchFromAPI('daytrips', 'Osaka', 'Nara'),
+        fetchFromAPI('restaurants', 'Osaka', 'Kobe'),
+        fetchFromAPI('attractions', 'Osaka', 'Kobe'),
+        fetchFromAPI('shopping', 'Osaka', 'Kobe')
+      ]);
+
+      renderList('attractions-list', osakaAttr);
+      renderList('shopping-list', osakaShopping);
+      renderList('restaurants-list', osakaRest);
+      renderList('Nara-list', nara);
+      renderList('Kobe-restaurants-list', kobeRest);
+      renderList('Kobe-attractions-list', kobeAttr);
+      renderList('Kobe-shopping-list', kobeShopping);
+
+      console.log('✅ Osaka data loaded from MongoDB!');
+    } catch (err) {
+      console.error('❌ Error:', err);
+      console.log('💡 Start MongoDB API: python Back_end/app_mongodb.py');
+    }
+  })();
 </script>
 </body>
 </html>

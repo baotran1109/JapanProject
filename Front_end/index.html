@@ -9,7 +9,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- Firebase init -->
-  <script type="module" src="/static/js/firebase-init.js?v=3"></script>
+  <script type="module" src="/static/js/firebase-init.js?v=4"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 selection:bg-blue-100 selection:text-blue-900">
 
@@ -17,11 +17,11 @@
   <nav class="sticky top-0 z-50 bg-[#222] text-white">
     <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
       <div class="flex flex-wrap items-center gap-3">
-        <a href="index.html" class="font-semibold tracking-wide">Home</a>
-        <a href="itineraries.html" class="hover:underline">Recommended Itineraries</a>
-        <a href="cities.html" class="hover:underline">Explore Cities</a>
-        <a href="tips.html" class="hover:underline">Travel Tips</a>
-        <a href="my_itineraries.html" class="hover:underline">My Itineraries</a>
+        <a href="/index.html" class="font-semibold tracking-wide">Home</a>
+        <a href="/itineraries.html" class="hover:underline">Recommended Itineraries</a>
+        <a href="/cities.html" class="hover:underline">Explore Cities</a>
+        <a href="/tips.html" class="hover:underline">Travel Tips</a>
+        <a href="/my_itineraries.html" class="hover:underline">My Itineraries</a>
       </div>
 
       <!-- Auth mini -->
@@ -37,7 +37,7 @@
 
     <!-- Auth state logic -->
     <script type="module">
-      import { auth } from "/static/js/firebase-init.js?v=3";
+      import { auth } from "/static/js/firebase-init.js?v=4";
       import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
       const nameEl = document.getElementById("auth-name");
       const linkEl = document.getElementById("auth-link");
@@ -62,7 +62,7 @@
   <!-- HERO (image + overlay, Tailwind-only) -->
   <header class="relative">
     <!-- Background image -->
-    <img src="static/Image/Japan-2107x1406.jpg" alt="" class="absolute inset-0 -z-10 h-96 w-full object-cover object-center md:h-[420px]" />
+    <img src="/static/Image/Japan-2107x1406.jpg" alt="" class="absolute inset-0 -z-10 h-96 w-full object-cover object-center md:h-[420px]" />
     <!-- Overlay -->
     <div class="absolute inset-0 -z-10 bg-black/45"></div>
 
@@ -86,7 +86,7 @@
 
       <div class="mt-8 grid gap-6 md:grid-cols-3">
         <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <img src="static/Image/omakase-sushi-maguro.webp" alt="Sushi in Japan" class="h-44 w-full object-cover" />
+          <img src="/static/Image/omakase-sushi-maguro.webp" alt="Sushi in Japan" class="h-44 w-full object-cover" />
           <div class="p-5">
             <h3 class="font-semibold">Food &amp; Drink</h3>
             <p class="mt-1 text-sm text-slate-600">Counter sushi, back-alley ramen, cozy kissaten.</p>
@@ -94,7 +94,7 @@
         </article>
 
         <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <img src="static/Image/tokyo-zojoji-temple-220177.jpg" alt="Temple in Japan" class="h-44 w-full object-cover" />
+          <img src="/static/Image/tokyo-zojoji-temple-220177.jpg" alt="Temple in Japan" class="h-44 w-full object-cover" />
           <div class="p-5">
             <h3 class="font-semibold">Culture &amp; Tradition</h3>
             <p class="mt-1 text-sm text-slate-600">Temples, tea, and neighborhoods with centuries of history.</p>
@@ -102,7 +102,7 @@
         </article>
 
         <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <img src="static/Image/kapital-gqstyle-fall-13.webp" alt="Japanese fashion" class="h-44 w-full object-cover" />
+          <img src="/static/Image/kapital-gqstyle-fall-13.webp" alt="Japanese fashion" class="h-44 w-full object-cover" />
           <div class="p-5">
             <h3 class="font-semibold">Shopping &amp; Style</h3>
             <p class="mt-1 text-sm text-slate-600">Niche select shops, vintage finds, thoughtful design.</p>
@@ -120,7 +120,7 @@
 
       <div class="mt-8 grid gap-6 md:grid-cols-2">
         <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <img src="static/Image/content.jpg" alt="Cherry blossoms" class="h-44 w-full object-cover" />
+          <img src="/static/Image/content.jpg" alt="Cherry blossoms" class="h-44 w-full object-cover" />
           <div class="p-5">
             <h3 class="font-semibold">Spring (Mar–May)</h3>
             <p class="mt-1 text-sm text-slate-600">Cherry blossoms, hanami picnics, mild weather.</p>
@@ -128,7 +128,7 @@
         </article>
 
         <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <img src="static/Image/e86ebe2670890cc476c21d36229fd5ac.jpg" alt="Autumn leaves" class="h-44 w-full object-cover" />
+          <img src="/static/Image/e86ebe2670890cc476c21d36229fd5ac.jpg" alt="Autumn leaves" class="h-44 w-full object-cover" />
           <div class="p-5">
             <h3 class="font-semibold">Autumn (Oct–Nov)</h3>
             <p class="mt-1 text-sm text-slate-600">Red-gold leaves across gardens, hills, and shrines.</p>
@@ -136,7 +136,7 @@
         </article>
 
         <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <img src="static/Image/december_1.jpg" alt="Winter in Japan" class="h-44 w-full object-cover" />
+          <img src="/static/Image/december_1.jpg" alt="Winter in Japan" class="h-44 w-full object-cover" />
           <div class="p-5">
             <h3 class="font-semibold">Winter (Dec–Feb)</h3>
             <p class="mt-1 text-sm text-slate-600">Snow festivals, onsen trips, Hokkaidō powder.</p>
@@ -144,7 +144,7 @@
         </article>
 
         <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <img src="static/Image/image.jpg" alt="Summer fireworks" class="h-44 w-full object-cover" />
+          <img src="/static/Image/image.jpg" alt="Summer fireworks" class="h-44 w-full object-cover" />
           <div class="p-5">
             <h3 class="font-semibold">Summer (Jun–Aug)</h3>
             <p class="mt-1 text-sm text-slate-600">Fireworks, matsuri, island escapes—lively but warm.</p>
@@ -158,10 +158,10 @@
       <h2 class="text-2xl font-semibold">Start Your Journey</h2>
       <p class="mt-2 text-slate-600">Explore a city or begin planning your itinerary.</p>
       <div class="mt-5 flex justify-center gap-4">
-        <a href="cities.html" class="rounded-lg bg-blue-600 px-5 py-3 font-medium text-white shadow hover:bg-blue-700">
+        <a href="/cities.html" class="rounded-lg bg-blue-600 px-5 py-3 font-medium text-white shadow hover:bg-blue-700">
           Explore Cities
         </a>
-        <a href="itineraries.html" class="rounded-lg border border-slate-300 bg-white px-5 py-3 font-medium hover:bg-slate-50">
+        <a href="/itineraries.html" class="rounded-lg border border-slate-300 bg-white px-5 py-3 font-medium hover:bg-slate-50">
           Plan Itineraries
         </a>
       </div>

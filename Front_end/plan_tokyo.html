@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <base href="/">
   <meta charset="UTF-8" />
   <title>Plan Your Tokyo Trip · Explore Japan</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Firebase init -->
-  <script type="module" src="/static/js/firebase-init.js?v=3"></script>
+  <script type="module" src="/static/js/firebase-init.js?v=5"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 selection:bg-blue-100 selection:text-blue-900">
 
@@ -15,11 +16,11 @@
   <nav class="sticky top-0 z-50 bg-[#222] text-white">
     <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
       <div class="flex flex-wrap items-center gap-3">
-        <a href="index.html" class="font-semibold tracking-wide">Home</a>
-        <a href="itineraries.html" class="hover:underline">Recommended Itineraries</a>
-        <a href="cities.html" class="hover:underline">Explore Cities</a>
-        <a href="tips.html" class="hover:underline">Travel Tips</a>
-        <a href="my_itineraries.html" class="hover:underline">My Itineraries</a>
+        <a href="/index.html" class="font-semibold tracking-wide">Home</a>
+        <a href="/itineraries.html" class="hover:underline">Recommended Itineraries</a>
+        <a href="/cities.html" class="hover:underline">Explore Cities</a>
+        <a href="/tips.html" class="hover:underline">Travel Tips</a>
+        <a href="/my_itineraries.html" class="hover:underline">My Itineraries</a>
       </div>
 
       <!-- Auth mini -->
@@ -35,7 +36,7 @@
 
     <!-- Auth state logic -->
     <script type="module">
-      import { auth } from "/static/js/firebase-init.js?v=3";
+      import { auth } from "/static/js/firebase-init.js?v=5";
       import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
       const nameEl = document.getElementById("auth-name");
       const linkEl = document.getElementById("auth-link");
@@ -59,7 +60,7 @@
 
   <!-- HERO -->
   <header class="relative">
-    <img src="static/Image/japan.jpg" alt=""
+    <img src="/static/Image/japan.jpg" alt=""
          class="absolute inset-0 -z-10 h-56 w-full object-cover object-center md:h-64" />
     <div class="absolute inset-0 -z-10 bg-black/35"></div>
     <div class="mx-auto flex h-56 max-w-6xl items-center px-4 md:h-64">
@@ -76,15 +77,81 @@
     <section>
       <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:p-6">
         <div class="flex items-center justify-between gap-3">
-          <h2 class="text-xl font-semibold">Your Days</h2>
-          <div class="flex flex-wrap gap-2">
-            <button onclick="addDay()" class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700">+ Add Day</button>
-            <button id="save-btn" onclick="savePlan()" class="rounded-lg bg-emerald-600 px-4 py-2 font-medium text-white hover:bg-emerald-700">💾 Save Plan</button>
-            <button id="ask-ai-review" class="rounded-lg border border-slate-300 bg-white px-4 py-2 font-medium text-slate-800 hover:bg-slate-50">🤖 Ask AI to review</button>
+          <h2 class="text-xl font-semibold">📍 Tokyo</h2>
+          <button onclick="addDay()" class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700">+ Add Day</button>
+        </div>
+        <div id="days" class="mt-4 space-y-4"></div>
+        
+        <!-- Custom Places Section -->
+        <div class="mt-6 rounded-2xl border border-purple-200 bg-purple-50 shadow-sm p-5">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <h2 class="text-xl font-semibold text-purple-900">➕ Add Custom Place</h2>
+              <p class="text-sm text-purple-700 mt-1">Add places not in our database (hotels, friend's houses, local spots)</p>
+            </div>
+            <button onclick="toggleCustomPlaceForm()" class="rounded-lg bg-purple-600 px-4 py-2 text-white font-medium hover:bg-purple-700">+ New Place</button>
+          </div>
+          
+          <!-- Add Custom Place Form -->
+          <div id="custom-place-form" class="mt-4 hidden rounded-lg bg-white p-4 space-y-3">
+            <div>
+              <label class="block text-sm font-medium text-slate-700">Place Name *</label>
+              <input id="custom-name" type="text" placeholder="e.g., Kenji's Apartment, Hidden Ramen Shop" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" required />
+            </div>
+            
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-sm font-medium text-slate-700">Latitude *</label>
+                <input id="custom-lat" type="number" step="0.000001" placeholder="35.6895" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" required />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700">Longitude *</label>
+                <input id="custom-lng" type="number" step="0.000001" placeholder="139.6917" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" required />
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-slate-700">City *</label>
+              <input id="custom-city" type="text" value="Tokyo" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" required />
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-slate-700">Notes (optional)</label>
+              <textarea id="custom-notes" placeholder="Personal notes..." class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 h-20"></textarea>
+            </div>
+            
+            <div class="flex gap-2">
+              <button onclick="saveCustomPlace()" class="flex-1 rounded-lg bg-purple-600 px-4 py-2 text-white font-medium hover:bg-purple-700">💾 Save Place</button>
+              <button onclick="toggleCustomPlaceForm()" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-700 font-medium hover:bg-slate-50">Cancel</button>
+            </div>
+            
+            <p class="text-xs text-slate-500">💡 Tip: Get GPS coordinates from Google Maps (right-click → coordinates)</p>
+          </div>
+          
+          <!-- List of User's Custom Places -->
+          <div id="custom-places-list" class="mt-4 hidden">
+            <h3 class="text-sm font-semibold text-purple-900 mb-2">Your Custom Places:</h3>
+            <div id="custom-places-items" class="space-y-2"></div>
           </div>
         </div>
-        <p id="save-msg" class="mt-2 text-sm font-medium text-emerald-700"></p>
-        <div id="days" class="mt-4 space-y-4"></div>
+      </div>
+
+      <!-- Save + Ask AI -->
+      <div class="flex flex-wrap items-center gap-3">
+        <button id="save-btn" onclick="savePlan()" class="rounded-lg bg-emerald-600 px-5 py-2.5 text-white font-semibold hover:bg-emerald-700">💾 Save Entire Plan</button>
+
+        <button id="ask-ai-review" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-800 font-semibold hover:bg-slate-50">
+          🤖 Ask AI to review
+        </button>
+        
+        <button id="optimize-route-btn" class="rounded-lg bg-gradient-to-r from-green-600 to-teal-600 px-4 py-2 font-semibold text-white hover:from-green-700 hover:to-teal-700">
+          🚀 Optimize Route
+        </button>
+
+        <span id="save-msg" class="text-emerald-600 font-medium"></span>
+        <button id="toggle-info" class="ml-auto rounded-lg bg-slate-900 px-4 py-2 text-white font-medium hover:bg-black md:hidden">
+          🗺️ View Recommendations
+        </button>
       </div>
 
       <!-- AI Review panel -->
@@ -111,6 +178,43 @@
         </div>
       </aside>
 
+      <!-- Route Optimization panel -->
+      <aside id="route-panel" class="mt-6 hidden rounded-2xl border-2 border-green-200 bg-gradient-to-br from-green-50 to-teal-50 p-4 shadow-sm md:p-6">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-semibold text-green-900">🚀 Optimized Route</h3>
+          <div class="text-sm text-green-700">Time saved: <span id="time-saved" class="font-bold">—</span> min</div>
+        </div>
+
+        <div class="mt-4 grid gap-4 md:grid-cols-2">
+          <div class="rounded-lg bg-white p-4 shadow-sm">
+            <h4 class="font-semibold text-slate-700">⏱️ Time Breakdown</h4>
+            <div class="mt-2 space-y-1 text-sm">
+              <div class="flex justify-between"><span>Activities:</span> <span id="activity-time" class="font-medium">—</span></div>
+              <div class="flex justify-between"><span>Travel:</span> <span id="travel-time" class="font-medium">—</span></div>
+              <div class="flex justify-between border-t pt-1"><span class="font-semibold">Total:</span> <span id="total-time" class="font-bold">—</span></div>
+            </div>
+          </div>
+          
+          <div class="rounded-lg bg-white p-4 shadow-sm">
+            <h4 class="font-semibold text-slate-700">💴 Cost Estimate</h4>
+            <div class="mt-2 space-y-1 text-sm">
+              <div class="flex justify-between"><span>Pay per ride:</span> <span id="cost-total" class="font-medium">—</span></div>
+              <div class="flex justify-between"><span>With JR Pass:</span> <span id="cost-jr-pass" class="font-medium text-blue-600">—</span></div>
+              <div id="jr-pass-tip" class="mt-2 rounded bg-yellow-50 p-2 text-xs text-yellow-800"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <h4 class="font-semibold text-slate-700">📍 Step-by-Step Route</h4>
+          <div id="route-steps" class="mt-2 space-y-2"></div>
+        </div>
+        
+        <button id="apply-optimized-route" class="mt-4 w-full rounded-lg bg-green-600 px-4 py-2 font-medium text-white hover:bg-green-700">
+          ✅ Apply This Optimized Route
+        </button>
+      </aside>
+
       <div class="mt-6">
         <button id="toggle-info" class="w-full rounded-lg bg-slate-900 px-4 py-2 font-medium text-white hover:bg-black md:hidden">🗺️ View Recommendations</button>
       </div>
@@ -119,7 +223,7 @@
     <!-- Recommendations -->
     <aside id="recommendation-panel" class="hidden h-fit rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:block md:p-6">
       <div class="space-y-4">
-        <img src="static/Image/Screenshot 2025-08-28 210525.png" alt="Tokyo Recommendation Map" class="h-auto w-full rounded-lg border border-slate-200" />
+        <img src="/static/Image/Screenshot 2025-08-28 210525.png" alt="Tokyo Recommendation Map" class="h-auto w-full rounded-lg border border-slate-200" />
         <div>
           <h3 class="text-lg font-semibold">Top Attractions</h3>
           <details class="mt-1">
@@ -167,8 +271,10 @@
 
   <!-- Planner logic -->
   <script>
-    let dayCounter = 0;
     const daysContainer = document.getElementById("days");
+    
+    // Track current user for custom places and authenticated requests
+    let currentUserId = null;
 
     function dayBoxTemplate(i, prefill = {location:"", activities:""}) {
       const esc = (s) => String(s||"").replaceAll('"','&quot;');
@@ -187,24 +293,26 @@
           <label class="mt-4 block text-sm font-medium text-slate-700" for="activities-${i}">Activities / Notes</label>
           <textarea id="activities-${i}" placeholder="e.g., Meiji Shrine, coffee at Omotesando Koffee…"
                     class="mt-1 w-full min-h-[110px] rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-blue-200">${prefill.activities||""}</textarea>
+          <label class="mt-3 block text-sm font-medium text-slate-700" for="durations-${i}">⏱️ Duration for each (minutes, comma-separated)</label>
+          <input id="durations-${i}" type="text" placeholder="e.g., 90, 120, 60 (default: 60 per activity)"
+                 class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-4 focus:ring-blue-200"
+                 value="${esc(prefill.durations)}" />
+          <p class="mt-1 text-xs text-slate-500">💡 Separate with commas to match your activities. Leave blank for default 60 min each.</p>
         </div>`;
     }
 
     function addDay(prefill){
-      dayCounter++;
-      const i = dayCounter;
+      const boxes = document.querySelectorAll(".day-box");
+      const i = boxes.length + 1;
       const wrap = document.createElement("div");
-      wrap.className = "day-box";
       wrap.innerHTML = dayBoxTemplate(i, prefill);
-      daysContainer.appendChild(wrap);
+      daysContainer.appendChild(wrap.firstElementChild);
     }
 
     function renumberDays(){
       const boxes = [...document.querySelectorAll(".day-box")];
-      dayCounter = 0;
       boxes.forEach((box, idx) => {
         const n = idx + 1;
-        dayCounter = n;
         box.querySelector("h3").textContent = `Day ${n}`;
         const loc = box.querySelector("[id^='location-']");
         const act = box.querySelector("[id^='activities-']");
@@ -217,7 +325,6 @@
       const params = new URLSearchParams(location.search);
       if (params.get("itineraryId")) return;  // edit mode handled below
       daysContainer.innerHTML = "";
-      dayCounter = 0;
       addDay();
     });
 
@@ -229,47 +336,90 @@
       if (shouldShow) window.scrollTo({ top: panel.offsetTop - 90, behavior: "smooth" });
     });
 
-    const fetchJsonToList = async (ulId, path) => {
-      try {
-        const res = await fetch(path);
-        if (!res.ok) throw new Error(`${path}: ${res.status}`);
-        const data = await res.json();
-        const ul = document.getElementById(ulId);
-        if (!ul) return;
-        for (const item of data){
-          const li = document.createElement('li');
-          const a  = document.createElement('a');
-          a.href = item.google_map_url || item.google_maps_url || "#";
-          a.textContent = item.name || "(Unnamed)";
-          a.target = "_blank";
-          a.rel = "noopener";
-          a.className = "text-blue-700 hover:underline";
-          li.appendChild(a);
-          ul.appendChild(li);
-        }
-      } catch(err){ console.log("Fetch failed:", err.message||err); }
-    };
+    // Fetch from MongoDB API using relative URLs
+    async function fetchFromAPI(endpoint, params = {}) {
+      const queryString = new URLSearchParams(params).toString();
+      const url = `https://japan-travel-backend-587601512996.us-central1.run.app/${endpoint}${queryString ? '?' + queryString : ''}`;
+      
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`API error: ${res.status}`);
+      const json = await res.json();
+      return json.data || [];
+    }
 
-    const sources = [
-      ["attractions-list","/data/Tokyo/Tokyo Attractions.json"],
-      ["shopping-list","/data/Tokyo/Tokyo shopping.json"],
-      ["akihabara-list","/data/Tokyo/Akihabara_restaurants.json"],
-      ["asakusa-list","/data/Tokyo/Asakusa_restaurants.json"],
-      ["ginza-list","/data/Tokyo/Ginza_restaurants.json"],
-      ["ikebukuro-list","/data/Tokyo/Ikebukuro_restaurants.json"],
-      ["meguro-list","/data/Tokyo/Meguro_restaurants.json"],
-      ["roppongi-list","/data/Tokyo/Roppongi_restaurants.json"],
-      ["shibuya-list","/data/Tokyo/Shibuya_restaurants.json"],
-      ["shinjuku-list","/data/Tokyo/Shinjuku_restaurants.json"],
-      ["other-area-list","/data/Tokyo/tokyo_other_area_restaurants.json"],
-      ["Yokohama-list","/data/Tokyo/Yokohama_daytrip.json"],
-      ["Nikko-list","/data/Tokyo/Nikko_daytrip.json"],
-      ["Kamakura-list","/data/Tokyo/Kamakura_daytrip.json"],
-      ["Kawagoe-list","/data/Tokyo/Kawagoe_daytrip.json"],
-      ["Hakone-list","/data/Tokyo/Hakone_daytrip.json"],
-      ["MountFuji-list","/data/Tokyo/Fujimount_daytrip.json"],
-    ];
-    (async()=>{ await Promise.all(sources.map(([id,p])=>fetchJsonToList(id,p))); })();
+    // Render list
+    function renderToList(ulId, items) {
+      const ul = document.getElementById(ulId);
+      if (!ul) return;
+      
+      ul.innerHTML = '';
+      items.forEach(item => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = item.google_map_url || item.google_maps_url || "#";
+        a.textContent = item.name || "(Unnamed)";
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.className = "text-blue-700 hover:underline";
+        li.appendChild(a);
+        ul.appendChild(li);
+      });
+    }
+
+    // Load all recommendations
+    (async () => {
+      try {
+        // Fetch all data in parallel
+        const [attractions, shopping, daytrips, restaurants] = await Promise.all([
+          fetchFromAPI('attractions', { city: 'Tokyo', limit: 200 }),
+          fetchFromAPI('shopping', { city: 'Tokyo', limit: 300 }),
+          fetchFromAPI('daytrips', { city: 'Tokyo', limit: 100 }),
+          fetchFromAPI('restaurants', { city: 'Tokyo', limit: 800 })
+        ]);
+
+        // Render attractions and shopping
+        renderToList('attractions-list', attractions);
+        renderToList('shopping-list', shopping);
+
+        // Group daytrips by area
+        const daytripsByArea = daytrips.reduce((acc, item) => {
+          const area = item.area || 'Other';
+          if (!acc[area]) acc[area] = [];
+          acc[area].push(item);
+          return acc;
+        }, {});
+
+        renderToList('Yokohama-list', daytripsByArea['Yokohama'] || []);
+        renderToList('Nikko-list', daytripsByArea['Nikko'] || []);
+        renderToList('Kamakura-list', daytripsByArea['Kamakura'] || []);
+        renderToList('Kawagoe-list', daytripsByArea['Kawagoe'] || []);
+        renderToList('Hakone-list', daytripsByArea['Hakone'] || []);
+        renderToList('MountFuji-list', daytripsByArea['Fujimount'] || []);
+
+        // Group restaurants by area
+        const restaurantsByArea = restaurants.reduce((acc, item) => {
+          const area = (item.area || 'Other').toLowerCase();
+          if (!acc[area]) acc[area] = [];
+          acc[area].push(item);
+          return acc;
+        }, {});
+
+        renderToList('akihabara-list', restaurantsByArea['akihabara'] || []);
+        renderToList('asakusa-list', restaurantsByArea['asakusa'] || []);
+        renderToList('ginza-list', restaurantsByArea['ginza'] || []);
+        renderToList('ikebukuro-list', restaurantsByArea['ikebukuro'] || []);
+        renderToList('meguro-list', restaurantsByArea['meguro'] || []);
+        renderToList('roppongi-list', restaurantsByArea['roppongi'] || []);
+        renderToList('shibuya-list', restaurantsByArea['shibuya'] || []);
+        renderToList('shinjuku-list', restaurantsByArea['shinjuku'] || []);
+        renderToList('other-area-list', restaurantsByArea['tokyo'] || restaurantsByArea['other'] || []);
+
+        console.log('✅ Tokyo recommendations loaded from MongoDB!');
+      } catch (err) {
+        console.error('❌ Error loading data:', err);
+        console.log('💡 Make sure MongoDB API is running: python Back_end/app_mongodb.py');
+      }
+    })();
 
     // expose
     window.collectPlan = function(){
@@ -432,11 +582,284 @@
         alert("AI review failed: " + (e?.message||e));
       }
     });
+
+    // Route Optimization with Dynamic Programming
+    let optimizedRouteData = null;
+
+    document.getElementById("optimize-route-btn")?.addEventListener("click", async () => {
+      try {
+        // Collect all activities from all days
+        const boxes = document.querySelectorAll(".day-box");
+        const allLocations = [];
+        
+        boxes.forEach((box, dayIndex) => {
+          const location = box.querySelector(`input[id^="location-"]`)?.value.trim();
+          const activities = box.querySelector(`textarea[id^="activities-"]`)?.value.trim();
+          const durationsInput = box.querySelector(`input[id^="durations-"]`)?.value.trim();
+          
+          // Parse durations (comma-separated)
+          const durationValues = durationsInput 
+            ? durationsInput.split(',').map(d => parseInt(d.trim()) || 60)
+            : [];
+          
+          // Add main location
+          if (location) {
+            allLocations.push({
+              name: location,
+              duration: durationValues[0] || 60,  // First duration or default 60
+              day: dayIndex + 1
+            });
+          }
+          
+          // Add activities with their corresponding durations
+          if (activities) {
+            const acts = activities.split(/[/,;\n]/).map(a => a.trim()).filter(a => a);
+            acts.forEach((act, actIndex) => {
+              // Get duration for this activity (offset by 1 if location exists)
+              const durationIndex = location ? actIndex + 1 : actIndex;
+              allLocations.push({
+                name: act,
+                duration: durationValues[durationIndex] || 60,
+                day: dayIndex + 1
+              });
+            });
+          }
+        });
+        
+        if (allLocations.length < 2) {
+          alert("Add at least 2 locations to optimize the route!");
+          return;
+        }
+        
+        // Try to enrich with GPS coordinates from knowledge base
+        const enrichedLocations = [];
+        
+        // Get the main location/area from Day 1 to prioritize nearby places
+        const firstBox = document.querySelector(".day-box");
+        const mainLocation = firstBox?.querySelector(`input[id^="location-"]`)?.value.trim() || "Tokyo";
+        
+        for (const loc of allLocations) {
+          try {
+            // Search for this location in MongoDB + user's custom places
+            console.log(`🔍 Searching for: "${loc.name}"`);
+            const searchUrl = `/search/combined?q=${encodeURIComponent(loc.name)}&limit=10`;
+            const searchHeaders = currentUserId ? { "X-User-ID": currentUserId } : {};
+            const searchRes = await fetch(searchUrl, { headers: searchHeaders });
+            const searchData = await searchRes.json();
+            console.log(`  → Search returned ${searchData.total_results || 0} results`);
+            
+            // Show what came back before filtering
+            const beforeFilter = [
+              ...(searchData.attractions || []),
+              ...(searchData.restaurants || []),
+              ...(searchData.shopping || []),
+              ...(searchData.daytrips || [])
+            ];
+            console.log(`  → Before filter: ${beforeFilter.length} items`, beforeFilter.map(r => `${r.name} (${r.city})`));
+            
+            // Combine all results and filter to Tokyo only
+            let allResults = [
+              ...(searchData.attractions || []),
+              ...(searchData.restaurants || []),
+              ...(searchData.shopping || []),
+              ...(searchData.daytrips || [])
+            ];
+            
+            // CRITICAL: Filter to Tokyo only!
+            allResults = allResults.filter(r => 
+              r.city === 'Tokyo' || r.city === 'tokyo'
+            );
+            console.log(`  → After Tokyo filter: ${allResults.length} items`, allResults.map(r => `${r.name} (lat:${r.lat}, lng:${r.lng})`));
+            
+            if (allResults.length === 0) {
+              // No Tokyo results - skip this location
+              console.warn(`⚠️ No Tokyo results found for "${loc.name}" - all results were from other cities!`);
+              enrichedLocations.push({
+                name: loc.name,
+                lat: null,
+                lng: null,
+                duration: loc.duration,
+                original_day: loc.day
+              });
+              continue;
+            }
+            
+            // Prioritize results in the same area (e.g., Shinjuku, Shibuya)
+            let best = allResults[0];
+            
+            // If main location mentions an area, prioritize matches in that area
+            const areaKeywords = ['Shinjuku', 'Shibuya', 'Asakusa', 'Ginza', 'Harajuku', 'Akihabara', 'Roppongi', 'Ikebukuro'];
+            for (const area of areaKeywords) {
+              if (mainLocation.toLowerCase().includes(area.toLowerCase())) {
+                // Find result in this area
+                const areaMatch = allResults.find(r => 
+                  r.area?.toLowerCase().includes(area.toLowerCase()) ||
+                  r.name?.toLowerCase().includes(area.toLowerCase())
+                );
+                if (areaMatch) {
+                  best = areaMatch;
+                  break;
+                }
+              }
+            }
+            
+            console.log(`  ✅ Matched "${loc.name}" to "${best.name}" (${best.lat}, ${best.lng})`);
+            enrichedLocations.push({
+              name: loc.name,
+              lat: best.lat,
+              lng: best.lng,
+              duration: loc.duration,
+              original_day: loc.day,
+              matched_place: best.name,  // Show what we actually matched
+              matched_area: best.area
+            });
+          } catch (err) {
+            // Add without coordinates
+            console.error(`  ❌ Error searching for "${loc.name}":`, err);
+            enrichedLocations.push({
+              name: loc.name,
+              lat: null,
+              lng: null,
+              duration: loc.duration,
+              original_day: loc.day
+            });
+          }
+        }
+        
+        // Log what we're sending to the optimizer
+        console.log('📍 Enriched locations:', enrichedLocations);
+        const locationsWithCoords = enrichedLocations.filter(l => l.lat && l.lng);
+        console.log(`✅ ${locationsWithCoords.length}/${enrichedLocations.length} locations have GPS coordinates`);
+        
+        // Call optimization API
+        const res = await fetch("/optimize-route", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            locations: enrichedLocations,
+            start_index: 0,
+            has_jr_pass: false  // TODO: Add checkbox for user to specify
+          })
+        });
+        
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          console.error('Backend error:', errorData);
+          throw new Error(errorData.error || errorData.suggestion || `HTTP ${res.status}`);
+        }
+        
+        const optimized = await res.json();
+        optimizedRouteData = optimized;
+        renderOptimizedRoute(optimized);
+        
+      } catch (e) {
+        console.error('Optimization error:', e);
+        alert("Route optimization failed: " + (e?.message || e));
+      }
+    });
+
+    function renderOptimizedRoute(data) {
+      const panel = document.getElementById("route-panel");
+      if (!panel) return;
+      
+      panel.classList.remove("hidden");
+      
+      // Update stats
+      document.getElementById("time-saved").textContent = 
+        `${data.time_saved} (${data.time_saved_percentage}%)`;
+      document.getElementById("activity-time").textContent = 
+        `${data.total_activity_time} min`;
+      document.getElementById("travel-time").textContent = 
+        `${data.total_travel_time} min`;
+      document.getElementById("total-time").textContent = 
+        `${data.total_time} min`;
+      
+      // Update costs with new accurate calculation
+      const costEst = data.cost_estimate;
+      document.getElementById("cost-total").textContent = 
+        `¥${costEst.total_without_pass.toLocaleString()}`;
+      document.getElementById("cost-jr-pass").textContent = 
+        `¥${costEst.total_with_pass.toLocaleString()} (${costEst.pass_type})`;
+      
+      const jrTip = document.getElementById("jr-pass-tip");
+      if (costEst.is_worth_it) {
+        jrTip.innerHTML = `
+          <strong>${costEst.recommendation}</strong><br>
+          <span class="text-xs">
+            ${costEst.pass_type} JR Pass: ¥${costEst.pass_cost.toLocaleString()} | 
+            JR fares: ¥${costEst.jr_fares_only.toLocaleString()} (${costEst.value_percentage}% value) | 
+            Private lines: ¥${costEst.private_line_fares.toLocaleString()}
+          </span>
+        `;
+        jrTip.className = "mt-2 rounded bg-green-50 p-2 text-xs text-green-800";
+      } else {
+        jrTip.innerHTML = `
+          <strong>${costEst.recommendation}</strong><br>
+          <span class="text-xs">
+            Better to pay per ride. ${costEst.pass_type} JR Pass costs ¥${costEst.pass_cost.toLocaleString()}, 
+            but you'd only use ¥${costEst.jr_fares_only.toLocaleString()} in JR fares (${costEst.value_percentage}% value).
+          </span>
+        `;
+        jrTip.className = "mt-2 rounded bg-yellow-50 p-2 text-xs text-yellow-800";
+      }
+      
+      // Render step-by-step route
+      const stepsContainer = document.getElementById("route-steps");
+      stepsContainer.innerHTML = "";
+      
+      data.route_details.forEach((step, idx) => {
+        const stepDiv = document.createElement("div");
+        stepDiv.className = "flex items-start gap-3 rounded-lg bg-white p-3 shadow-sm";
+        
+        let html = `
+          <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-green-600 text-sm font-bold text-white">
+            ${step.step}
+          </div>
+          <div class="flex-1">
+            <div class="font-semibold">${step.location}</div>
+            <div class="text-sm text-slate-600">Spend ${step.time_at_location} minutes here</div>
+        `;
+        
+        if (step.travel_from_previous) {
+          const icon = step.transport_mode === 'walk' ? '🚶' : '🚃';
+          const distKm = step.distance_km || 0;
+          
+          // Warning if distance seems unrealistic (> 50km in a day trip)
+          const warningClass = distKm > 50 ? 'text-red-600 font-bold' : 'text-slate-500';
+          const warningIcon = distKm > 50 ? '⚠️ ' : '';
+          
+          html += `
+            <div class="mt-1 text-xs ${warningClass}">
+              ${warningIcon}${icon} ${step.travel_from_previous} min from previous (${distKm} km)
+            </div>
+          `;
+        }
+        
+        html += `</div>`;
+        stepDiv.innerHTML = html;
+        stepsContainer.appendChild(stepDiv);
+      });
+      
+      panel.scrollIntoView({behavior: "smooth", block: "start"});
+    }
+
+    // Apply optimized route to the plan
+    document.getElementById("apply-optimized-route")?.addEventListener("click", () => {
+      if (!optimizedRouteData) return;
+      
+      if (!confirm("This will reorder your activities to match the optimized route. Continue?")) {
+        return;
+      }
+      
+      // TODO: Implement applying the optimized order to the day boxes
+      // For now, show a message
+      alert(`Optimized route:\n${optimizedRouteData.optimal_route.join(' → ')}\n\nManually reorder your activities to match this sequence for best results!`);
+    });
   </script>
 
   <!-- Firebase Save/Load -->
   <script type="module">
-    import { auth, db } from "/static/js/firebase-init.js?v=3";
+    import { auth, db } from "/static/js/firebase-init.js?v=5";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
     import { doc, getDoc, updateDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
@@ -448,7 +871,6 @@
     const renderPlan = (days) => {
       const container = document.getElementById("days");
       container.innerHTML = "";
-      window.dayCounter = 0;
       (days || []).forEach(d => window.addDay?.(d));
       if (!days || !days.length) window.addDay?.();
     };
@@ -464,9 +886,123 @@
       }
       copyBtn.onclick = handler;
     };
+    
+    // Helper function to make authenticated requests
+    async function authenticatedFetch(url, options = {}) {
+      if (!currentUserId) {
+        throw new Error("Please sign in to use this feature");
+      }
+      
+      options.headers = {
+        ...options.headers,
+        "X-User-ID": currentUserId
+      };
+      
+      return fetch(url, options);
+    }
+    
+    // Toggle custom place form
+    window.toggleCustomPlaceForm = function() {
+      const form = document.getElementById("custom-place-form");
+      form.classList.toggle("hidden");
+    };
+    
+    // Save custom place
+    window.saveCustomPlace = async function() {
+      if (!currentUserId) {
+        alert("Please sign in to add custom places!");
+        window.location.href = "/auth.html";
+        return;
+      }
+      
+      const placeData = {
+        name: document.getElementById("custom-name").value.trim(),
+        lat: parseFloat(document.getElementById("custom-lat").value),
+        lng: parseFloat(document.getElementById("custom-lng").value),
+        city: document.getElementById("custom-city").value.trim(),
+        notes: document.getElementById("custom-notes").value.trim(),
+        category: "custom"
+      };
+      
+      if (!placeData.name) {
+        alert("Please enter a place name");
+        return;
+      }
+      if (isNaN(placeData.lat) || isNaN(placeData.lng)) {
+        alert("Please enter valid GPS coordinates");
+        return;
+      }
+      
+      try {
+        const response = await authenticatedFetch("/user/places", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(placeData)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          alert(`✅ "${placeData.name}" saved! Now you can use it in your itinerary.`);
+          document.getElementById("custom-name").value = "";
+          document.getElementById("custom-lat").value = "";
+          document.getElementById("custom-lng").value = "";
+          document.getElementById("custom-notes").value = "";
+          toggleCustomPlaceForm();
+          loadUserCustomPlaces();
+        } else {
+          alert(`❌ Error: ${result.error || "Failed to save place"}`);
+        }
+      } catch (error) {
+        console.error("Error saving custom place:", error);
+        alert(`❌ Error: ${error.message}`);
+      }
+    };
+    
+    // Load user's custom places
+    async function loadUserCustomPlaces() {
+      if (!currentUserId) return;
+      
+      try {
+        const response = await authenticatedFetch("/user/places");
+        const data = await response.json();
+        
+        const listContainer = document.getElementById("custom-places-list");
+        const itemsContainer = document.getElementById("custom-places-items");
+        
+        if (data.places && data.places.length > 0) {
+          listContainer.classList.remove("hidden");
+          itemsContainer.innerHTML = data.places.map(place => `
+            <div class="rounded-lg bg-white p-3 border border-purple-200">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-medium text-purple-900">${place.name}</div>
+                  <div class="text-xs text-slate-600">${place.city} • ${place.lat.toFixed(4)}, ${place.lng.toFixed(4)}</div>
+                  ${place.notes ? `<div class="text-xs text-slate-500 mt-1">${place.notes}</div>` : ''}
+                </div>
+                <span class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">Custom</span>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          listContainer.classList.add("hidden");
+        }
+      } catch (error) {
+        console.error("Error loading custom places:", error);
+      }
+    }
 
     onAuthStateChanged(auth, async (user) => {
       const readyUser = user || null;
+      
+      // Update currentUserId for custom places
+      currentUserId = readyUser ? readyUser.uid : null;
+      
+      // Load user's custom places if signed in
+      if (currentUserId) {
+        loadUserCustomPlaces();
+      }
+      
       saveBtn.disabled = !readyUser;
       if (!readyUser) return;
 

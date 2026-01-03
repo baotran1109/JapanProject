@@ -68,3 +68,11 @@ node_modules/
 # dataconnect generated files
 .dataconnect
 
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+.static/js/firebase-init.js

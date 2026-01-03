@@ -7,7 +7,7 @@
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Firebase init -->
-  <script type="module" src="/static/js/firebase-init.js?v=3"></script>
+  <script type="module" src="/static/js/firebase-init.js?v=4"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 selection:bg-blue-100 selection:text-blue-900">
 
@@ -15,11 +15,11 @@
   <nav class="sticky top-0 z-50 bg-[#222] text-white">
     <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
       <div class="flex flex-wrap items-center gap-3">
-        <a href="index.html" class="font-semibold tracking-wide">Home</a>
-        <a href="itineraries.html" class="hover:underline">Recommended Itineraries</a>
-        <a href="cities.html" class="hover:underline">Explore Cities</a>
-        <a href="tips.html" class="hover:underline">Travel Tips</a>
-        <a href="my_itineraries.html" class="hover:underline">My Itineraries</a>
+        <a href="/index.html" class="font-semibold tracking-wide">Home</a>
+        <a href="/itineraries.html" class="hover:underline">Recommended Itineraries</a>
+        <a href="/cities.html" class="hover:underline">Explore Cities</a>
+        <a href="/tips.html" class="hover:underline">Travel Tips</a>
+        <a href="/my_itineraries.html" class="hover:underline">My Itineraries</a>
       </div>
 
       <div id="auth-mini" class="text-sm">
@@ -34,7 +34,7 @@
 
     <!-- Auth state logic -->
     <script type="module">
-      import { auth } from "/static/js/firebase-init.js?v=3";
+      import { auth } from "/static/js/firebase-init.js?v=4";
       import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
       const nameEl = document.getElementById("auth-name");
       const linkEl = document.getElementById("auth-link");
@@ -58,7 +58,7 @@
 
   <!-- HERO -->
   <header class="relative">
-    <img src="static/Image/japan.jpg" alt=""
+    <img src="/static/Image/japan.jpg" alt=""
          class="absolute inset-0 -z-10 h-56 w-full object-cover object-center md:h-64" />
     <div class="absolute inset-0 -z-10 bg-black/35"></div>
     <div class="mx-auto flex h-56 max-w-6xl items-center px-4 md:h-64">
@@ -127,6 +127,10 @@
         <button id="ask-ai" class="rounded-lg border border-slate-300 bg-white px-4 py-2 font-semibold text-slate-800 hover:bg-slate-50">
           🤖 Ask AI to review
         </button>
+        
+        <button id="optimize-route-btn" class="rounded-lg bg-gradient-to-r from-green-600 to-teal-600 px-4 py-2 font-semibold text-white hover:from-green-700 hover:to-teal-700">
+          🚀 Optimize Route
+        </button>
         <span id="save-message" class="text-emerald-700 font-medium"></span>
         <button id="toggle-info" class="ml-auto rounded-lg bg-slate-900 px-4 py-2 font-medium text-white hover:bg-black lg:hidden">
           🗺️ View Recommendations
@@ -154,6 +158,37 @@
           <h4 class="font-semibold">💡 Suggestions</h4>
           <div id="ai-suggestions" class="mt-2 grid gap-3"></div>
         </div>
+      </aside>
+
+      <!-- Route Optimization Panel -->
+      <aside id="route-panel" class="mt-6 hidden rounded-2xl border-2 border-green-200 bg-gradient-to-br from-green-50 to-teal-50 p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-semibold text-green-900">🚀 Optimized Route</h3>
+          <div class="text-sm text-green-700">Time saved: <span id="time-saved" class="font-bold">—</span></div>
+        </div>
+        <div class="mt-4 grid gap-4 md:grid-cols-2">
+          <div class="rounded-lg bg-white p-4 shadow-sm">
+            <h4 class="font-semibold text-slate-700">⏱️ Time Breakdown</h4>
+            <div class="mt-2 space-y-1 text-sm">
+              <div class="flex justify-between"><span>Activities:</span> <span id="activity-time" class="font-medium">—</span></div>
+              <div class="flex justify-between"><span>Travel:</span> <span id="travel-time" class="font-medium">—</span></div>
+              <div class="flex justify-between border-t pt-1"><span class="font-semibold">Total:</span> <span id="total-time" class="font-bold">—</span></div>
+            </div>
+          </div>
+          <div class="rounded-lg bg-white p-4 shadow-sm">
+            <h4 class="font-semibold text-slate-700">💴 Cost Estimate</h4>
+            <div class="mt-2 space-y-1 text-sm">
+              <div class="flex justify-between"><span>Train fares:</span> <span id="cost-total" class="font-medium">—</span></div>
+              <div class="flex justify-between"><span>With JR Pass:</span> <span id="cost-jr-pass" class="font-medium text-green-600">—</span></div>
+              <div id="jr-pass-tip" class="mt-2 rounded bg-yellow-50 p-2 text-xs text-yellow-800"></div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4">
+          <h4 class="font-semibold text-slate-700">📍 Step-by-Step Route</h4>
+          <div id="route-steps" class="mt-2 space-y-2"></div>
+        </div>
+        <button id="apply-optimized-route" class="mt-4 w-full rounded-lg bg-green-600 px-4 py-2 font-medium text-white hover:bg-green-700">✅ Apply This Optimized Route</button>
       </aside>
     </section>
 
@@ -306,6 +341,9 @@
           <textarea id="${city}-notes-${n}" rows="3"
                     placeholder="e.g., Meiji Shrine, Fushimi Inari, Kuromon Market, yatai stalls…"
                     class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-blue-200"></textarea>
+          <label class="mt-3 block text-sm font-medium text-slate-700">⏱️ Duration for each (minutes, comma-separated)</label>
+          <input id="${city}-time-${n}" type="text" placeholder="e.g., 90, 120, 60 (default: 60 per activity)" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-4 focus:ring-blue-200" />
+          <p class="mt-1 text-xs text-slate-500">💡 Separate with commas to match your activities. Leave blank for default 60 min each.</p>
         </div>`;
     }
 
@@ -586,11 +624,75 @@
         alert("AI review failed: " + (e?.message || e));
       }
     });
+
+    // Route Optimization with DP
+    let optimizedRouteData = null;
+    document.getElementById("optimize-route-btn")?.addEventListener("click", async () => {
+      try {
+        const allLocations = [];
+        const cityMap = {tokyo: 'Tokyo', kyoto: 'Kyoto', osaka: 'Osaka', fukuoka: 'Fukuoka'};
+        for (const [cityKey, cityName] of Object.entries(cityMap)) {
+          const boxes = document.querySelectorAll(`#${cityKey}-days .day-box`);
+          boxes.forEach(box => {
+            const location = box.querySelector(`input[id^="${cityKey}-place-"]`)?.value.trim();
+            const activities = box.querySelector(`textarea[id^="${cityKey}-notes-"]`)?.value.trim();
+            const durationsInput = box.querySelector(`input[id^="${cityKey}-time-"]`)?.value.trim();
+            const durationValues = durationsInput ? durationsInput.split(',').map(d => parseInt(d.trim()) || 60) : [];
+            if (location) allLocations.push({name: location, duration: durationValues[0] || 60, city: cityName});
+            if (activities) {
+              const acts = activities.split(/[/,;\n]/).map(a => a.trim()).filter(a => a);
+              acts.forEach((act, actIndex) => {
+                const durationIndex = location ? actIndex + 1 : actIndex;
+                allLocations.push({name: act, duration: durationValues[durationIndex] || 60, city: cityName});
+              });
+            }
+          });
+        }
+        if (allLocations.length < 2) { alert("Add at least 2 locations!"); return; }
+        const enriched = [];
+        for (const loc of allLocations) {
+          try {
+            const searchUrl = `/search/combined?q=${encodeURIComponent(loc.name)}&limit=10`;
+            const searchRes = await fetch(searchUrl);
+            const searchData = await searchRes.json();
+            let allResults = [...(searchData.attractions || []), ...(searchData.restaurants || []), ...(searchData.shopping || [])].filter(r => r.city === loc.city);
+            if (allResults.length > 0) enriched.push({name: loc.name, lat: allResults[0].lat, lng: allResults[0].lng, duration: loc.duration});
+            else enriched.push({name: loc.name, lat: null, lng: null, duration: loc.duration});
+          } catch { enriched.push({name: loc.name, lat: null, lng: null, duration: loc.duration}); }
+        }
+        const res = await fetch("/optimize-route", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({locations: enriched, start_index: 0, has_jr_pass: false})});
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const optimized = await res.json();
+        optimizedRouteData = optimized;
+        const panel = document.getElementById("route-panel");
+        panel.classList.remove("hidden");
+        document.getElementById("time-saved").textContent = `${optimized.time_saved} min (${optimized.time_saved_percentage}%)`;
+        document.getElementById("activity-time").textContent = `${optimized.total_activity_time} min`;
+        document.getElementById("travel-time").textContent = `${optimized.total_travel_time} min`;
+        document.getElementById("total-time").textContent = `${optimized.total_time} min`;
+        document.getElementById("cost-total").textContent = `¥${optimized.cost_estimate.total_yen.toLocaleString()}`;
+        document.getElementById("cost-jr-pass").textContent = `¥${optimized.cost_estimate.with_jr_pass.toLocaleString()}`;
+        document.getElementById("jr-pass-tip").textContent = optimized.cost_estimate.jr_pass_recommended ? `💡 JR Pass recommended! Saves ¥${optimized.cost_estimate.jr_pass_savings.toLocaleString()}` : `ℹ️ JR Pass saves ¥${optimized.cost_estimate.jr_pass_savings.toLocaleString()}`;
+        const stepsContainer = document.getElementById("route-steps");
+        stepsContainer.innerHTML = "";
+        optimized.route_details.forEach(step => {
+          const div = document.createElement("div");
+          div.className = "flex gap-3 rounded-lg bg-white p-3 shadow-sm";
+          const icon = step.transport_mode === 'walk' ? '🚶' : '🚃';
+          const distKm = step.distance_km || 0;
+          const warning = distKm > 50 ? '⚠️ ' : '';
+          div.innerHTML = `<div class="flex h-8 w-8 items-center justify-center rounded-full bg-green-600 text-sm font-bold text-white">${step.step}</div><div class="flex-1"><div class="font-semibold">${step.location}</div><div class="text-sm text-slate-600">${step.time_at_location} min</div>${step.travel_from_previous ? `<div class="text-xs text-slate-500">${warning}${icon} ${step.travel_from_previous} min (${distKm} km)</div>` : ''}</div>`;
+          stepsContainer.appendChild(div);
+        });
+        panel.scrollIntoView({behavior: "smooth"});
+      } catch (e) { console.error(e); alert("Route optimization failed: " + (e?.message || e)); }
+    });
+    document.getElementById("apply-optimized-route")?.addEventListener("click", () => { if (!optimizedRouteData) return; alert(`Optimized route:\n${optimizedRouteData.optimal_route.join(' → ')}\n\nManually reorder to match!`); });
   </script>
 
   <!-- Firestore: save/edit -->
   <script type="module">
-    import { auth, db } from "/static/js/firebase-init.js?v=3";
+    import { auth, db } from "/static/js/firebase-init.js?v=4";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
     import { doc, getDoc, updateDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
@@ -712,6 +814,66 @@
         }
       };
     });
+  </script>
+
+  <!-- Load Recommendations from MongoDB -->
+  <script type="module">
+    async function fetchFromAPI(type, city) {
+      const url = `https://japan-travel-backend-587601512996.us-central1.run.app/${type}?city=${city}&limit=500`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`API error: ${res.status}`);
+      const json = await res.json();
+      return json.data || [];
+    }
+
+    function renderList(id, data) {
+      const ul = document.getElementById(id);
+      if (!ul) return;
+      ul.innerHTML = '';
+      (data || []).forEach(item => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = item.google_map_url || item.google_maps_url || "#";
+        a.textContent = item.name || "(Unnamed)";
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.className = "text-blue-700 hover:underline";
+        li.appendChild(a);
+        ul.appendChild(li);
+      });
+    }
+
+    (async () => {
+      try {
+        // Tokyo, Kyoto, Osaka, Fukuoka
+        const [[tA, tSh, tR, tDT], [kA, kSh, kR], [oA, oSh, oR, oDT], [fA, fSh, fR]] = await Promise.all([
+          Promise.all([fetchFromAPI('attractions', 'Tokyo'), fetchFromAPI('shopping', 'Tokyo'), fetchFromAPI('restaurants', 'Tokyo'), fetchFromAPI('daytrips', 'Tokyo')]),
+          Promise.all([fetchFromAPI('attractions', 'Kyoto'), fetchFromAPI('shopping', 'Kyoto'), fetchFromAPI('restaurants', 'Kyoto')]),
+          Promise.all([fetchFromAPI('attractions', 'Osaka'), fetchFromAPI('shopping', 'Osaka'), fetchFromAPI('restaurants', 'Osaka'), fetchFromAPI('daytrips', 'Osaka')]),
+          Promise.all([fetchFromAPI('attractions', 'Fukuoka'), fetchFromAPI('shopping', 'Fukuoka'), fetchFromAPI('restaurants', 'Fukuoka')])
+        ]);
+
+        // Tokyo
+        renderList('tokyo-attractions', tA); renderList('tokyo-shopping', tSh);
+        const tRByArea = tR.reduce((acc, i) => { const a = (i.area || '').toLowerCase(); if (!acc[a]) acc[a] = []; acc[a].push(i); return acc; }, {});
+        ['akihabara', 'asakusa', 'ginza', 'ikebukuro', 'meguro', 'roppongi', 'shibuya', 'shinjuku'].forEach(a => renderList(a + '-list', tRByArea[a] || []));
+        renderList('other-area-list', tRByArea['tokyo'] || []);
+        const tDTByA = tDT.reduce((acc, i) => { const a = i.area || ''; if (!acc[a]) acc[a] = []; acc[a].push(i); return acc; }, {});
+        ['Yokohama', 'Nikko', 'Kamakura', 'Kawagoe', 'Hakone', 'Fujimount'].forEach(a => renderList(a + '-list', tDTByA[a] || []));
+
+        // Kyoto
+        renderList('kyoto-attractions', kA); renderList('kyoto-shopping', kSh); renderList('kyoto-restaurants', kR);
+
+        // Osaka
+        renderList('osaka-attractions', oA); renderList('osaka-shopping', oSh); renderList('osaka-restaurants', oR);
+        renderList('nara-list', oDT.filter(d => (d.area || '').toLowerCase().includes('nara')));
+
+        // Fukuoka
+        renderList('fukuoka-attractions', fA); renderList('fukuoka-shopping', fSh); renderList('fukuoka-restaurants', fR);
+
+        console.log('✅ All Tokyo+Kansai+Fukuoka recommendations loaded!');
+      } catch (err) { console.error('❌ Error:', err); }
+    })();
   </script>
 </body>
 </html>

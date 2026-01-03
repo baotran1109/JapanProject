@@ -9,9 +9,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Firebase init (auth mini like other pages) -->
-    <script type="module" src="/static/js/firebase-init.js?v=3"></script>
+    <script type="module" src="/static/js/firebase-init.js?v=4"></script>
 
-    <link rel="icon" href="static/Image/r-冬の函館山夜景.jpg" />
+    <link rel="icon" href="/static/Image/r-冬の函館山夜景.jpg" />
   </head>
   <body class="bg-slate-50 text-slate-800">
 
@@ -19,11 +19,11 @@
     <nav class="sticky top-0 z-50 bg-[#222] text-white">
       <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         <div class="flex flex-wrap items-center gap-3">
-          <a href="index.html" class="font-semibold tracking-wide">Home</a>
-          <a href="itineraries.html" class="hover:underline">Recommended Itineraries</a>
-          <a href="cities.html" class="hover:underline">Explore Cities</a>
-          <a href="tips.html" class="hover:underline">Travel Tips</a>
-          <a href="my_itineraries.html" class="hover:underline">My Itineraries</a>
+          <a href="/index.html" class="font-semibold tracking-wide">Home</a>
+          <a href="/itineraries.html" class="hover:underline">Recommended Itineraries</a>
+          <a href="/cities.html" class="hover:underline">Explore Cities</a>
+          <a href="/tips.html" class="hover:underline">Travel Tips</a>
+          <a href="/my_itineraries.html" class="hover:underline">My Itineraries</a>
         </div>
         <div id="auth-mini" class="text-sm">
           <span id="auth-name" class="font-medium">Not signed in</span>
@@ -33,7 +33,7 @@
         </div>
       </div>
       <script type="module">
-        import { auth } from "/static/js/firebase-init.js?v=3";
+        import { auth } from "/static/js/firebase-init.js?v=4";
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         const nameEl = document.getElementById('auth-name');
         const linkEl = document.getElementById('auth-link');
@@ -59,7 +59,7 @@
     <section class="mx-auto max-w-6xl px-4 pt-6">
       <div class="overflow-hidden rounded-3xl shadow-lg">
         <img
-          src="static/Image/r-冬の函館山夜景.jpg"
+          src="/static/Image/r-冬の函館山夜景.jpg"
           alt="Hakodate night view from Mt. Hakodate"
           class="h-[44vh] w-full object-cover md:h-[56vh]"
           loading="eager"
@@ -70,10 +70,7 @@
       <div class="mx-auto max-w-3xl py-8">
         <h1 class="text-4xl font-extrabold tracking-tight md:text-5xl">Hakodate</h1>
         <p class="mt-3 text-lg leading-relaxed text-slate-600">
-          Hakodate is a historic port city at the southern tip of Hokkaidō. Think sweeping night views from
-          Mount Hakodate, ultra-fresh seafood at the Morning Market, and a mix of Japanese and Western
-          architecture from its early open-port days. Explore star-shaped <strong>Goryōkaku</strong>,
-          stroll <strong>Motomachi</strong>, and enjoy the relaxed coastal vibe.
+          Hakodate is a historic port city at the southern tip of Hokkaidō, known for its stunning panoramic views from Mount Hakodate, incredibly fresh seafood at the Morning Market, and its charming blend of Japanese and Western architecture from its early open-port days in the 19th century. Explore the star-shaped Goryōkaku Fort, wander through the scenic Motomachi district with its old Western-style churches, and soak in the relaxed coastal atmosphere that makes Hakodate one of Japan’s most underrated gems.
         </p>
 
         <!-- Quick section buttons -->
@@ -95,7 +92,7 @@
 
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <figure class="overflow-hidden rounded-xl border bg-white shadow-sm">
-            <img src="static/Image/210419K01-1024x683.jpg" alt="Goryōkaku Fort" class="h-48 w-full object-cover" loading="lazy" />
+            <img src="/static/Image/210419K01-1024x683.jpg" alt="Goryōkaku Fort" class="h-48 w-full object-cover" loading="lazy" />
             <figcaption class="p-3 text-sm text-slate-700">Goryōkaku Fort</figcaption>
           </figure>
           <figure class="overflow-hidden rounded-xl border bg-white shadow-sm">
@@ -103,7 +100,7 @@
             <figcaption class="p-3 text-sm text-slate-700">Mount Hakodate Night View</figcaption>
           </figure>
           <figure class="overflow-hidden rounded-xl border bg-white shadow-sm">
-            <img src="static/Image/slope_sec-2-2.jpg" alt="Motomachi slopes" class="h-48 w-full object-cover" loading="lazy" />
+            <img src="/static/Image/slope_sec-2-2.jpg" alt="Motomachi slopes" class="h-48 w-full object-cover" loading="lazy" />
             <figcaption class="p-3 text-sm text-slate-700">Motomachi Slopes & Churches</figcaption>
           </figure>
         </div>
@@ -125,7 +122,7 @@
 
         <div class="overflow-hidden rounded-2xl border bg-white shadow-sm">
           <img
-            src="static/Image/onuma1 (1).jpg"
+            src="/static/Image/onuma1 (1).jpg"
             alt="Ōnuma Park"
             class="h-64 w-full object-cover md:h-72"
             loading="lazy"
@@ -148,9 +145,9 @@
         </header>
 
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <img src="static/Image/Live-squid-Gyosanko-Hakodate.jpg" alt="Live squid" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-          <img src="static/Image/caption (1).jpg" alt="Seafood rice bowl" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-          <img src="static/Image/64993655.jpg" alt="Crab and seafood" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+          <img src="/static/Image/Live-squid-Gyosanko-Hakodate.jpg" alt="Live squid" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+          <img src="/static/Image/caption (1).jpg" alt="Seafood rice bowl" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+          <img src="/static/Image/64993655.jpg" alt="Crab and seafood" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
         </div>
 
         <details class="group mt-6 rounded-xl border bg-white p-4">
@@ -169,7 +166,7 @@
           <h3 class="text-xl font-semibold text-slate-900">Planning Hokkaidō (Hakodate + Sapporo)?</h3>
           <p class="mt-1 text-sm text-slate-600">Use the combined planner to add days, drop in places, and save to your account.</p>
         </div>
-        <a href="plan_tokyo_hokkaido.html" class="mt-4 inline-flex rounded-lg bg-blue-600 px-5 py-2.5 font-medium text-white shadow hover:bg-blue-700 sm:mt-0">
+        <a href="/plan_tokyo_hokkaido.html" class="mt-4 inline-flex rounded-lg bg-blue-600 px-5 py-2.5 font-medium text-white shadow hover:bg-blue-700 sm:mt-0">
           Plan this route
         </a>
       </div>
@@ -181,53 +178,71 @@
       </div>
     </footer>
 
-    <!-- Simple one-function loader (matches your other pages) -->
-    <script>
-      function fetchData(id, file) {
+    <!-- MongoDB API Script -->
+    <script type="module">
+      async function fetchFromAPI(type) {
+        const url = `https://japan-travel-backend-587601512996.us-central1.run.app/${type}?city=Hakodate&limit=300`;
+        
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`API error: ${res.status}`);
+        const json = await res.json();
+        return json.data || [];
+      }
+
+      function renderList(id, data) {
         const ul = document.getElementById(id);
         if (!ul) return;
 
-        fetch('/data/Hakodate/' + file)
-          .then((res) => {
-            if (!res.ok) throw new Error(file + ' missing');
-            return res.json();
-          })
-          .then((data) => {
-            ul.innerHTML = '';
-            data.forEach((item) => {
-              const li = document.createElement('li');
-              const a  = document.createElement('a');
+        ul.innerHTML = '';
+        if (!data || data.length === 0) {
+          ul.innerHTML = '<li class="text-slate-500">No items found.</li>';
+          return;
+        }
 
-              a.href = item.google_map_url || item.google_maps_url || '#';
-              a.target = '_blank';
-              a.rel = 'noopener';
-              a.textContent = item.name || 'Untitled';
-              a.style.color = '#007BFF';
-              a.style.textDecoration = 'none';
+        data.forEach((item) => {
+          const li = document.createElement('li');
+          const a = document.createElement('a');
 
-              li.appendChild(a);
+          a.href = item.google_map_url || item.google_maps_url || '#';
+          a.target = '_blank';
+          a.rel = 'noopener';
+          a.textContent = item.name || 'Untitled';
+          a.className = 'text-blue-600 hover:underline';
 
-              const extra = item.category ? ' (' + item.category + ')' :
-                            item.type ? ' - ' + item.type : '';
-              if (extra) {
-                const span = document.createElement('span');
-                span.textContent = extra;
-                li.appendChild(span);
-              }
+          li.appendChild(a);
 
-              ul.appendChild(li);
-            });
-          })
-          .catch((err) => {
-            console.warn(err.message);
-            ul.innerHTML = '<li>Could not load: ' + file + '</li>';
-          });
+          const extra = item.category ? ' (' + item.category + ')' :
+                        item.type ? ' - ' + item.type : '';
+          if (extra) {
+            const span = document.createElement('span');
+            span.textContent = extra;
+            span.className = 'text-slate-600 text-sm ml-1';
+            li.appendChild(span);
+          }
+
+          ul.appendChild(li);
+        });
       }
 
-      // Load lists (keep your filenames)
-      fetchData('attractions-list', 'Hakodate_Attractions.json');
-      fetchData('daytrip-list', 'Onuma National Park Half Day Trip.json');
-      fetchData('restaurants-list', 'Hakodate_Restaurants.json');
+      // Load all data
+      (async () => {
+        try {
+          const [attractions, daytrips, restaurants] = await Promise.all([
+            fetchFromAPI('attractions'),
+            fetchFromAPI('daytrips'),
+            fetchFromAPI('restaurants')
+          ]);
+
+          renderList('attractions-list', attractions);
+          renderList('daytrip-list', daytrips);
+          renderList('restaurants-list', restaurants);
+
+          console.log('✅ Hakodate data loaded from MongoDB!');
+        } catch (err) {
+          console.error('❌ Error:', err);
+          console.log('💡 Start MongoDB API: python Back_end/app_mongodb.py');
+        }
+      })();
     </script>
   </body>
 </html>

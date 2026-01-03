@@ -1,0 +1,81 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      ".env",
+      "Back_end/**"
+    ],
+    "cleanUrls": true,
+    "trailingSlash": false,
+
+    "rewrites": [
+      // API endpoints - route to Cloud Run backend
+      { "source": "/ai/**", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
+      { "source": "/api/**", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
+      { "source": "/attractions", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
+      { "source": "/restaurants", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
+      { "source": "/shopping", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
+      { "source": "/daytrips", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
+      { "source": "/search", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
+      { "source": "/search/**", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
+      { "source": "/optimize-route", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
+      { "source": "/user/**", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
+      { "source": "/cities", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
+      { "source": "/stats", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
+      { "source": "/areas/**", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
+      { "source": "/data/**", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
+      { "source": "/healthz", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
+
+      { "source": "/", "destination": "/Front_end/index.html" },
+      { "source": "/index", "destination": "/Front_end/index.html" },
+      { "source": "/index.html", "destination": "/Front_end/index.html" },
+      { "source": "/cities", "destination": "/Front_end/cities.html" },
+      { "source": "/cities.html", "destination": "/Front_end/cities.html" },
+      { "source": "/itineraries", "destination": "/Front_end/itineraries.html" },
+      { "source": "/itineraries.html", "destination": "/Front_end/itineraries.html" },
+      { "source": "/tips", "destination": "/Front_end/tips.html" },
+      { "source": "/tips.html", "destination": "/Front_end/tips.html" },
+      { "source": "/auth", "destination": "/Front_end/auth.html" },
+      { "source": "/auth.html", "destination": "/Front_end/auth.html" },
+      { "source": "/my_itineraries", "destination": "/Front_end/my_itineraries.html" },
+      { "source": "/my_itineraries.html", "destination": "/Front_end/my_itineraries.html" },
+      { "source": "/tokyo", "destination": "/Front_end/tokyo.html" },
+      { "source": "/tokyo.html", "destination": "/Front_end/tokyo.html" },
+      { "source": "/osaka", "destination": "/Front_end/osaka.html" },
+      { "source": "/osaka.html", "destination": "/Front_end/osaka.html" },
+      { "source": "/kyoto", "destination": "/Front_end/kyoto.html" },
+      { "source": "/kyoto.html", "destination": "/Front_end/kyoto.html" },
+      { "source": "/aomori", "destination": "/Front_end/aomori.html" },
+      { "source": "/aomori.html", "destination": "/Front_end/aomori.html" },
+      { "source": "/hakodate", "destination": "/Front_end/hakodate.html" },
+      { "source": "/hakodate.html", "destination": "/Front_end/hakodate.html" },
+      { "source": "/sapporo", "destination": "/Front_end/sapporo.html" },
+      { "source": "/sapporo.html", "destination": "/Front_end/sapporo.html" },
+      { "source": "/fukuoka", "destination": "/Front_end/fukuoka.html" },
+      { "source": "/fukuoka.html", "destination": "/Front_end/fukuoka.html" },
+      { "source": "/okinawa", "destination": "/Front_end/okinawa.html" },
+      { "source": "/okinawa.html", "destination": "/Front_end/okinawa.html" },
+      { "source": "/plan_tokyo_aomori_hokkaido.html", "destination": "/Front_end/plan_tokyo_aomori_hokkaido.html" },
+      { "source": "/plan_tokyo", "destination": "/Front_end/plan_tokyo.html" },
+      { "source": "/plan_tokyo.html", "destination": "/Front_end/plan_tokyo.html" },
+      { "source": "/plan_tokyo_hokkaido.html", "destination": "/Front_end/plan_tokyo_hokkaido.html" },
+      { "source": "/plan_tokyo_kansai_fukuoka.html", "destination": "/Front_end/plan_tokyo_kansai_fukuoka.html" },
+      { "source": "/plan_tokyo_kansai.html", "destination": "/Front_end/plan_tokyo_kansai.html" },
+      { "source": "/plan_tokyo_okinawa.html", "destination": "/Front_end/plan_tokyo_okinawa.html" }
+    ],
+
+    "headers": [
+      {
+        "source": "/static/**",
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      },
+      {
+        "source": "/data/**",
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=600" }]
+      }
+    ]
+  }
+}

@@ -9,9 +9,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- Firebase init (auth mini) -->
-  <script type="module" src="/static/js/firebase-init.js?v=3"></script>
+  <script type="module" src="/static/js/firebase-init.js?v=4"></script>
 
-  <link rel="icon" href="static/Image/fukuoka-skyline-iStock-845231208-1024x600.jpg" />
+  <link rel="icon" href="/static/Image/fukuoka-skyline-iStock-845231208-1024x600.jpg" />
 </head>
 <body class="bg-neutral-50 text-neutral-800 antialiased">
 
@@ -19,11 +19,11 @@
   <nav class="sticky top-0 z-50 bg-[#222] text-white">
     <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
       <div class="flex flex-wrap items-center gap-3">
-        <a href="index.html" class="font-semibold tracking-wide">Home</a>
-        <a href="itineraries.html" class="hover:underline">Recommended Itineraries</a>
-        <a href="cities.html" class="hover:underline">Explore Cities</a>
-        <a href="tips.html" class="hover:underline">Travel Tips</a>
-        <a href="my_itineraries.html" class="hover:underline">My Itineraries</a>
+        <a href="/index.html" class="font-semibold tracking-wide">Home</a>
+        <a href="/itineraries.html" class="hover:underline">Recommended Itineraries</a>
+        <a href="/cities.html" class="hover:underline">Explore Cities</a>
+        <a href="/tips.html" class="hover:underline">Travel Tips</a>
+        <a href="/my_itineraries.html" class="hover:underline">My Itineraries</a>
       </div>
       <div id="auth-mini" class="text-sm">
         <span id="auth-name" class="font-medium">Not signed in</span>
@@ -33,7 +33,7 @@
       </div>
     </div>
     <script type="module">
-      import { auth } from "/static/js/firebase-init.js?v=3";
+      import { auth } from "/static/js/firebase-init.js?v=4";
       import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
       const nameEl = document.getElementById('auth-name');
       const linkEl = document.getElementById('auth-link');
@@ -59,7 +59,7 @@
   <section id="top" class="mx-auto max-w-6xl px-4 pt-6">
     <div class="overflow-hidden rounded-3xl shadow-lg">
       <img
-        src="static/Image/fukuoka-skyline-iStock-845231208-1024x600.jpg"
+        src="/static/Image/fukuoka-skyline-iStock-845231208-1024x600.jpg"
         alt="Fukuoka skyline at dusk"
         class="h-[44vh] w-full object-cover md:h-[56vh]"
         loading="eager"
@@ -69,9 +69,7 @@
     <div class="mx-auto max-w-3xl py-8">
       <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 md:text-5xl">Fukuoka</h1>
       <p class="mt-3 text-lg leading-relaxed text-slate-600">
-        Fukuoka blends chill coastal vibes with a lively food scene. Slurp rich <strong>Hakata ramen</strong>
-        at yatai stalls, stroll <strong>Ohori Park</strong>, browse <strong>Canal City</strong>, and hop to nearby
-        beaches and shrines with ease.
+        Fukuoka, the largest city on Kyushu Island, is a perfect mix of chill vibes and city energy. It's known for its buzzing yatai (street food stalls), rich history as a cultural gateway to Asia, and easy access via bullet train or its super convenient airport. From shopping at Canal City to slurping down rich Hakata ramen, there’s something for everyone here. The city also offers relaxing waterfront parks, scenic shrines, and a friendly atmosphere that makes it easy to explore and enjoy.
       </p>
 
       <!-- CTA chips -->
@@ -95,15 +93,15 @@
 
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
-          <img src="static/Image/Canal-City_Fukuoka_Shutterstock_1280w.jpg" alt="Canal City Hakata" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <img src="/static/Image/Canal-City_Fukuoka_Shutterstock_1280w.jpg" alt="Canal City Hakata" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
           <figcaption class="p-3 text-sm text-neutral-700">Canal City Hakata</figcaption>
         </figure>
         <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
-          <img src="static/Image/japan-2019-trip-day-19-09.webp" alt="Kushida Shrine / Hakata" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <img src="/static/Image/japan-2019-trip-day-19-09.webp" alt="Kushida Shrine / Hakata" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
           <figcaption class="p-3 text-sm text-neutral-700">Kushida Shrine</figcaption>
         </figure>
         <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
-          <img src="static/Image/momochibeach3.jpg" alt="Momochi Seaside Park" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <img src="/static/Image/momochibeach3.jpg" alt="Momochi Seaside Park" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
           <figcaption class="p-3 text-sm text-neutral-700">Momochi Seaside Park</figcaption>
         </figure>
       </div>
@@ -127,15 +125,15 @@
 
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
-          <img src="static/Image/BIOTOP_f_01b.jpg" alt="BIOTOP Fukuoka" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <img src="/static/Image/BIOTOP_f_01b.jpg" alt="BIOTOP Fukuoka" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
           <figcaption class="p-3 text-sm text-neutral-700">BIOTOP Fukuoka</figcaption>
         </figure>
         <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
-          <img src="static/Image/re_14.jpg" alt="Daimyo area" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <img src="/static/Image/re_14.jpg" alt="Daimyo area" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
           <figcaption class="p-3 text-sm text-neutral-700">Daimyo / Tenjin</figcaption>
         </figure>
         <figure class="group overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
-          <img src="static/Image/b0398dc1-414b-4f1b-b1a5-213098b23338.jpg" alt="Canal City Shops" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <img src="/static/Image/b0398dc1-414b-4f1b-b1a5-213098b23338.jpg" alt="Canal City Shops" class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
           <figcaption class="p-3 text-sm text-neutral-700">Canal City Shops</figcaption>
         </figure>
       </div>
@@ -156,9 +154,9 @@
       </header>
 
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <img src="static/Image/5b90bbd8.jpg" alt="Yatai stalls" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-        <img src="static/Image/640x640_rect_c5fdd814ed487c453b7c83046c47ce46.jpg" alt="Hakata Ramen" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
-        <img src="static/Image/DSC01237-2.jpg" alt="Motsunabe" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+        <img src="/static/Image/5b90bbd8.jpg" alt="Yatai stalls" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+        <img src="/static/Image/640x640_rect_c5fdd814ed487c453b7c83046c47ce46.jpg" alt="Hakata Ramen" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
+        <img src="/static/Image/DSC01237-2.jpg" alt="Motsunabe" class="h-48 w-full rounded-xl object-cover" loading="lazy" />
       </div>
 
       <details class="group mt-6 rounded-xl border bg-white p-4 open:shadow-sm">
@@ -182,52 +180,70 @@
   document.getElementById('lastUpdated').textContent =
     new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 
-  function fetchData(id, file) {
+  // MongoDB API Configuration
+  async function fetchFromAPI(type) {
+    const url = `https://japan-travel-backend-587601512996.us-central1.run.app/${type}?city=Fukuoka&limit=300`;
+    
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    const json = await res.json();
+    return json.data || [];
+  }
+
+  function renderList(id, data) {
     const ul = document.getElementById(id);
     if (!ul) return;
 
-    fetch('/data/Fukuoka/' + file)
-      .then((res) => {
-        if (!res.ok) throw new Error(file + ' missing');
-        return res.json();
-      })
-      .then((data) => {
-        ul.innerHTML = '';
-        data.forEach((item) => {
-          const li = document.createElement('li');
-          const a  = document.createElement('a');
+    ul.innerHTML = '';
+    if (!data || data.length === 0) {
+      ul.innerHTML = '<li class="text-slate-500">No items found.</li>';
+      return;
+    }
 
-          a.href = item.google_map_url || item.google_maps_url || '#';
-          a.target = '_blank';
-          a.rel = 'noopener';
-          a.textContent = item.name || 'Untitled';
-          a.style.color = '#007BFF';
-          a.style.textDecoration = 'none';
+    data.forEach((item) => {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
 
-          li.appendChild(a);
+      a.href = item.google_map_url || item.google_maps_url || '#';
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.textContent = item.name || 'Untitled';
+      a.className = 'text-blue-600 hover:underline';
 
-          const extra =
-            item.category ? ' (' + item.category + ')' :
-            (item.type ? ' - ' + item.type : '');
-          if (extra) {
-            const span = document.createElement('span');
-            span.textContent = extra;
-            li.appendChild(span);
-          }
+      li.appendChild(a);
 
-          ul.appendChild(li);
-        });
-      })
-      .catch((err) => {
-        console.warn(err.message || err);
-        ul.innerHTML = '<li>Could not load: ' + file + '</li>';
-      });
+      const extra = item.category ? ' (' + item.category + ')' :
+                    item.type ? ' - ' + item.type : '';
+      if (extra) {
+        const span = document.createElement('span');
+        span.textContent = extra;
+        span.className = 'text-slate-600 text-sm ml-1';
+        li.appendChild(span);
+      }
+
+      ul.appendChild(li);
+    });
   }
 
-  // Load lists
-  fetchData('attractions-list', 'Fukuoka_Attractions.json');
-  fetchData('shopping-list', 'Fukuoka_Shopping.json');
-  fetchData('restaurants-list', 'Fukuoka_Restaurants.json');
+  // Load all data
+  (async () => {
+    try {
+      const [attractions, shopping, restaurants] = await Promise.all([
+        fetchFromAPI('attractions'),
+        fetchFromAPI('shopping'),
+        fetchFromAPI('restaurants')
+      ]);
+
+      renderList('attractions-list', attractions);
+      renderList('shopping-list', shopping);
+      renderList('restaurants-list', restaurants);
+
+      console.log('✅ Fukuoka data loaded from MongoDB!');
+    } catch (err) {
+      console.error('❌ Error:', err);
+      console.log('💡 Start MongoDB API: python Back_end/app_mongodb.py');
+    }
+  })();
 </script>
 </body>
 </html>

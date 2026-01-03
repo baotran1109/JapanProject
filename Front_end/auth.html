@@ -9,18 +9,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Firebase init -->
-    <script type="module" src="/static/js/firebase-init.js?v=3"></script>
+    <script type="module" src="/static/js/firebase-init.js?v=4"></script>
   </head>
   <body class="bg-slate-50 text-slate-900 antialiased">
     <!-- NAV (same chrome as the rest of the site) -->
     <nav class="sticky top-0 z-50 bg-[#222] text-white">
       <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         <div class="flex flex-wrap items-center gap-3">
-          <a href="index.html" class="font-semibold tracking-wide">Home</a>
-          <a href="itineraries.html" class="hover:underline">Recommended Itineraries</a>
-          <a href="cities.html" class="hover:underline">Explore Cities</a>
-          <a href="tips.html" class="hover:underline">Travel Tips</a>
-          <a href="my_itineraries.html" class="hover:underline">My Itineraries</a>
+          <a href="/index.html" class="font-semibold tracking-wide">Home</a>
+          <a href="/itineraries.html" class="hover:underline">Recommended Itineraries</a>
+          <a href="/cities.html" class="hover:underline">Explore Cities</a>
+          <a href="/tips.html" class="hover:underline">Travel Tips</a>
+          <a href="/my_itineraries.html" class="hover:underline">My Itineraries</a>
         </div>
         <div id="auth-mini" class="text-sm">
           <span id="auth-name" class="font-medium">Not signed in</span>
@@ -30,7 +30,7 @@
         </div>
       </div>
       <script type="module">
-        import { auth } from "/static/js/firebase-init.js?v=3";
+        import { auth } from "/static/js/firebase-init.js?v=4";
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         const nameEl = document.getElementById("auth-name");
         const linkEl = document.getElementById("auth-link");
@@ -107,7 +107,7 @@
     </main>
 
     <script type="module">
-      import { auth, db } from "/static/js/firebase-init.js?v=3";
+      import { auth, db } from "/static/js/firebase-init.js?v=4";
       import {
         onAuthStateChanged,
         createUserWithEmailAndPassword,
