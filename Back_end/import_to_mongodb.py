@@ -17,7 +17,7 @@ from pymongo import MongoClient
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Fix Windows console encoding for emoji output
+# Fix Windows console encoding
 if sys.platform == 'win32':
     sys.stdout.reconfigure(encoding='utf-8')
 
@@ -212,7 +212,7 @@ def import_all_data(data_directory, clear_first=True):
         if city_name.lower() == 'kml data':
             continue
         
-        print(f"\n📍 Processing {city_name}...")
+        print(f"\nProcessing {city_name}...")
         
         # Process all JSON files in this city
         json_files = list(city_dir.glob("*.json"))
@@ -242,19 +242,19 @@ def import_all_data(data_directory, clear_first=True):
     print("="*60)
     
     # Show collection stats
-    print("\n📦 Collection Statistics:")
-    print(f"  • attractions: {attractions_col.count_documents({})} documents")
-    print(f"  • restaurants: {restaurants_col.count_documents({})} documents")
-    print(f"  • shopping: {shopping_col.count_documents({})} documents")
-    print(f"  • daytrips: {daytrips_col.count_documents({})} documents")
+    print("\nCollection Statistics:")
+    print(f"  • attractions: {attractions_collection.count_documents({})} documents")
+    print(f"  • restaurants: {restaurants_collection.count_documents({})} documents")
+    print(f"  • shopping: {shopping_collection.count_documents({})} documents")
+    print(f"  • daytrips: {daytrips_collection.count_documents({})} documents")
     
     # Show sample document from each collection
-    print("\n📝 Sample Documents:")
+    print("\nSample Documents:")
     for name, collection in [
-        ('attractions', attractions_col),
-        ('restaurants', restaurants_col),
-        ('shopping', shopping_col),
-        ('daytrips', daytrips_col)
+        ('attractions', attractions_collection),
+        ('restaurants', restaurants_collection),
+        ('shopping', shopping_collection),
+        ('daytrips', daytrips_collection)
     ]:
         sample = collection.find_one()
         if sample:
@@ -293,5 +293,5 @@ if __name__ == "__main__":
     import_all_data(data_dir, clear_first=True)
     
     print("\nImport completed successfully!")
-    client.close()
+    mongodb_client.close()
 
