@@ -23,7 +23,6 @@
       { "source": "/search/**", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
       { "source": "/optimize-route", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
       { "source": "/user/**", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
-      { "source": "/cities", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
       { "source": "/stats", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
       { "source": "/areas/**", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
       { "source": "/data/**", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
@@ -64,7 +63,8 @@
       { "source": "/plan_tokyo_hokkaido.html", "destination": "/Front_end/plan_tokyo_hokkaido.html" },
       { "source": "/plan_tokyo_kansai_fukuoka.html", "destination": "/Front_end/plan_tokyo_kansai_fukuoka.html" },
       { "source": "/plan_tokyo_kansai.html", "destination": "/Front_end/plan_tokyo_kansai.html" },
-      { "source": "/plan_tokyo_okinawa.html", "destination": "/Front_end/plan_tokyo_okinawa.html" }
+      { "source": "/plan_tokyo_okinawa.html", "destination": "/Front_end/plan_tokyo_okinawa.html" },
+      { "source": "/plan_tokyo_fukuoka_okinawa.html", "destination": "/Front_end/plan_tokyo_fukuoka_okinawa.html" }
     ],
 
     "headers": [

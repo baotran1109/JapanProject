@@ -11,6 +11,7 @@
 # Imports the neccessary libraries
 import os
 import json
+import re
 import logging
 from math import radians, sin, cos, asin, sqrt
 from typing import Dict, List, Any, Tuple, Set, Optional
@@ -30,6 +31,11 @@ try:
 except ImportError:
     MONGODB_AVAILABLE = False
     logging.warning("pymongo not installed - MongoDB features disabled")
+
+# Firebase Admin - verifies the ID tokens the frontend sends for logged-in users
+import firebase_admin
+from firebase_admin import auth as firebase_auth, credentials as firebase_credentials
+from google.auth.credentials import AnonymousCredentials
 
 
 # =============================================================================
@@ -78,8 +84,8 @@ CITY_DIRS = {
         "Aomori/Aomori_attractions.json",
         "Aomori/Aomori_restaurants.json",
         "Aomori/Aomori_shopping.json",
-        "Aomori/Hachinohe_Day_Trip(Restaurants).json",
-        "Aomori/Hachinohe_Day_(Attractions).json",
+        "Aomori/Hachinohe_Day_Trip (Restaurants).json",
+        "Aomori/Hachinohe_Day_Trip_(Attractions).json",
         "Aomori/Hirosaki Day Trip (Attractions + Shopping).json",
         "Aomori/Hirosaki_Day_Trip (Restaurants).json",
     ],
@@ -98,7 +104,7 @@ CITY_DIRS = {
     "osaka": [
         "Osaka/Kobe_Attractions.json",
         "Osaka/Kobe_restaurants.json",
-        "Osaka/Kobe_shopping.json",
+        "Osaka/Kobe_Shopping.json",
         "Osaka/Nara_day_trip.json",
         "Osaka/Osaka_Attractions.json",
         "Osaka/Osaka_Shopping.json",
@@ -145,6 +151,18 @@ if MONGODB_AVAILABLE:
     except Exception as e:
         logging.warning(f"MongoDB connection failed: {e}")
         MONGODB_AVAILABLE = False
+
+# Initialize Firebase Admin. Verifying ID tokens only needs the project ID and
+# Google's public keys, so no service account is required (works locally too)
+class _NoCredential(firebase_credentials.Base):
+    def get_credential(self):
+        return AnonymousCredentials()
+
+FIREBASE_PROJECT_ID = os.getenv("FIREBASE_PROJECT_ID", "japan-travel-project-f2be0")
+firebase_admin.initialize_app(_NoCredential(), {"projectId": FIREBASE_PROJECT_ID})
+
+# Debug-only endpoints (like /ai/debug_allowed) are off unless this is set
+ENABLE_DEBUG_ENDPOINTS = os.getenv("ENABLE_DEBUG_ENDPOINTS", "").lower() in ("1", "true", "yes")
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -587,10 +605,14 @@ def optimize_route_dp(locations, start_index=0):
         # Reconstruct path
         if best_last == -1:
             # Fallback to original order
+            total_activity = sum(loc.get('duration', 60) for loc in locations)
             return {
                 "optimal_order": list(range(n)),
-                "total_time": sum(loc.get('duration', 60) for loc in locations),
-                "route_details": []
+                "total_time": total_activity,
+                "total_travel_time": 0,
+                "total_activity_time": total_activity,
+                "route_details": [],
+                "optimization_method": "original_order"
             }
         
         # Backtrack to get the path
@@ -691,7 +713,7 @@ def optimize_route_dp(locations, start_index=0):
             
             if i > 0:
                 prev_idx = path[i-1]
-                travel = travel_time[prev_idx][loc_idx]
+                travel = travel_time_matrix[prev_idx][loc_idx]
                 distance = haversine_km(
                     locations[prev_idx].get('lat'), locations[prev_idx].get('lng'),
                     loc.get('lat'), loc.get('lng')
@@ -1539,9 +1561,9 @@ def load_city_data(city, filename):
     Example: /data/Tokyo/Tokyo_Attractions.json
     """
     try:
-        safe_city = city.replace("..", "")
-        safe_file = filename.replace("..", "")
-        data_path = os.path.join(DATA_ROOT, safe_city, safe_file)
+        data_path = safe_join(DATA_ROOT, city, filename)
+        if not data_path:
+            return jsonify({"error": "File not found"}), 404
         with open(data_path, "r", encoding="utf-8") as f:
             data = f.read()
         return app.response_class(response=data, status=200, mimetype="application/json")
@@ -1550,6 +1572,35 @@ def load_city_data(city, filename):
     except Exception as e:
         logger.exception("Failed to read file")
         return jsonify({"error": f"Failed to read file: {e}"}), 500
+
+
+def int_arg(name: str, default: int, min_value: int = 1, max_value: int = 1000) -> int:
+    """Reads an integer query param, falling back to the default if it's missing or invalid"""
+    try:
+        value = int(request.args.get(name, default))
+    except (TypeError, ValueError):
+        return default
+    return max(min_value, min(value, max_value))
+
+
+def get_verified_user_id() -> Optional[str]:
+    """
+    Returns the Firebase UID of the logged-in user, or None.
+    The frontend sends "Authorization: Bearer <Firebase ID token>",
+    and the token is verified so nobody can pretend to be another user.
+    """
+    header = request.headers.get("Authorization", "")
+    if not header.startswith("Bearer "):
+        return None
+    token = header[len("Bearer "):].strip()
+    if not token:
+        return None
+    try:
+        decoded = firebase_auth.verify_id_token(token)
+        return decoded.get("uid")
+    except Exception as e:
+        logger.info(f"Rejected Firebase ID token: {e}")
+        return None
 
 
 @app.route("/healthz")
@@ -1589,7 +1640,7 @@ def api_attractions():
     # Get query parameters from URL
     city = request.args.get("city")
     area = request.args.get("area")
-    limit = int(request.args.get("limit", 100))
+    limit = int_arg("limit", 100)
     
     # Build MongoDB query
     search_query = {}
@@ -1599,7 +1650,7 @@ def api_attractions():
     
     if area:
         # Use regex for flexible area matching (case-insensitive)
-        search_query["area"] = {"$regex": area, "$options": "i"}
+        search_query["area"] = {"$regex": re.escape(area), "$options": "i"}
     
     # Query MongoDB and get results
     results = list(mongo_db["attractions"].find(search_query, {"_id": 0}).limit(limit))
@@ -1623,13 +1674,13 @@ def api_restaurants():
     
     city = request.args.get("city")
     area = request.args.get("area")
-    limit = int(request.args.get("limit", 100))
+    limit = int_arg("limit", 100)
     
     query = {}
     if city:
         query["city"] = city
     if area:
-        query["area"] = {"$regex": area, "$options": "i"}
+        query["area"] = {"$regex": re.escape(area), "$options": "i"}
     
     results = list(mongo_db["restaurants"].find(query, {"_id": 0}).limit(limit))
     return jsonify({"count": len(results), "data": results})
@@ -1647,13 +1698,13 @@ def api_shopping():
     
     city = request.args.get("city")
     area = request.args.get("area")
-    limit = int(request.args.get("limit", 100))
+    limit = int_arg("limit", 100)
     
     query = {}
     if city:
         query["city"] = city
     if area:
-        query["area"] = {"$regex": area, "$options": "i"}
+        query["area"] = {"$regex": re.escape(area), "$options": "i"}
     
     results = list(mongo_db["shopping"].find(query, {"_id": 0}).limit(limit))
     return jsonify({"count": len(results), "data": results})
@@ -1671,13 +1722,13 @@ def api_daytrips():
     
     city = request.args.get("city")
     area = request.args.get("area")
-    limit = int(request.args.get("limit", 100))
+    limit = int_arg("limit", 100)
     
     query = {}
     if city:
         query["city"] = city
     if area:
-        query["area"] = {"$regex": area, "$options": "i"}
+        query["area"] = {"$regex": re.escape(area), "$options": "i"}
     
     results = list(mongo_db["daytrips"].find(query, {"_id": 0}).limit(limit))
     return jsonify({"count": len(results), "data": results})
@@ -1706,8 +1757,8 @@ def api_search():
         return jsonify({"error": "Missing query parameter 'q'"}), 400
     
     # Get parameters
-    max_results_per_category = int(request.args.get("limit", 20))
-    min_fuzzy_score = int(request.args.get("min_score", 60))
+    max_results_per_category = int_arg("limit", 20)
+    min_fuzzy_score = int_arg("min_score", 60, 0, 100)
     
     # Normalize search text for better matching
     search_normalized = search_text.lower().strip()
@@ -1726,11 +1777,11 @@ def api_search():
     # Create a broad regex pattern that matches any keyword prefix
     if len(keywords) > 1:
         # Match if name contains ANY keyword prefix
-        keyword_patterns = "|".join([get_prefix(k) for k in keywords])
+        keyword_patterns = "|".join([re.escape(get_prefix(k)) for k in keywords])
         search_pattern = {"$regex": keyword_patterns, "$options": "i"}
     else:
         # Single keyword - search for prefix
-        prefix = get_prefix(search_text)
+        prefix = re.escape(get_prefix(search_text))
         search_pattern = {"$regex": prefix, "$options": "i"}
     
     mongodb_query = {"name": search_pattern}
@@ -1809,13 +1860,13 @@ def user_places():
     POST: Add a new custom place
     DELETE: Remove a custom place (requires place_id in body)
     
-    Requires: X-User-ID header (Firebase UID)
+    Requires: Authorization: Bearer <Firebase ID token>
     """
     if not MONGODB_AVAILABLE or mongo_db is None:
         return jsonify({"error": "MongoDB not available"}), 503
-    
-    # Get Firebase UID from request header
-    user_id = request.headers.get("X-User-ID")
+
+    # Get the Firebase UID from the verified ID token
+    user_id = get_verified_user_id()
     if not user_id:
         return jsonify({"error": "Authentication required. Please sign in."}), 401
     
@@ -1829,8 +1880,10 @@ def user_places():
     
     elif request.method == "POST":
         # Add new custom place
-        place_data = request.json
-        
+        place_data = request.get_json(silent=True)
+        if not isinstance(place_data, dict):
+            return jsonify({"error": "Request body must be a JSON object"}), 400
+
         # Validate required fields
         required_fields = ["name", "lat", "lng", "city"]
         for field in required_fields:
@@ -1866,14 +1919,20 @@ def user_places():
     
     elif request.method == "DELETE":
         # Delete a custom place
-        place_id = request.json.get("place_id")
+        body = request.get_json(silent=True) or {}
+        place_id = body.get("place_id")
         if not place_id:
             return jsonify({"error": "Missing place_id"}), 400
-        
+
         # Delete only if owned by this user (security check)
         from bson import ObjectId
+        from bson.errors import InvalidId
+        try:
+            object_id = ObjectId(place_id)
+        except (InvalidId, TypeError):
+            return jsonify({"error": "Invalid place_id"}), 400
         result = mongo_db["user_places"].delete_one({
-            "_id": ObjectId(place_id),
+            "_id": object_id,
             "user_id": user_id  # Must match logged-in user
         })
         
@@ -1894,7 +1953,7 @@ def search_combined():
     - limit: Max results per category (default: 20)
     
     Headers:
-    - X-User-ID: Firebase UID (optional, for including custom places)
+    - Authorization: Bearer <Firebase ID token> (optional, for including custom places)
     
     Returns: Combined results from global + user's custom places
     """
@@ -1906,8 +1965,8 @@ def search_combined():
     if not search_text:
         return jsonify({"error": "Missing query parameter 'q'"}), 400
     
-    max_results_per_category = int(request.args.get("limit", 20))
-    user_id = request.headers.get("X-User-ID")  # Optional
+    max_results_per_category = int_arg("limit", 20)
+    user_id = get_verified_user_id()  # Optional
     
     # Search global database using existing fuzzy search logic
     search_normalized = search_text.lower().strip()
@@ -1917,10 +1976,10 @@ def search_combined():
         return word[:min(len(word), max(min_len, len(word) // 2))]
     
     if len(keywords) > 1:
-        keyword_patterns = "|".join([get_prefix(k) for k in keywords])
+        keyword_patterns = "|".join([re.escape(get_prefix(k)) for k in keywords])
         search_pattern = {"$regex": keyword_patterns, "$options": "i"}
     else:
-        prefix = get_prefix(search_text)
+        prefix = re.escape(get_prefix(search_text))
         search_pattern = {"$regex": prefix, "$options": "i"}
     
     mongodb_query = {"name": search_pattern}
@@ -2405,7 +2464,10 @@ def ai_debug_allowed():
     Debug endpoint to see what the AI can work with.
     Shows the "allowed places" map and enriched data.
     Useful for troubleshooting when suggestions seem wrong.
+    Only enabled when ENABLE_DEBUG_ENDPOINTS is set.
     """
+    if not ENABLE_DEBUG_ENDPOINTS:
+        abort(404)
     body = request.get_json(silent=True) or {}
     plan = body.get("plan") or {}
     cities = [c for c in plan.keys() if c in CITY_DIRS]
@@ -2431,4 +2493,6 @@ if __name__ == "__main__":
     print(f"OpenAI: {'Ready' if OPENAI_API_KEY is not None else 'Missing API key'}")
     print("="*60 + "\n")
     
-    app.run(host="0.0.0.0", port=port, debug=True)
+    # Debug mode (auto-reload + interactive error pages) only when FLASK_DEBUG=1
+    debug_mode = os.environ.get("FLASK_DEBUG", "").lower() in ("1", "true", "yes")
+    app.run(host="0.0.0.0", port=port, debug=debug_mode)

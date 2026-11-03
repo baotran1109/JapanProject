@@ -9,6 +9,31 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Firebase init -->
   <script type="module" src="/static/js/firebase-init.js?v=5"></script>
+  <style>
+    .activity-item {
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .activity-item:hover {
+      transform: translateY(-2px);
+    }
+    .activity-item.dragging {
+      opacity: 0.5;
+      transform: rotate(2deg);
+    }
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .activity-item {
+      animation: slideIn 0.3s ease-out;
+    }
+  </style>
 </head>
 <body class="bg-slate-50 text-slate-800 selection:bg-blue-100 selection:text-blue-900">
 
@@ -290,14 +315,56 @@
           <input id="location-${i}" type="text" placeholder="e.g., Shibuya, Asakusa"
                  class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-blue-200"
                  value="${esc(prefill.location)}" />
-          <label class="mt-4 block text-sm font-medium text-slate-700" for="activities-${i}">Activities / Notes</label>
-          <textarea id="activities-${i}" placeholder="e.g., Meiji Shrine, coffee at Omotesando Koffee…"
-                    class="mt-1 w-full min-h-[110px] rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-blue-200">${prefill.activities||""}</textarea>
-          <label class="mt-3 block text-sm font-medium text-slate-700" for="durations-${i}">⏱️ Duration for each (minutes, comma-separated)</label>
-          <input id="durations-${i}" type="text" placeholder="e.g., 90, 120, 60 (default: 60 per activity)"
-                 class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-4 focus:ring-blue-200"
-                 value="${esc(prefill.durations)}" />
-          <p class="mt-1 text-xs text-slate-500">💡 Separate with commas to match your activities. Leave blank for default 60 min each.</p>
+          <!-- Enhanced Activities Section -->
+          <div class="mt-4">
+            <div class="flex items-center justify-between mb-2">
+              <label class="block text-sm font-semibold text-slate-700">
+                ✨ Activities / Notes
+                <span id="activity-count-${i}" class="ml-2 text-xs font-normal text-slate-500">(0 activities)</span>
+              </label>
+              <button type="button" onclick="toggleActivityView(${i})" 
+                      class="text-xs text-blue-600 hover:text-blue-800 font-medium">
+                <span id="view-toggle-${i}">📝 Text Mode</span>
+              </button>
+            </div>
+
+            <!-- Quick Add Input -->
+            <div class="mb-3 flex gap-2">
+              <input type="text" 
+                     id="quick-add-${i}"
+                     placeholder="Type activity and press Enter or click +"
+                     class="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                     onkeypress="if(event.key==='Enter') addActivityQuick(${i})" />
+              <button type="button" onclick="addActivityQuick(${i})"
+                      class="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 transition-colors font-medium">
+                ➕ Add
+              </button>
+              <button type="button" onclick="importActivitiesFromText(${i})"
+                      class="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm hover:bg-slate-50 transition-colors">
+                📋 Paste
+              </button>
+            </div>
+
+            <!-- Activity Cards Container -->
+            <div id="activities-container-${i}" class="space-y-2 min-h-[60px] rounded-lg border-2 border-dashed border-slate-200 p-3 bg-slate-50/50">
+              <p class="text-xs text-slate-400 text-center py-4">No activities yet. Add one above!</p>
+            </div>
+
+            <!-- Hidden Textarea for Backend Compatibility -->
+            <textarea id="activities-${i}" 
+                      class="hidden"
+                      style="display: none;">${prefill.activities||""}</textarea>
+
+            <!-- Duration Input -->
+            <div class="mt-4">
+              <label class="block text-sm font-medium text-slate-700" for="durations-${i}">⏱️ Duration for each (minutes, comma-separated)</label>
+              <input id="durations-${i}" type="text" 
+                     placeholder="e.g., 90, 120, 60 (default: 60 per activity)"
+                     class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-4 focus:ring-blue-200"
+                     value="${esc(prefill.durations)}" />
+              <p class="mt-1 text-xs text-slate-500">💡 Separate with commas to match your activities. Leave blank for default 60 min each.</p>
+            </div>
+          </div>
         </div>`;
     }
 
@@ -318,14 +385,516 @@
         const act = box.querySelector("[id^='activities-']");
         if (loc) loc.id = `location-${n}`;
         if (act) act.id = `activities-${n}`;
+        // Renumber activity-related elements
+        const quickAdd = box.querySelector("[id^='quick-add-']");
+        const container = box.querySelector("[id^='activities-container-']");
+        const count = box.querySelector("[id^='activity-count-']");
+        const toggle = box.querySelector("[id^='view-toggle-']");
+        if (quickAdd) quickAdd.id = `quick-add-${n}`;
+        if (container) container.id = `activities-container-${n}`;
+        if (count) count.id = `activity-count-${n}`;
+        if (toggle) toggle.id = `view-toggle-${n}`;
       });
+    }
+
+    // Activity management functions for plan_tokyo.html (no city prefix)
+    let activityViewMode = {};
+    
+    function toggleActivityView(i) {
+      activityViewMode[i] = !activityViewMode[i];
+      const toggle = document.getElementById(`view-toggle-${i}`);
+      const container = document.getElementById(`activities-container-${i}`);
+      const textarea = document.getElementById(`activities-${i}`);
+      
+      if (!toggle || !container || !textarea) return;
+      
+      if (activityViewMode[i]) {
+        toggle.textContent = '🎴 Card Mode';
+        const activities = getActivities(i);
+        textarea.style.display = 'block';
+        textarea.className = 'mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-blue-200';
+        textarea.value = activities.join('\n');
+        container.style.display = 'none';
+      } else {
+        toggle.textContent = '📝 Text Mode';
+        textarea.style.display = 'none';
+        container.style.display = 'block';
+        syncTextareaToCards(i);
+        renderActivities(i);
+      }
+    }
+    
+    function getActivities(i) {
+      const textarea = document.getElementById(`activities-${i}`);
+      if (!textarea) return [];
+      const text = textarea.value.trim();
+      if (!text) return [];
+      return text.split(/\n/).map(a => a.trim()).filter(a => a);
+    }
+    
+    function setActivities(i, activities) {
+      console.log(`📝 setActivities called: day ${i}, ${activities.length} activities`);
+      const textarea = document.getElementById(`activities-${i}`);
+      if (textarea) {
+        textarea.value = activities.join('\n');
+      }
+      syncTextareaToCards(i);
+      renderActivities(i);
+      // Auto-save to localStorage (with small delay to ensure DOM is updated)
+      setTimeout(() => {
+        console.log('💾 Triggering auto-save after setActivities');
+        autoSaveToLocalStorage();
+      }, 50);
+    }
+    
+    function syncTextareaToCards(i) {
+      const textarea = document.getElementById(`activities-${i}`);
+      const container = document.getElementById(`activities-container-${i}`);
+      if (!textarea || !container) return;
+      
+      // CRITICAL: Read directly from textarea (which was just set by setActivities)
+      // Don't call getActivities() which reads from cards first and would overwrite the textarea
+      const text = (textarea.value || "").trim();
+      const activities = text ? text.split(/\n/).map(a => a.trim()).filter(a => a) : [];
+      
+      // Removed verbose console.log for performance
+      
+      const activitiesHTML = activities.map((activity, index) => 
+        createActivityCard(i, activity, index)
+      ).join('');
+      
+      container.innerHTML = activities.length > 0 
+        ? activitiesHTML 
+        : '<p class="text-xs text-slate-400 text-center py-4">No activities yet. Add one above!</p>';
+      
+      updateActivityCount(i);
+      attachDragHandlers(i);
+    }
+    
+    function createActivityCard(i, activity, index) {
+      const colors = [
+        'bg-blue-50 border-blue-200 text-blue-900',
+        'bg-purple-50 border-purple-200 text-purple-900',
+        'bg-pink-50 border-pink-200 text-pink-900',
+        'bg-green-50 border-green-200 text-green-900',
+        'bg-orange-50 border-orange-200 text-orange-900',
+        'bg-indigo-50 border-indigo-200 text-indigo-900'
+      ];
+      const colorClass = colors[index % colors.length];
+      
+      return `
+        <div class="activity-item group relative flex items-center gap-2 rounded-lg border-2 ${colorClass} p-3 shadow-sm hover:shadow-md transition-all"
+             data-index="${index}" draggable="true">
+          <div class="drag-handle text-slate-400 hover:text-slate-600 cursor-grab active:cursor-grabbing flex-shrink-0 p-1 hover:bg-slate-100 rounded"
+               title="Drag to reorder">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
+            </svg>
+          </div>
+          <div class="flex flex-col gap-0.5 flex-shrink-0">
+            <button type="button" onclick="window.moveActivityUp(${i}, ${index})"
+                    class="opacity-60 hover:opacity-100 transition-opacity rounded p-0.5 hover:bg-slate-200 text-slate-600 ${index === 0 ? 'opacity-20 cursor-not-allowed' : ''}"
+                    title="Move up"
+                    ${index === 0 ? 'disabled' : ''}
+                    style="pointer-events: auto; z-index: 10;">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+              </svg>
+            </button>
+            <button type="button" onclick="window.moveActivityDown(${i}, ${index})"
+                    class="opacity-60 hover:opacity-100 transition-opacity rounded p-0.5 hover:bg-slate-200 text-slate-600"
+                    title="Move down"
+                    style="pointer-events: auto; z-index: 10;">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="flex-1 font-medium text-sm">${escapeHtml(activity)}</div>
+          <button type="button" onclick="window.removeActivity(${i}, ${index})"
+                  class="opacity-70 hover:opacity-100 transition-opacity rounded-full p-1 hover:bg-red-100 text-red-600 flex-shrink-0"
+                  title="Remove activity"
+                  style="pointer-events: auto; z-index: 10;">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>`;
+    }
+    
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    function renderActivities(i) {
+      const container = document.getElementById(`activities-container-${i}`);
+      const textarea = document.getElementById(`activities-${i}`);
+      if (!container) return;
+      
+      // CRITICAL: Read directly from textarea (which was just set by setActivities)
+      // Don't call getActivities() which reads from cards first and would overwrite the textarea
+      const text = textarea ? textarea.value.trim() : '';
+      const activities = text ? text.split(/\n/).map(a => a.trim()).filter(a => a) : [];
+      
+      console.log(`  🎨 renderActivities: day ${i}, textarea="${text}", activities:`, activities);
+      
+      if (activities.length === 0) {
+        container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">No activities yet. Add one above!</p>';
+        updateActivityCount(i);
+        return;
+      }
+      
+      container.innerHTML = activities.map((activity, index) => 
+        createActivityCard(i, activity, index)
+      ).join('');
+      
+      // Update button states (disable up for first, disable down for last)
+      const items = container.querySelectorAll('.activity-item');
+      items.forEach((item, idx) => {
+        const upBtn = item.querySelector('button[onclick*="moveActivityUp"]');
+        const downBtn = item.querySelector('button[onclick*="moveActivityDown"]');
+        if (upBtn) {
+          if (idx === 0) {
+            upBtn.disabled = true;
+            upBtn.classList.add('opacity-20', 'cursor-not-allowed');
+          } else {
+            upBtn.disabled = false;
+            upBtn.classList.remove('opacity-20', 'cursor-not-allowed');
+          }
+        }
+        if (downBtn) {
+          if (idx === activities.length - 1) {
+            downBtn.disabled = true;
+            downBtn.classList.add('opacity-20', 'cursor-not-allowed');
+          } else {
+            downBtn.disabled = false;
+            downBtn.classList.remove('opacity-20', 'cursor-not-allowed');
+          }
+        }
+      });
+      
+      updateActivityCount(i);
+      attachDragHandlers(i);
+    }
+    
+    function updateActivityCount(i) {
+      const countEl = document.getElementById(`activity-count-${i}`);
+      const textarea = document.getElementById(`activities-${i}`);
+      if (countEl && textarea) {
+        // Read directly from textarea to get accurate count
+        const text = (textarea.value || "").trim();
+        const count = text ? text.split(/\n/).filter(a => a.trim()).length : 0;
+        countEl.textContent = `(${count} ${count === 1 ? 'activity' : 'activities'})`;
+      }
+    }
+    
+    function addActivityQuick(i) {
+      const input = document.getElementById(`quick-add-${i}`);
+      if (!input) return;
+      
+      const activity = input.value.trim();
+      if (!activity) return;
+      
+      const activities = getActivities(i);
+      activities.push(activity);
+      setActivities(i, activities);
+      
+      input.value = '';
+      input.focus();
+    }
+    
+    function removeActivity(i, index) {
+      console.log(`🗑️ removeActivity called: day ${i}, index ${index}`);
+      const activities = getActivities(i);
+      console.log(`  Current activities before removal:`, activities);
+      console.log(`  Removing index ${index} from ${activities.length} activities`);
+      
+      if (index >= 0 && index < activities.length) {
+        activities.splice(index, 1);
+        console.log(`  Activities after removal:`, activities);
+        setActivities(i, activities);
+      } else {
+        console.error(`  ❌ Invalid index ${index} for ${activities.length} activities`);
+      }
+    }
+    // Expose globally for onclick handlers
+    window.removeActivity = removeActivity;
+    
+    function moveActivityUp(i, index) {
+      if (index === 0) return; // Already at top
+      const activities = getActivities(i);
+      if (index > 0 && index < activities.length) {
+        [activities[index - 1], activities[index]] = [activities[index], activities[index - 1]];
+        setActivities(i, activities);
+      }
+    }
+    window.moveActivityUp = moveActivityUp;
+    
+    function moveActivityDown(i, index) {
+      const activities = getActivities(i);
+      if (index >= 0 && index < activities.length - 1) {
+        [activities[index], activities[index + 1]] = [activities[index + 1], activities[index]];
+        setActivities(i, activities);
+      }
+    }
+    window.moveActivityDown = moveActivityDown;
+    
+    function importActivitiesFromText(i) {
+      const text = prompt('Paste your activities (comma or line-separated):');
+      if (!text) return;
+      
+      const activities = text
+        .split(/[,;\n]/)
+        .map(a => a.trim())
+        .filter(a => a);
+      
+      if (activities.length > 0) {
+        const existing = getActivities(i);
+        setActivities(i, [...existing, ...activities]);
+      }
+    }
+    
+    let draggedElement = null;
+    let draggedIndex = null;
+    
+    function attachDragHandlers(i) {
+      const container = document.getElementById(`activities-container-${i}`);
+      if (!container) return;
+      
+      const items = container.querySelectorAll('.activity-item');
+      items.forEach((item) => {
+        // Make only the drag handle initiate dragging, not the whole card
+        const dragHandle = item.querySelector('.drag-handle');
+        if (dragHandle) {
+          dragHandle.addEventListener('mousedown', () => {
+            item.draggable = true;
+          });
+        }
+        
+        item.addEventListener('dragstart', (e) => {
+          draggedElement = item;
+          draggedIndex = parseInt(item.dataset.index);
+          item.classList.add('dragging');
+          item.style.opacity = '0.5';
+          item.style.transform = 'rotate(2deg)';
+          e.dataTransfer.effectAllowed = 'move';
+        });
+        
+        item.addEventListener('dragend', () => {
+          item.classList.remove('dragging');
+          item.style.opacity = '1';
+          item.style.transform = '';
+          item.draggable = false;
+          draggedElement = null;
+          draggedIndex = null;
+        });
+        
+        item.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          
+          const afterElement = getDragAfterElement(container, e.clientY);
+          const dragging = container.querySelector('.dragging');
+          
+          if (dragging === null) return;
+          
+          if (afterElement == null) {
+            container.appendChild(dragging);
+          } else {
+            container.insertBefore(dragging, afterElement);
+          }
+        });
+        
+        item.addEventListener('drop', (e) => {
+          e.preventDefault();
+          const activities = getActivities(i);
+          const newOrder = [];
+          const items = container.querySelectorAll('.activity-item');
+          items.forEach(item => {
+            const textEl = item.querySelector('.flex-1');
+            const text = textEl ? textEl.textContent?.trim() : '';
+            if (text) {
+              // Find the activity in the original array
+              const originalIndex = parseInt(item.dataset.index);
+              if (originalIndex >= 0 && originalIndex < activities.length) {
+                newOrder.push(activities[originalIndex]);
+              } else {
+                // Fallback: find by text content
+                const found = activities.find(a => a.trim() === text);
+                if (found) newOrder.push(found);
+              }
+            }
+          });
+          // If order changed, update
+          if (newOrder.length === activities.length) {
+            setActivities(i, newOrder);
+          }
+        });
+      });
+    }
+    
+    function getDragAfterElement(container, y) {
+      const draggableElements = [...container.querySelectorAll('.activity-item:not(.dragging)')];
+      
+      return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        
+        if (offset < 0 && offset > closest.offset) {
+          return { offset: offset, element: child };
+        } else {
+          return closest;
+        }
+      }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    // Update addDay to initialize activities
+    const originalAddDay = addDay;
+    addDay = function(prefill) {
+      originalAddDay(prefill);
+      const boxes = document.querySelectorAll(".day-box");
+      const i = boxes.length;
+      const dayBox = boxes[boxes.length - 1];
+      
+      // Initialize activity view mode
+      activityViewMode[i] = false; // Start in card mode
+      
+      // Sync textarea on input (for text mode)
+      const textarea = dayBox.querySelector(`textarea[id^="activities-"]`);
+      if (textarea) {
+        // If textarea already has content (from saved data or prefill), render it immediately
+        if (textarea.value.trim()) {
+          setTimeout(() => {
+            syncTextareaToCards(i);
+            renderActivities(i);
+          }, 10);
+        }
+        
+        // Add input listener
+        textarea.addEventListener('input', () => {
+          const match = textarea.id.match(/activities-(\d+)/);
+          if (match) {
+            const dayNum = parseInt(match[1]);
+            if (!activityViewMode[dayNum]) {
+              renderActivities(dayNum);
+            }
+          }
+        });
+      }
+    };
+
+    // Collect plan for localStorage (separate function to ensure it works)
+    function collectPlanForLocalStorage() {
+      // First, sync all card views to textareas before collecting
+      const boxes = document.querySelectorAll(".day-box");
+      boxes.forEach((box, i)=>{
+        const dayNum = i + 1;
+        const container = document.getElementById(`activities-container-${dayNum}`);
+        const textarea = document.getElementById(`activities-${dayNum}`);
+        
+        // If container exists and has activities, sync them to textarea
+        if (container && textarea) {
+          const activityItems = container.querySelectorAll('.activity-item');
+          if (activityItems.length > 0) {
+            // Collect activities from cards
+            const activities = Array.from(activityItems).map(item => {
+              const text = item.querySelector('.flex-1')?.textContent?.trim();
+              return text;
+            }).filter(text => text);
+            
+            // Update textarea with activities
+            textarea.value = activities.join('\n');
+          }
+        }
+      });
+      
+      // Now collect the plan as usual
+      return Array.from(boxes).map((box,i)=>({
+        day: i+1,
+        location: box.querySelector(`[id^="location-"]`)?.value || "",
+        activities: box.querySelector(`[id^="activities-"]`)?.value || "",
+      }));
+    }
+    
+    // Auto-save to localStorage
+    function autoSaveToLocalStorage() {
+      const params = new URLSearchParams(location.search);
+      if (params.get("itineraryId")) {
+        console.log('Skipping auto-save: in edit mode');
+        return; // Don't auto-save in edit mode
+      }
+      
+      try {
+        const plan = collectPlanForLocalStorage();
+        const planStr = JSON.stringify(plan);
+        localStorage.setItem('tokyoDraft', planStr);
+        console.log('✅ Auto-saved to localStorage:', plan);
+        console.log('✅ localStorage key exists:', localStorage.getItem('tokyoDraft') ? 'YES' : 'NO');
+      } catch (e) {
+        console.error('❌ Auto-save failed:', e);
+        console.error('Error stack:', e.stack);
+      }
+    }
+    
+    // Load from localStorage
+    function loadFromLocalStorage() {
+      const params = new URLSearchParams(location.search);
+      if (params.get("itineraryId")) {
+        console.log('Skipping load: in edit mode');
+        return null; // Don't load draft in edit mode
+      }
+      
+      try {
+        const saved = localStorage.getItem('tokyoDraft');
+        console.log('🔍 Checking localStorage:', saved ? 'Found data' : 'No data');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          console.log('✅ Loaded from localStorage:', parsed);
+          return parsed;
+        }
+      } catch (e) {
+        console.error('❌ Load from localStorage failed:', e);
+      }
+      return null;
+    }
+    
+    // Clear localStorage draft
+    function clearLocalStorageDraft() {
+      localStorage.removeItem('tokyoDraft');
     }
 
     window.addEventListener("load", () => {
       const params = new URLSearchParams(location.search);
       if (params.get("itineraryId")) return;  // edit mode handled below
-      daysContainer.innerHTML = "";
-      addDay();
+      
+      // Wait a bit for auth state to be determined, then load
+      setTimeout(() => {
+        // Check if days are already loaded (might have been loaded by auth callback)
+        const existingDays = document.querySelectorAll('.day-box').length;
+        if (existingDays === 0) {
+          // Try to load from localStorage first
+          const savedPlan = loadFromLocalStorage();
+          if (savedPlan && savedPlan.length > 0) {
+            if (typeof window.renderPlan === "function") {
+              window.renderPlan(savedPlan);
+            }
+          } else {
+            daysContainer.innerHTML = "";
+            addDay();
+          }
+        }
+      }, 100);
+    });
+    
+    // Auto-save on input changes (with debounce)
+    let autoSaveTimeout;
+    document.addEventListener('input', (e) => {
+      if (e.target.matches('input[id^="location-"], textarea[id^="activities-"], input[id^="durations-"]')) {
+        clearTimeout(autoSaveTimeout);
+        autoSaveTimeout = setTimeout(() => autoSaveToLocalStorage(), 300);
+      }
     });
 
     document.getElementById("toggle-info")?.addEventListener("click", () => {
@@ -424,11 +993,47 @@
     // expose
     window.collectPlan = function(){
       const boxes = document.querySelectorAll(".day-box");
-      return Array.from(boxes).map((box,i)=>({
-        day: i+1,
-        location: box.querySelector(`[id^="location-"]`)?.value || "",
-        activities: box.querySelector(`[id^="activities-"]`)?.value || "",
-      }));
+      return Array.from(boxes).map((box, i) => {
+        const dayNum = i + 1;
+        const location = box.querySelector(`[id^="location-"]`)?.value || "";
+        
+        // Read activities from textarea (which should have been synced from cards by force sync)
+        const textarea = document.getElementById(`activities-${dayNum}`);
+        const container = document.getElementById(`activities-container-${dayNum}`);
+        let activities = "";
+        
+        // PRIORITY 1: Read from textarea (most reliable after force sync)
+        if (textarea) {
+          const textareaValue = textarea.value;
+          activities = (textareaValue != null) ? String(textareaValue) : "";
+          
+          // If textarea is empty, try reading from cards as fallback
+          if (!activities.trim() && container) {
+            const activityItems = container.querySelectorAll('.activity-item');
+            
+            if (activityItems.length > 0) {
+              const activityTexts = Array.from(activityItems).map((item) => {
+                const textEl = item.querySelector('.flex-1');
+                return textEl ? (textEl.textContent || "").trim() : '';
+              }).filter(text => text);
+              
+              if (activityTexts.length > 0) {
+                activities = activityTexts.join('\n');
+                textarea.value = activities; // Update textarea with card data
+              }
+            }
+          }
+        }
+        
+        // CRITICAL: Ensure activities is always a string, never undefined or null
+        const activitiesValue = (activities || "").toString();
+        
+        return {
+          day: dayNum,
+          location: (location || "").trim(),
+          activities: activitiesValue
+        };
+      });
     };
   </script>
 
@@ -643,7 +1248,7 @@
             // Search for this location in MongoDB + user's custom places
             console.log(`🔍 Searching for: "${loc.name}"`);
             const searchUrl = `/search/combined?q=${encodeURIComponent(loc.name)}&limit=10`;
-            const searchHeaders = currentUserId ? { "X-User-ID": currentUserId } : {};
+            const searchHeaders = await window.getAuthHeaders();
             const searchRes = await fetch(searchUrl, { headers: searchHeaders });
             const searchData = await searchRes.json();
             console.log(`  → Search returned ${searchData.total_results || 0} results`);
@@ -863,6 +1468,13 @@
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
     import { doc, getDoc, updateDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
+    // Sends the Firebase ID token so the backend can verify who the user is
+    window.getAuthHeaders = async function () {
+      const user = auth.currentUser;
+      if (!user) return {};
+      return { Authorization: `Bearer ${await user.getIdToken()}` };
+    };
+
     const saveBtn = document.getElementById("save-btn");
     const msg = document.getElementById("save-msg");
     const params = new URLSearchParams(location.search);
@@ -870,10 +1482,46 @@
 
     const renderPlan = (days) => {
       const container = document.getElementById("days");
+      if (!container) return;
       container.innerHTML = "";
-      (days || []).forEach(d => window.addDay?.(d));
+      (days || []).forEach((d, idx) => {
+        window.addDay?.(d);
+        const dayNum = idx + 1;
+        
+        // Try multiple possible field names and ensure it's always a string
+        const activitiesText = String(d.activities || d.notes || d.act || "");
+        
+        // Use setTimeout to ensure addDay has fully completed and DOM is ready
+        setTimeout(() => {
+          const location = document.getElementById(`location-${dayNum}`);
+          const textarea = document.getElementById(`activities-${dayNum}`);
+          
+          if (location) location.value = (d.location || "").trim();
+          if (textarea) {
+            // Set textarea value immediately
+            textarea.value = activitiesText;
+            
+            // Use requestAnimationFrame to ensure DOM is fully ready before syncing
+            requestAnimationFrame(() => {
+              // Re-query the textarea to ensure we have the latest reference
+              const currentTextarea = document.getElementById(`activities-${dayNum}`);
+              if (currentTextarea) {
+                // Always restore the value before syncing (in case something cleared it)
+                if (currentTextarea.value !== activitiesText) {
+                  currentTextarea.value = activitiesText;
+                }
+                // Now sync to cards - this reads from textarea
+                if (window.syncTextareaToCards && currentTextarea.value) {
+                  window.syncTextareaToCards(dayNum);
+                }
+              }
+            });
+          }
+        }, 10);
+      });
       if (!days || !days.length) window.addDay?.();
     };
+    window.renderPlan = renderPlan;
 
     const addCopyButton = (handler) => {
       let copyBtn = document.getElementById("save-copy");
@@ -895,7 +1543,7 @@
       
       options.headers = {
         ...options.headers,
-        "X-User-ID": currentUserId
+        ...(await window.getAuthHeaders())
       };
       
       return fetch(url, options);
@@ -1016,19 +1664,115 @@
 
         saveBtn.textContent = "Save Changes";
         window.savePlan = async () => {
-          const plan = window.collectPlan();
-          msg.textContent = "Saving…";
+          // Prevent multiple simultaneous saves
+          if (window.isSaving) {
+            console.log('⏳ Save already in progress, please wait...');
+            return;
+          }
+          
+          window.isSaving = true;
+          const originalText = saveBtn.textContent;
           saveBtn.disabled = true;
+          saveBtn.textContent = "Saving...";
+          
           try {
-            await updateDoc(ref, { plan, days: plan.length, updatedAt: serverTimestamp() });
-            alert("Changes saved.");
+            // FORCE SYNC: Before collecting, ensure all textareas are synced from cards
+            // But preserve textarea content if it exists and cards are empty
+            const boxes = document.querySelectorAll("#days .day-box");
+            
+            boxes.forEach((box, i) => {
+              const dayNum = i + 1;
+              const container = document.getElementById(`activities-container-${dayNum}`);
+              const textarea = document.getElementById(`activities-${dayNum}`);
+              
+              if (container && textarea) {
+                // Preserve existing textarea content
+                const existingTextareaValue = (textarea.value || "").trim();
+                
+                // Read from cards
+                const activityItems = container.querySelectorAll('.activity-item');
+                if (activityItems.length > 0) {
+                  const activityTexts = Array.from(activityItems).map(item => {
+                    const textEl = item.querySelector('.flex-1');
+                    return textEl ? (textEl.textContent || "").trim() : '';
+                  }).filter(text => text);
+                  
+                  if (activityTexts.length > 0) {
+                    const cardsValue = activityTexts.join('\n');
+                    // Cards have content - use cards (they're the source of truth for UI)
+                    textarea.value = cardsValue;
+                  } else {
+                    // Cards exist but are empty - preserve textarea content if it exists
+                    // Don't overwrite textarea with empty value
+                    if (!existingTextareaValue) {
+                      // Both are empty, keep textarea empty
+                      textarea.value = "";
+                    }
+                    // If textarea has content, keep it (don't overwrite with empty cards)
+                  }
+                } else if (!existingTextareaValue) {
+                  // No cards and no textarea content, ensure it's empty
+                  textarea.value = "";
+                }
+                // If no cards but textarea has content, keep the textarea value (don't overwrite)
+              }
+            });
+            
+            // Use requestAnimationFrame to ensure DOM is updated
+            await new Promise(resolve => requestAnimationFrame(resolve));
+            
+            // Add a small delay to ensure textarea values are updated in DOM
+            await new Promise(resolve => setTimeout(resolve, 50));
+            
+            // VERIFICATION: Double-check that textareas have content (especially for existing days)
+            boxes.forEach((box, i) => {
+              const dayNum = i + 1;
+              const textarea = document.getElementById(`activities-${dayNum}`);
+              const container = document.getElementById(`activities-container-${dayNum}`);
+              
+              if (textarea && container) {
+                // If textarea is empty but container has cards, sync from cards
+                if (!textarea.value.trim()) {
+                  const activityItems = container.querySelectorAll('.activity-item');
+                  if (activityItems.length > 0) {
+                    const activityTexts = Array.from(activityItems).map(item => {
+                      const textEl = item.querySelector('.flex-1');
+                      return textEl ? (textEl.textContent || "").trim() : '';
+                    }).filter(text => text);
+                    
+                    if (activityTexts.length > 0) {
+                      textarea.value = activityTexts.join('\n');
+                    }
+                  }
+                }
+              }
+            });
+            
+            const plan = window.collectPlan();
+            
+            // Ensure plan is always an array
+            const safePlan = Array.isArray(plan) ? plan : [];
+            
+            msg.textContent = "Saving…";
+            
+            await updateDoc(ref, { plan: safePlan, days: safePlan.length, updatedAt: serverTimestamp() });
+            
             msg.textContent = "Changes saved.";
+            clearLocalStorageDraft(); // Clear draft after successful save
+            
+            // Redirect to the saved itinerary URL
+            const newUrl = `${window.location.pathname}?itineraryId=${itineraryId}`;
+            window.location.href = newUrl;
           } catch (e) {
             console.error(e);
-            alert(`Save failed: ${e.message || e}`);
-            msg.textContent = "Save failed.";
+            msg.textContent = `Save failed: ${e.message || e}`;
+            setTimeout(() => {
+              msg.textContent = "";
+            }, 3000);
           } finally {
+            window.isSaving = false;
             saveBtn.disabled = false;
+            saveBtn.textContent = originalText || "Save entire plan";
           }
         };
 
@@ -1043,6 +1787,7 @@
               createdAt: serverTimestamp(), updatedAt: serverTimestamp()
             });
             alert("Saved a new copy!");
+            clearLocalStorageDraft(); // Clear draft after successful save
           } catch (e) {
             console.error(e);
             alert(`Save-as-copy failed: ${e.message || e}`);
@@ -1052,28 +1797,140 @@
         return;
       }
 
+      // CREATE mode - only initialize if days don't exist yet
+      // (load event might have already loaded from localStorage)
+      const existingDays = document.querySelectorAll('.day-box').length;
+      if (existingDays === 0) {
+        // Page hasn't loaded yet or load event hasn't run, try localStorage
+        const savedPlan = loadFromLocalStorage();
+        if (savedPlan && savedPlan.length > 0) {
+          renderPlan(savedPlan);
+        } else {
+          const daysEl = document.getElementById("days");
+          if (daysEl) daysEl.innerHTML = "";
+          window.addDay?.();
+        }
+      }
+      // If days already exist, they were loaded by the load event, so don't re-render
+
       // CREATE
       saveBtn.textContent = "Save Plan";
       window.savePlan = async () => {
-        const plan = window.collectPlan();
-        msg.textContent = "Saving to the cloud…";
+        // Prevent multiple simultaneous saves
+        if (window.isSaving) {
+          console.log('⏳ Save already in progress, please wait...');
+          return;
+        }
+        
+        window.isSaving = true;
+        const originalText = saveBtn.textContent;
         saveBtn.disabled = true;
-        try {
-          const title = prompt("Trip title?", `Tokyo Trip (${new Date().toLocaleDateString()})`)
+        saveBtn.textContent = "Saving...";
+        
+          try {
+            // FORCE SYNC: Before collecting, ensure all textareas are synced from cards
+            // But preserve textarea content if it exists and cards are empty
+            const boxes = document.querySelectorAll("#days .day-box");
+            
+            boxes.forEach((box, i) => {
+              const dayNum = i + 1;
+              const container = document.getElementById(`activities-container-${dayNum}`);
+              const textarea = document.getElementById(`activities-${dayNum}`);
+              
+              if (container && textarea) {
+                // Preserve existing textarea content
+                const existingTextareaValue = (textarea.value || "").trim();
+                
+                // Read from cards
+                const activityItems = container.querySelectorAll('.activity-item');
+                if (activityItems.length > 0) {
+                  const activityTexts = Array.from(activityItems).map(item => {
+                    const textEl = item.querySelector('.flex-1');
+                    return textEl ? (textEl.textContent || "").trim() : '';
+                  }).filter(text => text);
+                  
+                  if (activityTexts.length > 0) {
+                    const cardsValue = activityTexts.join('\n');
+                    // Cards have content - use cards (they're the source of truth for UI)
+                    textarea.value = cardsValue;
+                  } else {
+                    // Cards exist but are empty - preserve textarea content if it exists
+                    // Don't overwrite textarea with empty value
+                    if (!existingTextareaValue) {
+                      // Both are empty, keep textarea empty
+                      textarea.value = "";
+                    }
+                    // If textarea has content, keep it (don't overwrite with empty cards)
+                  }
+                } else if (!existingTextareaValue) {
+                  // No cards and no textarea content, ensure it's empty
+                  textarea.value = "";
+                }
+                // If no cards but textarea has content, keep the textarea value (don't overwrite)
+              }
+            });
+            
+            // Use requestAnimationFrame to ensure DOM is updated
+            await new Promise(resolve => requestAnimationFrame(resolve));
+            
+            // Add a small delay to ensure textarea values are updated in DOM
+            await new Promise(resolve => setTimeout(resolve, 50));
+            
+            // VERIFICATION: Double-check that textareas have content (especially for existing days)
+            boxes.forEach((box, i) => {
+              const dayNum = i + 1;
+              const textarea = document.getElementById(`activities-${dayNum}`);
+              const container = document.getElementById(`activities-container-${dayNum}`);
+              
+              if (textarea && container) {
+                // If textarea is empty but container has cards, sync from cards
+                if (!textarea.value.trim()) {
+                  const activityItems = container.querySelectorAll('.activity-item');
+                  if (activityItems.length > 0) {
+                    const activityTexts = Array.from(activityItems).map(item => {
+                      const textEl = item.querySelector('.flex-1');
+                      return textEl ? (textEl.textContent || "").trim() : '';
+                    }).filter(text => text);
+                    
+                    if (activityTexts.length > 0) {
+                      textarea.value = activityTexts.join('\n');
+                    }
+                  }
+                }
+              }
+            });
+            
+            const plan = window.collectPlan();
+            
+            // Ensure plan is always an array
+            const safePlan = Array.isArray(plan) ? plan : [];
+            
+            const title = prompt("Trip title?", `Tokyo Trip (${new Date().toLocaleDateString()})`)
                         || `Tokyo Trip (${new Date().toLocaleDateString()})`;
+          msg.textContent = "Saving to the cloud…";
+          
           const colRef = collection(db, `users/${readyUser.uid}/itineraries`);
-          await addDoc(colRef, {
-            title, city: "Tokyo", plan, days: plan.length,
+          const docRef = await addDoc(colRef, {
+            title, city: "Tokyo", plan: safePlan, days: safePlan.length,
             createdAt: serverTimestamp(), updatedAt: serverTimestamp()
           });
-          alert("Saved as a new itinerary!");
+          
           msg.textContent = "Saved as a new itinerary.";
+          clearLocalStorageDraft(); // Clear draft after successful save
+          
+          // Redirect to the saved itinerary URL
+          const newUrl = `${window.location.pathname}?itineraryId=${docRef.id}`;
+          window.location.href = newUrl;
         } catch (e) {
           console.error(e);
-          alert(`Cloud save failed: ${e.code || ""} ${e.message || e}`);
-          msg.textContent = "Save failed. See console.";
+          msg.textContent = `Save failed: ${e.message || e}`;
+          setTimeout(() => {
+            msg.textContent = "";
+          }, 3000);
         } finally {
+          window.isSaving = false;
           saveBtn.disabled = false;
+          saveBtn.textContent = originalText || "Save entire plan";
         }
       };
     });

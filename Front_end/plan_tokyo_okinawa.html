@@ -8,6 +8,31 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Firebase init -->
   <script type="module" src="/static/js/firebase-init.js?v=4"></script>
+  <style>
+    .activity-item {
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .activity-item:hover {
+      transform: translateY(-2px);
+    }
+    .activity-item.dragging {
+      opacity: 0.5;
+      transform: rotate(2deg);
+    }
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .activity-item {
+      animation: slideIn 0.3s ease-out;
+    }
+  </style>
 </head>
 <body class="bg-slate-50 text-slate-800 selection:bg-blue-100 selection:text-blue-900">
 
@@ -91,6 +116,53 @@
           <button onclick="addDay('okinawa')" class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700">+ Add Okinawa Day</button>
         </div>
         <div id="okinawa-days" class="mt-4 space-y-4"></div>
+      </div>
+
+      <!-- Custom Places (sign in required) -->
+      <div id="custom-places-section" class="rounded-2xl border border-purple-200 bg-purple-50 shadow-sm p-5">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-semibold text-purple-900">➕ Add Custom Place</h2>
+            <p class="text-sm text-purple-700 mt-1">Hotels, a friend’s place, or spots not in our database</p>
+          </div>
+          <button type="button" onclick="toggleCustomPlaceForm()" class="rounded-lg bg-purple-600 px-4 py-2 text-white font-medium hover:bg-purple-700">+ New Place</button>
+        </div>
+        <div id="custom-place-form" class="mt-4 hidden rounded-lg bg-white p-4 space-y-3">
+          <div>
+            <label class="block text-sm font-medium text-slate-700">Place Name *</label>
+            <input id="custom-name" type="text" placeholder="e.g., Airbnb, friend’s house" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" required />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-sm font-medium text-slate-700">Latitude *</label>
+              <input id="custom-lat" type="number" step="0.000001" placeholder="35.6895" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" required />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700">Longitude *</label>
+              <input id="custom-lng" type="number" step="0.000001" placeholder="139.6917" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" required />
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700">City *</label>
+            <select id="custom-city" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" required>
+              <option value="Tokyo">Tokyo</option>
+              <option value="Okinawa">Okinawa</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700">Notes (optional)</label>
+            <textarea id="custom-notes" placeholder="Personal notes…" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 h-20"></textarea>
+          </div>
+          <div class="flex gap-2">
+            <button type="button" onclick="saveCustomPlace()" class="flex-1 rounded-lg bg-purple-600 px-4 py-2 text-white font-medium hover:bg-purple-700">💾 Save Place</button>
+            <button type="button" onclick="toggleCustomPlaceForm()" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-700 font-medium hover:bg-slate-50">Cancel</button>
+          </div>
+          <p class="text-xs text-slate-500">💡 Get coordinates from Google Maps (right-click → coordinates)</p>
+        </div>
+        <div id="custom-places-list" class="mt-4 hidden">
+          <h3 class="text-sm font-semibold text-purple-900 mb-2">Your Custom Places</h3>
+          <div id="custom-places-items" class="space-y-2"></div>
+        </div>
       </div>
 
       <!-- AI Review panel -->
@@ -249,13 +321,413 @@
           <input id="${region}-loc-${i}" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2"
                  placeholder="e.g., Shibuya / Naha"
                  value="${esc(prefill.location)}" />
-          <label class="mt-4 block text-sm font-medium text-slate-700">Activities / Notes</label>
-          <textarea id="${region}-act-${i}" class="mt-1 w-full min-h-[110px] rounded-md border border-slate-300 px-3 py-2"
-                    placeholder="e.g., Meiji Shrine / Shurijo / snorkeling">${prefill.activities||""}</textarea>
-          <label class="mt-3 block text-sm font-medium text-slate-700">⏱️ Duration for each (minutes, comma-separated)</label>
-          <input id="${region}-dur-${i}" type="text" placeholder="e.g., 90, 120, 60 (default: 60 per activity)" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" value="${esc(prefill.durations)}" />
-          <p class="mt-1 text-xs text-slate-500">💡 Separate with commas to match your activities. Leave blank for default 60 min each.</p>
+          <!-- Enhanced Activities Section -->
+          <div class="mt-4">
+            <div class="flex items-center justify-between mb-2">
+              <label class="block text-sm font-semibold text-slate-700">
+                ✨ Activities / Notes
+                <span id="${region}-activity-count-${i}" class="ml-2 text-xs font-normal text-slate-500">(0 activities)</span>
+              </label>
+              <button type="button" onclick="toggleActivityView('${region}', ${i}, 'act')" 
+                      class="text-xs text-blue-600 hover:text-blue-800 font-medium">
+                <span id="${region}-view-toggle-${i}">📝 Text Mode</span>
+              </button>
+            </div>
+
+            <!-- Quick Add Input -->
+            <div class="mb-3 flex gap-2">
+              <input type="text" 
+                     id="${region}-quick-add-${i}"
+                     placeholder="Type activity and press Enter or click +"
+                     class="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                     onkeypress="if(event.key==='Enter') addActivityQuick('${region}', ${i}, 'act')" />
+              <button type="button" onclick="addActivityQuick('${region}', ${i}, 'act')"
+                      class="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 transition-colors font-medium">
+                ➕ Add
+              </button>
+              <button type="button" onclick="importActivitiesFromText('${region}', ${i}, 'act')"
+                      class="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm hover:bg-slate-50 transition-colors">
+                📋 Paste
+              </button>
+            </div>
+
+            <!-- Activity Cards Container -->
+            <div id="${region}-activities-container-${i}" class="space-y-2 min-h-[60px] rounded-lg border-2 border-dashed border-slate-200 p-3 bg-slate-50/50">
+              <p class="text-xs text-slate-400 text-center py-4">No activities yet. Add one above!</p>
+            </div>
+
+            <!-- Hidden Textarea for Backend Compatibility -->
+            <textarea id="${region}-act-${i}" 
+                      class="hidden"
+                      style="display: none;">${prefill.activities||""}</textarea>
+
+            <!-- Duration Input -->
+            <div class="mt-4">
+              <label class="block text-sm font-medium text-slate-700">⏱️ Duration for each (minutes, comma-separated)</label>
+              <input id="${region}-dur-${i}" type="text" 
+                     placeholder="e.g., 90, 120, 60 (default: 60 per activity)" 
+                     class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" 
+                     value="${esc(prefill.durations)}" />
+              <p class="mt-1 text-xs text-slate-500">💡 Separate with commas to match your activities. Leave blank for default 60 min each.</p>
+            </div>
+          </div>
         </div>`;
+    }
+
+    // Activity management functions
+    let activityViewMode = {};
+    
+    function getActivityKey(region, n) {
+      return `${region}-${n}`;
+    }
+    
+    function toggleActivityView(region, n, fieldType) {
+      const key = getActivityKey(region, n);
+      activityViewMode[key] = !activityViewMode[key];
+      const toggle = document.getElementById(`${region}-view-toggle-${n}`);
+      const container = document.getElementById(`${region}-activities-container-${n}`);
+      const textarea = document.getElementById(`${region}-${fieldType}-${n}`);
+      
+      if (activityViewMode[key]) {
+        toggle.textContent = '🎴 Card Mode';
+        const activities = getActivities(region, n, fieldType);
+        textarea.style.display = 'block';
+        textarea.className = 'mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-blue-200';
+        textarea.value = activities.join('\n');
+        container.style.display = 'none';
+      } else {
+        toggle.textContent = '📝 Text Mode';
+        textarea.style.display = 'none';
+        container.style.display = 'block';
+        syncTextareaToCards(region, n, fieldType);
+        renderActivities(region, n, fieldType);
+      }
+    }
+    
+    function getActivities(region, n, fieldType) {
+      const textarea = document.getElementById(`${region}-${fieldType}-${n}`);
+      if (!textarea) return [];
+      const text = textarea.value.trim();
+      if (!text) return [];
+      return text.split(/\n/).map(a => a.trim()).filter(a => a);
+    }
+    
+    function setActivities(region, n, activities, fieldType) {
+      console.log(`📝 setActivities called: ${region}, day ${n}, ${activities.length} activities`);
+      const textarea = document.getElementById(`${region}-${fieldType}-${n}`);
+      if (textarea) {
+        textarea.value = activities.join('\n');
+      }
+      syncTextareaToCards(region, n, fieldType);
+      renderActivities(region, n, fieldType);
+      // Auto-save to localStorage (with small delay to ensure DOM is updated)
+      setTimeout(() => {
+        console.log('💾 Triggering auto-save after setActivities');
+        autoSaveToLocalStorage();
+      }, 50);
+    }
+    
+    function syncTextareaToCards(region, n, fieldType) {
+      const textarea = document.getElementById(`${region}-${fieldType}-${n}`);
+      const container = document.getElementById(`${region}-activities-container-${n}`);
+      if (!textarea || !container) return;
+      
+      // CRITICAL: Read directly from textarea (which was just set by setActivities)
+      // Don't call getActivities() which reads from cards first and would overwrite the textarea
+      const text = (textarea.value || "").trim();
+      const activities = text ? text.split(/\n/).map(a => a.trim()).filter(a => a) : [];
+      
+      // Removed verbose console.log for performance
+      
+      const activitiesHTML = activities.map((activity, index) => 
+        createActivityCard(region, n, activity, index, fieldType)
+      ).join('');
+      
+      container.innerHTML = activities.length > 0 
+        ? activitiesHTML 
+        : '<p class="text-xs text-slate-400 text-center py-4">No activities yet. Add one above!</p>';
+      
+      updateActivityCount(region, n, fieldType);
+      attachDragHandlers(region, n, fieldType);
+    }
+    
+    function createActivityCard(region, n, activity, index, fieldType) {
+      const colors = [
+        'bg-blue-50 border-blue-200 text-blue-900',
+        'bg-purple-50 border-purple-200 text-purple-900',
+        'bg-pink-50 border-pink-200 text-pink-900',
+        'bg-green-50 border-green-200 text-green-900',
+        'bg-orange-50 border-orange-200 text-orange-900',
+        'bg-indigo-50 border-indigo-200 text-indigo-900'
+      ];
+      const colorClass = colors[index % colors.length];
+      
+      return `
+        <div class="activity-item group relative flex items-center gap-2 rounded-lg border-2 ${colorClass} p-3 shadow-sm hover:shadow-md transition-all"
+             data-index="${index}" draggable="true">
+          <div class="drag-handle text-slate-400 hover:text-slate-600 cursor-grab active:cursor-grabbing flex-shrink-0 p-1 hover:bg-slate-100 rounded"
+               title="Drag to reorder">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
+            </svg>
+          </div>
+          <div class="flex flex-col gap-0.5 flex-shrink-0">
+            <button type="button" onclick="window.moveActivityUp('${region}', ${n}, ${index}, '${fieldType}')"
+                    class="opacity-60 hover:opacity-100 transition-opacity rounded p-0.5 hover:bg-slate-200 text-slate-600 ${index === 0 ? 'opacity-20 cursor-not-allowed' : ''}"
+                    title="Move up"
+                    ${index === 0 ? 'disabled' : ''}
+                    style="pointer-events: auto; z-index: 10;">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+              </svg>
+            </button>
+            <button type="button" onclick="window.moveActivityDown('${region}', ${n}, ${index}, '${fieldType}')"
+                    class="opacity-60 hover:opacity-100 transition-opacity rounded p-0.5 hover:bg-slate-200 text-slate-600"
+                    title="Move down"
+                    style="pointer-events: auto; z-index: 10;">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="flex-1 font-medium text-sm">${escapeHtml(activity)}</div>
+          <button type="button" onclick="window.removeActivity('${region}', ${n}, ${index}, '${fieldType}')"
+                  class="opacity-70 hover:opacity-100 transition-opacity rounded-full p-1 hover:bg-red-100 text-red-600 flex-shrink-0"
+                  title="Remove activity"
+                  style="pointer-events: auto; z-index: 10;">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>`;
+    }
+    
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    function renderActivities(region, n, fieldType) {
+      const container = document.getElementById(`${region}-activities-container-${n}`);
+      const textarea = document.getElementById(`${region}-${fieldType}-${n}`);
+      if (!container) return;
+      
+      // CRITICAL: Read directly from textarea (which was just set by setActivities)
+      // Don't call getActivities() which reads from cards first and would overwrite the textarea
+      const text = textarea ? textarea.value.trim() : '';
+      const activities = text ? text.split(/\n/).map(a => a.trim()).filter(a => a) : [];
+      
+      // Removed verbose console.log for performance
+      
+      if (activities.length === 0) {
+        container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">No activities yet. Add one above!</p>';
+        updateActivityCount(region, n, fieldType);
+        return;
+      }
+      
+      container.innerHTML = activities.map((activity, index) => 
+        createActivityCard(region, n, activity, index, fieldType)
+      ).join('');
+      
+      // Update button states (disable up for first, disable down for last)
+      const items = container.querySelectorAll('.activity-item');
+      items.forEach((item, idx) => {
+        const upBtn = item.querySelector('button[onclick*="moveActivityUp"]');
+        const downBtn = item.querySelector('button[onclick*="moveActivityDown"]');
+        if (upBtn) {
+          if (idx === 0) {
+            upBtn.disabled = true;
+            upBtn.classList.add('opacity-20', 'cursor-not-allowed');
+          } else {
+            upBtn.disabled = false;
+            upBtn.classList.remove('opacity-20', 'cursor-not-allowed');
+          }
+        }
+        if (downBtn) {
+          if (idx === activities.length - 1) {
+            downBtn.disabled = true;
+            downBtn.classList.add('opacity-20', 'cursor-not-allowed');
+          } else {
+            downBtn.disabled = false;
+            downBtn.classList.remove('opacity-20', 'cursor-not-allowed');
+          }
+        }
+      });
+      
+      updateActivityCount(region, n, fieldType);
+      attachDragHandlers(region, n, fieldType);
+    }
+    
+    function updateActivityCount(region, n, fieldType) {
+      const countEl = document.getElementById(`${region}-activity-count-${n}`);
+      const textarea = document.getElementById(`${region}-${fieldType}-${n}`);
+      if (countEl && textarea) {
+        // Read directly from textarea to get accurate count
+        const text = (textarea.value || "").trim();
+        const count = text ? text.split(/\n/).filter(a => a.trim()).length : 0;
+        countEl.textContent = `(${count} ${count === 1 ? 'activity' : 'activities'})`;
+      }
+    }
+    
+    function addActivityQuick(region, n, fieldType) {
+      const input = document.getElementById(`${region}-quick-add-${n}`);
+      if (!input) return;
+      
+      const activity = input.value.trim();
+      if (!activity) return;
+      
+      const activities = getActivities(region, n, fieldType);
+      activities.push(activity);
+      setActivities(region, n, activities, fieldType);
+      
+      input.value = '';
+      input.focus();
+    }
+    
+    function removeActivity(region, n, index, fieldType) {
+      console.log(`🗑️ removeActivity called: ${region}, day ${n}, index ${index}`);
+      const activities = getActivities(region, n, fieldType);
+      console.log(`  Current activities before removal:`, activities);
+      console.log(`  Removing index ${index} from ${activities.length} activities`);
+      
+      if (index >= 0 && index < activities.length) {
+        activities.splice(index, 1);
+        console.log(`  Activities after removal:`, activities);
+        setActivities(region, n, activities, fieldType);
+      } else {
+        console.error(`  ❌ Invalid index ${index} for ${activities.length} activities`);
+      }
+    }
+    // Expose globally for onclick handlers
+    window.removeActivity = removeActivity;
+    
+    function moveActivityUp(region, n, index, fieldType) {
+      if (index === 0) return; // Already at top
+      const activities = getActivities(region, n, fieldType);
+      if (index > 0 && index < activities.length) {
+        [activities[index - 1], activities[index]] = [activities[index], activities[index - 1]];
+        setActivities(region, n, activities, fieldType);
+      }
+    }
+    window.moveActivityUp = moveActivityUp;
+    
+    function moveActivityDown(region, n, index, fieldType) {
+      const activities = getActivities(region, n, fieldType);
+      if (index >= 0 && index < activities.length - 1) {
+        [activities[index], activities[index + 1]] = [activities[index + 1], activities[index]];
+        setActivities(region, n, activities, fieldType);
+      }
+    }
+    window.moveActivityDown = moveActivityDown;
+    
+    function importActivitiesFromText(region, n, fieldType) {
+      const text = prompt('Paste your activities (comma or line-separated):');
+      if (!text) return;
+      
+      const activities = text
+        .split(/[,;\n]/)
+        .map(a => a.trim())
+        .filter(a => a);
+      
+      if (activities.length > 0) {
+        const existing = getActivities(region, n, fieldType);
+        setActivities(region, n, [...existing, ...activities], fieldType);
+      }
+    }
+    
+    let draggedElement = null;
+    let draggedIndex = null;
+    
+    function attachDragHandlers(region, n, fieldType) {
+      const container = document.getElementById(`${region}-activities-container-${n}`);
+      if (!container) return;
+      
+      const items = container.querySelectorAll('.activity-item');
+      items.forEach((item) => {
+        // Make only the drag handle initiate dragging, not the whole card
+        const dragHandle = item.querySelector('.drag-handle');
+        if (dragHandle) {
+          dragHandle.addEventListener('mousedown', () => {
+            item.draggable = true;
+          });
+        }
+        
+        item.addEventListener('dragstart', (e) => {
+          draggedElement = item;
+          draggedIndex = parseInt(item.dataset.index);
+          item.classList.add('dragging');
+          item.style.opacity = '0.5';
+          item.style.transform = 'rotate(2deg)';
+          e.dataTransfer.effectAllowed = 'move';
+        });
+        
+        item.addEventListener('dragend', () => {
+          item.classList.remove('dragging');
+          item.style.opacity = '1';
+          item.style.transform = '';
+          item.draggable = false;
+          draggedElement = null;
+          draggedIndex = null;
+        });
+        
+        item.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          
+          const afterElement = getDragAfterElement(container, e.clientY);
+          const dragging = container.querySelector('.dragging');
+          
+          if (dragging === null) return;
+          
+          if (afterElement == null) {
+            container.appendChild(dragging);
+          } else {
+            container.insertBefore(dragging, afterElement);
+          }
+        });
+        
+        item.addEventListener('drop', (e) => {
+          e.preventDefault();
+          const activities = getActivities(region, n, fieldType);
+          const newOrder = [];
+          const items = container.querySelectorAll('.activity-item');
+          items.forEach(item => {
+            const textEl = item.querySelector('.flex-1');
+            const text = textEl ? textEl.textContent?.trim() : '';
+            if (text) {
+              // Find the activity in the original array
+              const originalIndex = parseInt(item.dataset.index);
+              if (originalIndex >= 0 && originalIndex < activities.length) {
+                newOrder.push(activities[originalIndex]);
+              } else {
+                // Fallback: find by text content
+                const found = activities.find(a => a.trim() === text);
+                if (found) newOrder.push(found);
+              }
+            }
+          });
+          // If order changed, update
+          if (newOrder.length === activities.length) {
+            setActivities(region, n, newOrder, fieldType);
+          }
+        });
+      });
+    }
+    
+    function getDragAfterElement(container, y) {
+      const draggableElements = [...container.querySelectorAll('.activity-item:not(.dragging)')];
+      
+      return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        
+        if (offset < 0 && offset > closest.offset) {
+          return { offset: offset, element: child };
+        } else {
+          return closest;
+        }
+      }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 
     function addDay(region, prefill){
@@ -265,6 +737,33 @@
       wrap.className = "day-box";
       wrap.innerHTML = dayBoxTemplate(region, n, prefill);
       cont.appendChild(wrap);
+      
+      // Initialize activity view mode
+      const key = getActivityKey(region, n);
+      activityViewMode[key] = false; // Start in card mode
+      
+      // Sync textarea on input (for text mode)
+      const textarea = wrap.querySelector(`textarea[id^="${region}-act-"]`);
+      if (textarea) {
+        // If textarea already has content (from saved data or prefill), render it immediately
+        if (textarea.value.trim()) {
+          setTimeout(() => {
+            syncTextareaToCards(region, n, 'act');
+            renderActivities(region, n, 'act');
+          }, 10);
+        }
+        
+        // Add input listener
+        textarea.addEventListener('input', () => {
+          const match = textarea.id.match(/(\w+)-act-(\d+)/);
+          if (match) {
+            const key = getActivityKey(match[1], parseInt(match[2]));
+            if (!activityViewMode[key]) {
+              renderActivities(match[1], parseInt(match[2]), 'act');
+            }
+          }
+        });
+      }
     }
 
     function removeDay(btn, region){
@@ -288,24 +787,135 @@
     function collectPlan(){
       const plan = {};
       regions.forEach(region=>{
+        // Ensure region array exists
+        if (!plan[region]) {
+          plan[region] = [];
+        }
+        
         const boxes = regionEl(region).querySelectorAll(".day-box");
-        const arr = [];
-        boxes.forEach((box, i)=>{
-          const loc = box.querySelector(`[id^="${region}-loc-"]`)?.value || "";
-          const act = box.querySelector(`[id^="${region}-act-"]`)?.value || "";
-          arr.push({ day:i+1, location:loc, activities:act });
+        boxes.forEach((box, i) => {
+          const dayNum = i + 1;
+          const location = box.querySelector(`[id^="${region}-loc-"]`)?.value || "";
+          
+          // Read activities from textarea (which should have been synced from cards by force sync)
+          const textarea = document.getElementById(`${region}-act-${dayNum}`);
+          const container = document.getElementById(`${region}-activities-container-${dayNum}`);
+          let activities = "";
+          
+          // PRIORITY 1: Read from textarea (most reliable after force sync)
+          if (textarea) {
+            const textareaValue = textarea.value;
+            activities = (textareaValue != null) ? String(textareaValue) : "";
+            
+            // If textarea is empty, try reading from cards as fallback
+            if (!activities.trim() && container) {
+              const activityItems = container.querySelectorAll('.activity-item');
+              
+              if (activityItems.length > 0) {
+                const activityTexts = Array.from(activityItems).map((item) => {
+                  const textEl = item.querySelector('.flex-1');
+                  return textEl ? (textEl.textContent || "").trim() : '';
+                }).filter(text => text);
+                
+                if (activityTexts.length > 0) {
+                  activities = activityTexts.join('\n');
+                  textarea.value = activities; // Update textarea with card data
+                }
+              }
+            }
+          }
+          
+          // CRITICAL: Ensure activities is always a string, never undefined or null
+          const activitiesValue = (activities || "").toString();
+          
+          const dayObj = { 
+            day: dayNum, 
+            location: (location || "").trim(), 
+            activities: activitiesValue 
+          };
+          
+          plan[region].push(dayObj);
         });
-        plan[region] = arr;
       });
       return plan;
     }
     window.collectPlan = collectPlan;
 
+    // Auto-save to localStorage (uses collectPlan which is in same scope)
+    function autoSaveToLocalStorage() {
+      const params = new URLSearchParams(location.search);
+      if (params.get("itineraryId")) {
+        console.log('Skipping auto-save: in edit mode');
+        return; // Don't auto-save in edit mode
+      }
+      
+      try {
+        const plan = collectPlan(); // This is in the same script scope, so it works
+        const planStr = JSON.stringify(plan);
+        localStorage.setItem('tokyoOkinawaDraft', planStr);
+        console.log('✅ Auto-saved to localStorage:', plan);
+        console.log('✅ localStorage key exists:', localStorage.getItem('tokyoOkinawaDraft') ? 'YES' : 'NO');
+      } catch (e) {
+        console.error('❌ Auto-save failed:', e);
+        console.error('Error stack:', e.stack);
+      }
+    }
+    
+    // Load from localStorage
+    function loadFromLocalStorage() {
+      const params = new URLSearchParams(location.search);
+      if (params.get("itineraryId")) {
+        console.log('Skipping load: in edit mode');
+        return null; // Don't load draft in edit mode
+      }
+      
+      try {
+        const saved = localStorage.getItem('tokyoOkinawaDraft');
+        console.log('🔍 Checking localStorage:', saved ? 'Found data' : 'No data');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          console.log('✅ Loaded from localStorage:', parsed);
+          return parsed;
+        }
+      } catch (e) {
+        console.error('❌ Load from localStorage failed:', e);
+      }
+      return null;
+    }
+    
+    // Clear localStorage draft
+    function clearLocalStorageDraft() {
+      localStorage.removeItem('tokyoOkinawaDraft');
+    }
+
     // Initial blank day in each region (create mode)
     window.addEventListener("load", ()=>{
       const params = new URLSearchParams(location.search);
       if (params.get("itineraryId")) return;
-      regions.forEach(r=>{ regionEl(r).innerHTML=""; addDay(r); });
+      
+      // Wait a bit for auth state to be determined, then load
+      setTimeout(() => {
+        // Check if days are already loaded (might have been loaded by auth callback)
+        const existingDays = document.querySelectorAll('.day-box').length;
+        if (existingDays === 0) {
+          // Try to load from localStorage first
+          const savedPlan = loadFromLocalStorage();
+          if (savedPlan) {
+            renderPlan(savedPlan);
+          } else {
+            regions.forEach(r=>{ regionEl(r).innerHTML=""; addDay(r); });
+          }
+        }
+      }, 100);
+    });
+    
+    // Auto-save on input changes (with debounce)
+    let autoSaveTimeout;
+    document.addEventListener('input', (e) => {
+      if (e.target.matches('input[id*="-loc-"], textarea[id*="-act-"], input[id*="-dur-"]')) {
+        clearTimeout(autoSaveTimeout);
+        autoSaveTimeout = setTimeout(() => autoSaveToLocalStorage(), 300);
+      }
     });
 
     // Mobile toggle
@@ -474,7 +1084,8 @@
         for (const loc of allLocations) {
           try {
             const searchUrl = `/search/combined?q=${encodeURIComponent(loc.name)}&limit=10`;
-            const searchRes = await fetch(searchUrl);
+            const searchHeaders = await window.getAuthHeaders();
+            const searchRes = await fetch(searchUrl, { headers: searchHeaders });
             const searchData = await searchRes.json();
             let allResults = [...(searchData.attractions || []), ...(searchData.restaurants || []), ...(searchData.shopping || [])].filter(r => r.city === loc.city);
             if (allResults.length > 0) enriched.push({name: loc.name, lat: allResults[0].lat, lng: allResults[0].lng, duration: loc.duration});
@@ -566,9 +1177,98 @@
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
     import { doc, getDoc, updateDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
+    // Sends the Firebase ID token so the backend can verify who the user is
+    window.getAuthHeaders = async function () {
+      const user = auth.currentUser;
+      if (!user) return {};
+      return { Authorization: `Bearer ${await user.getIdToken()}` };
+    };
+
     const saveMsg = document.getElementById("save-msg");
     const params = new URLSearchParams(location.search);
     const itineraryId = params.get("itineraryId");
+
+    window.currentUserId = null;
+
+    async function authenticatedFetch(url, options = {}) {
+      if (!window.currentUserId) throw new Error("Please sign in to use this feature");
+      options.headers = { ...options.headers, ...(await window.getAuthHeaders()) };
+      return fetch(url, options);
+    }
+
+    window.toggleCustomPlaceForm = function () {
+      document.getElementById("custom-place-form")?.classList.toggle("hidden");
+    };
+
+    window.saveCustomPlace = async function () {
+      if (!window.currentUserId) {
+        alert("Please sign in to add custom places!");
+        window.location.href = "/auth.html";
+        return;
+      }
+      const cityEl = document.getElementById("custom-city");
+      const placeData = {
+        name: document.getElementById("custom-name").value.trim(),
+        lat: parseFloat(document.getElementById("custom-lat").value),
+        lng: parseFloat(document.getElementById("custom-lng").value),
+        city: cityEl?.tagName === "SELECT" ? cityEl.value : (cityEl?.value || "").trim(),
+        notes: document.getElementById("custom-notes").value.trim(),
+        category: "custom"
+      };
+      if (!placeData.name) { alert("Please enter a place name"); return; }
+      if (isNaN(placeData.lat) || isNaN(placeData.lng)) { alert("Please enter valid GPS coordinates"); return; }
+      try {
+        const response = await authenticatedFetch("/user/places", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(placeData)
+        });
+        const result = await response.json();
+        if (response.ok) {
+          alert(`✅ "${placeData.name}" saved!`);
+          document.getElementById("custom-name").value = "";
+          document.getElementById("custom-lat").value = "";
+          document.getElementById("custom-lng").value = "";
+          document.getElementById("custom-notes").value = "";
+          toggleCustomPlaceForm();
+          loadUserCustomPlaces();
+        } else {
+          alert(`❌ Error: ${result.error || "Failed to save place"}`);
+        }
+      } catch (e) {
+        console.error(e);
+        alert(`❌ Error: ${e.message}`);
+      }
+    };
+
+    async function loadUserCustomPlaces() {
+      if (!window.currentUserId) return;
+      try {
+        const response = await authenticatedFetch("/user/places");
+        const data = await response.json();
+        const listContainer = document.getElementById("custom-places-list");
+        const itemsContainer = document.getElementById("custom-places-items");
+        if (data.places && data.places.length > 0) {
+          listContainer.classList.remove("hidden");
+          itemsContainer.innerHTML = data.places.map(place => `
+            <div class="rounded-lg bg-white p-3 border border-purple-200">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-medium text-purple-900">${place.name}</div>
+                  <div class="text-xs text-slate-600">${place.city} • ${place.lat.toFixed(4)}, ${place.lng.toFixed(4)}</div>
+                  ${place.notes ? `<div class="text-xs text-slate-500 mt-1">${place.notes}</div>` : ""}
+                </div>
+                <span class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">Custom</span>
+              </div>
+            </div>
+          `).join("");
+        } else {
+          listContainer?.classList.add("hidden");
+        }
+      } catch (e) {
+        console.error("Error loading custom places:", e);
+      }
+    }
 
     function renderPlan(p){
       const plan = p || { tokyo:[], okinawa:[] };
@@ -577,11 +1277,48 @@
         cont.innerHTML = "";
         const arr = Array.isArray(plan[region]) ? plan[region] : [];
         if(!arr.length){ addDay(region); return; }
-        arr.forEach(d=> addDay(region, d));
+        arr.forEach((d, idx)=> {
+          addDay(region, d);
+          const dayNum = idx + 1;
+          
+          // Try multiple possible field names and ensure it's always a string
+          const activitiesText = String(d.activities || d.notes || d.act || "");
+          
+          // Use setTimeout to ensure addDay has fully completed and DOM is ready
+          setTimeout(() => {
+            const location = document.getElementById(`${region}-loc-${dayNum}`);
+            const textarea = document.getElementById(`${region}-act-${dayNum}`);
+            
+            if (location) location.value = (d.location || "").trim();
+            if (textarea) {
+              // Set textarea value immediately
+              textarea.value = activitiesText;
+              
+              // Use requestAnimationFrame to ensure DOM is fully ready before syncing
+              requestAnimationFrame(() => {
+                // Re-query the textarea to ensure we have the latest reference
+                const currentTextarea = document.getElementById(`${region}-act-${dayNum}`);
+                if (currentTextarea) {
+                  // Always restore the value before syncing (in case something cleared it)
+                  if (currentTextarea.value !== activitiesText) {
+                    currentTextarea.value = activitiesText;
+                  }
+                  // Now sync to cards - this reads from textarea
+                  if (window.syncTextareaToCards && currentTextarea.value) {
+                    window.syncTextareaToCards(region, dayNum, 'act');
+                  }
+                }
+              });
+            }
+          }, 10);
+        });
       });
     }
 
     onAuthStateChanged(auth, async (user)=>{
+      window.currentUserId = user?.uid ?? null;
+      if (window.currentUserId) loadUserCustomPlaces();
+
       const ready = user || null;
       if(!ready){
         // local save still works (define savePlan to localStorage)
@@ -602,51 +1339,328 @@
         renderPlan(plan);
 
         window.savePlan = async ()=>{
-          const newPlan = collectPlan();
-          const totalDays = (newPlan.tokyo?.length||0) + (newPlan.okinawa?.length||0);
-          saveMsg.textContent = "Saving…";
-          try{
+          // Prevent multiple simultaneous saves
+          if (window.isSaving) {
+            console.log('⏳ Save already in progress, please wait...');
+            return;
+          }
+          
+          window.isSaving = true;
+          const saveButton = document.querySelector('button[onclick="savePlan()"]');
+          const originalText = saveButton?.textContent;
+          if (saveButton) {
+            saveButton.disabled = true;
+            saveButton.textContent = "Saving...";
+          }
+          
+          try {
+            // FORCE SYNC: Before collecting, ensure all textareas are synced from cards
+            // But preserve textarea content if it exists and cards are empty
+            const regions = ["tokyo","okinawa"];
+            
+            regions.forEach(region => {
+              const boxes = document.querySelectorAll(`#${region}-days .day-box`);
+              boxes.forEach((box, i) => {
+                const dayNum = i + 1;
+                const container = document.getElementById(`${region}-activities-container-${dayNum}`);
+                const textarea = document.getElementById(`${region}-act-${dayNum}`);
+                
+                if (container && textarea) {
+                  // Preserve existing textarea content
+                  const existingTextareaValue = (textarea.value || "").trim();
+                  
+                  // Read from cards
+                  const activityItems = container.querySelectorAll('.activity-item');
+                  if (activityItems.length > 0) {
+                    const activityTexts = Array.from(activityItems).map(item => {
+                      const textEl = item.querySelector('.flex-1');
+                      return textEl ? (textEl.textContent || "").trim() : '';
+                    }).filter(text => text);
+                    
+                    if (activityTexts.length > 0) {
+                      const cardsValue = activityTexts.join('\n');
+                      // Cards have content - use cards (they're the source of truth for UI)
+                      textarea.value = cardsValue;
+                    } else {
+                      // Cards exist but are empty - preserve textarea content if it exists
+                      // Don't overwrite textarea with empty value
+                      if (!existingTextareaValue) {
+                        // Both are empty, keep textarea empty
+                        textarea.value = "";
+                      }
+                      // If textarea has content, keep it (don't overwrite with empty cards)
+                    }
+                  } else if (!existingTextareaValue) {
+                    // No cards and no textarea content, ensure it's empty
+                    textarea.value = "";
+                  }
+                  // If no cards but textarea has content, keep the textarea value (don't overwrite)
+                }
+              });
+            });
+            
+            // Use requestAnimationFrame to ensure DOM is updated
+            await new Promise(resolve => requestAnimationFrame(resolve));
+            
+            // Add a small delay to ensure textarea values are updated in DOM
+            await new Promise(resolve => setTimeout(resolve, 50));
+            
+            // VERIFICATION: Double-check that textareas have content (especially for existing days)
+            regions.forEach(region => {
+              const boxes = document.querySelectorAll(`#${region}-days .day-box`);
+              boxes.forEach((box, i) => {
+                const dayNum = i + 1;
+                const textarea = document.getElementById(`${region}-act-${dayNum}`);
+                const container = document.getElementById(`${region}-activities-container-${dayNum}`);
+                
+                if (textarea && container) {
+                  // If textarea is empty but container has cards, sync from cards
+                  if (!textarea.value.trim()) {
+                    const activityItems = container.querySelectorAll('.activity-item');
+                    if (activityItems.length > 0) {
+                      const activityTexts = Array.from(activityItems).map(item => {
+                        const textEl = item.querySelector('.flex-1');
+                        return textEl ? (textEl.textContent || "").trim() : '';
+                      }).filter(text => text);
+                      
+                      if (activityTexts.length > 0) {
+                        textarea.value = activityTexts.join('\n');
+                      }
+                    }
+                  }
+                }
+              });
+            });
+            
+            const newPlan = collectPlan();
+            
+            // Ensure newPlan and its region arrays are valid
+            const safePlan = {
+              tokyo: Array.isArray(newPlan.tokyo) ? newPlan.tokyo : [],
+              okinawa: Array.isArray(newPlan.okinawa) ? newPlan.okinawa : []
+            };
+            
+            const totalDays = safePlan.tokyo.length + safePlan.okinawa.length;
+            saveMsg.textContent = "Saving…";
+            
             await updateDoc(ref, {
-              plan: newPlan,
+              plan: safePlan,
               days: totalDays,
-              cities: ["Tokyo","Okinawa"].filter(c => (newPlan[c.toLowerCase()]||[]).length>0),
+              cities: ["Tokyo","Okinawa"].filter(c => Array.isArray(safePlan[c.toLowerCase()]) && safePlan[c.toLowerCase()].length > 0),
               updatedAt: serverTimestamp()
             });
-            alert("Changes saved.");
+            
             saveMsg.textContent = "Changes saved.";
-          }catch(e){
+            
+            // Redirect to the saved itinerary URL
+            const newUrl = `${window.location.pathname}?itineraryId=${itineraryId}`;
+            window.location.href = newUrl;
+          } catch(e) {
             console.error(e);
-            alert(`Save failed: ${e.message||e}`);
-            saveMsg.textContent = "Save failed.";
+            saveMsg.textContent = `Save failed: ${e.message || e}`;
+            setTimeout(() => {
+              saveMsg.textContent = "";
+            }, 3000);
+          } finally {
+            window.isSaving = false;
+            if (saveButton) {
+              saveButton.disabled = false;
+              saveButton.textContent = originalText || "Save entire plan";
+            }
           }
         };
+
+        if (!document.getElementById("save-as-copy-btn")) {
+          const saveBtnEl = document.querySelector('button[onclick="savePlan()"]');
+          const copyBtn = document.createElement("button");
+          copyBtn.id = "save-as-copy-btn";
+          copyBtn.type = "button";
+          copyBtn.textContent = "Save As Copy";
+          copyBtn.className = "rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-black";
+          saveBtnEl?.after(copyBtn);
+          copyBtn.onclick = async () => {
+            const newPlan = collectPlan();
+            const safePlan = {
+              tokyo: Array.isArray(newPlan.tokyo) ? newPlan.tokyo : [],
+              okinawa: Array.isArray(newPlan.okinawa) ? newPlan.okinawa : []
+            };
+            const totalDays = safePlan.tokyo.length + safePlan.okinawa.length;
+            const defaultTitle = `${data.title || "Tokyo + Okinawa Trip"} (copy)`;
+            const title = prompt("Title for the new copy?", defaultTitle);
+            if (title === null) return;
+            try {
+              const colRef = collection(db, `users/${ready.uid}/itineraries`);
+              const docRef = await addDoc(colRef, {
+                title: (title || "").trim() || defaultTitle,
+                city: data.city || "Tokyo + Okinawa",
+                plan: safePlan,
+                days: totalDays,
+                cities: ["Tokyo","Okinawa"].filter(c => Array.isArray(safePlan[c.toLowerCase()]) && safePlan[c.toLowerCase()].length > 0),
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+              });
+              window.location.href = `${window.location.pathname}?itineraryId=${docRef.id}`;
+            } catch (e) {
+              console.error(e);
+              alert(`Save as copy failed: ${e.message || e}`);
+            }
+          };
+        }
+
         return;
       }
 
+      // CREATE mode - only initialize if days don't exist yet
+      // (load event might have already loaded from localStorage)
+      const existingDays = document.querySelectorAll('.day-box').length;
+      if (existingDays === 0) {
+        // Page hasn't loaded yet or load event hasn't run, try localStorage
+        const savedPlan = loadFromLocalStorage();
+        if (savedPlan) {
+          renderPlan(savedPlan);
+        } else {
+          regions.forEach(r=>{ regionEl(r).innerHTML=""; addDay(r); });
+        }
+      }
+      // If days already exist, they were loaded by the load event, so don't re-render
+
       // CREATE mode
       window.savePlan = async ()=>{
-        const newPlan = collectPlan();
-        const totalDays = (newPlan.tokyo?.length||0) + (newPlan.okinawa?.length||0);
-        const title = prompt("Trip title?", `Tokyo + Okinawa Trip (${new Date().toLocaleDateString()})`)
-                      || `Tokyo + Okinawa Trip (${new Date().toLocaleDateString()})`;
-        saveMsg.textContent = "Saving to the cloud…";
-        try{
+        // Prevent multiple simultaneous saves
+        if (window.isSaving) {
+          console.log('⏳ Save already in progress, please wait...');
+          return;
+        }
+        
+        window.isSaving = true;
+        const saveButton = document.querySelector('button[onclick="savePlan()"]');
+        const originalText = saveButton?.textContent;
+        if (saveButton) {
+          saveButton.disabled = true;
+          saveButton.textContent = "Saving...";
+        }
+        
+        try {
+          // FORCE SYNC: Before collecting, ensure all textareas are synced from cards
+          // But preserve textarea content if it exists and cards are empty
+          const regions = ["tokyo","okinawa"];
+          
+          regions.forEach(region => {
+            const boxes = document.querySelectorAll(`#${region}-days .day-box`);
+            boxes.forEach((box, i) => {
+              const dayNum = i + 1;
+              const container = document.getElementById(`${region}-activities-container-${dayNum}`);
+              const textarea = document.getElementById(`${region}-act-${dayNum}`);
+              
+              if (container && textarea) {
+                // Preserve existing textarea content
+                const existingTextareaValue = (textarea.value || "").trim();
+                
+                // Read from cards
+                const activityItems = container.querySelectorAll('.activity-item');
+                if (activityItems.length > 0) {
+                  const activityTexts = Array.from(activityItems).map(item => {
+                    const textEl = item.querySelector('.flex-1');
+                    return textEl ? (textEl.textContent || "").trim() : '';
+                  }).filter(text => text);
+                  
+                  if (activityTexts.length > 0) {
+                    const cardsValue = activityTexts.join('\n');
+                    // Cards have content - use cards (they're the source of truth for UI)
+                    textarea.value = cardsValue;
+                  } else {
+                    // Cards exist but are empty - preserve textarea content if it exists
+                    // Don't overwrite textarea with empty value
+                    if (!existingTextareaValue) {
+                      // Both are empty, keep textarea empty
+                      textarea.value = "";
+                    }
+                    // If textarea has content, keep it (don't overwrite with empty cards)
+                  }
+                } else if (!existingTextareaValue) {
+                  // No cards and no textarea content, ensure it's empty
+                  textarea.value = "";
+                }
+                // If no cards but textarea has content, keep the textarea value (don't overwrite)
+              }
+            });
+          });
+          
+          // Use requestAnimationFrame to ensure DOM is updated
+          await new Promise(resolve => requestAnimationFrame(resolve));
+          
+          // Add a small delay to ensure textarea values are updated in DOM
+          await new Promise(resolve => setTimeout(resolve, 50));
+          
+          // VERIFICATION: Double-check that textareas have content (especially for existing days)
+          regions.forEach(region => {
+            const boxes = document.querySelectorAll(`#${region}-days .day-box`);
+            boxes.forEach((box, i) => {
+              const dayNum = i + 1;
+              const textarea = document.getElementById(`${region}-act-${dayNum}`);
+              const container = document.getElementById(`${region}-activities-container-${dayNum}`);
+              
+              if (textarea && container) {
+                // If textarea is empty but container has cards, sync from cards
+                if (!textarea.value.trim()) {
+                  const activityItems = container.querySelectorAll('.activity-item');
+                  if (activityItems.length > 0) {
+                    const activityTexts = Array.from(activityItems).map(item => {
+                      const textEl = item.querySelector('.flex-1');
+                      return textEl ? (textEl.textContent || "").trim() : '';
+                    }).filter(text => text);
+                    
+                    if (activityTexts.length > 0) {
+                      textarea.value = activityTexts.join('\n');
+                    }
+                  }
+                }
+              }
+            });
+          });
+          
+          const newPlan = collectPlan();
+          
+          // Ensure newPlan and its region arrays are valid
+          const safePlan = {
+            tokyo: Array.isArray(newPlan.tokyo) ? newPlan.tokyo : [],
+            okinawa: Array.isArray(newPlan.okinawa) ? newPlan.okinawa : []
+          };
+          
+          const totalDays = safePlan.tokyo.length + safePlan.okinawa.length;
+          const title = prompt("Trip title?", `Tokyo + Okinawa Trip (${new Date().toLocaleDateString()})`)
+                        || `Tokyo + Okinawa Trip (${new Date().toLocaleDateString()})`;
+          saveMsg.textContent = "Saving to the cloud…";
+          
           const colRef = collection(db, `users/${ready.uid}/itineraries`);
-          await addDoc(colRef, {
+          const docRef = await addDoc(colRef, {
             title,
             city: "Tokyo + Okinawa",
-            plan: newPlan,
+            plan: safePlan,
             days: totalDays,
-            cities: ["Tokyo","Okinawa"].filter(c => (newPlan[c.toLowerCase()]||[]).length>0),
+            cities: ["Tokyo","Okinawa"].filter(c => Array.isArray(safePlan[c.toLowerCase()]) && safePlan[c.toLowerCase()].length > 0),
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
           });
-          alert("Saved as a new itinerary!");
+          
           saveMsg.textContent = "Saved as a new itinerary.";
-        }catch(e){
+          clearLocalStorageDraft(); // Clear draft after successful save
+          
+          // Redirect to the saved itinerary URL
+          const newUrl = `${window.location.pathname}?itineraryId=${docRef.id}`;
+          window.location.href = newUrl;
+        } catch(e) {
           console.error(e);
-          alert(`Cloud save failed: ${e.code||""} ${e.message||e}`);
-          saveMsg.textContent = "Save failed. See console.";
+          saveMsg.textContent = `Save failed: ${e.message || e}`;
+          setTimeout(() => {
+            saveMsg.textContent = "";
+          }, 3000);
+        } finally {
+          window.isSaving = false;
+          if (saveButton) {
+            saveButton.disabled = false;
+            saveButton.textContent = originalText || "Save entire plan";
+          }
         }
       };
     });

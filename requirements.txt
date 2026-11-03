@@ -5,4 +5,4 @@ rapidfuzz>=3.0.0
 pymongo>=4.6.0
 dnspython>=2.4.0
 flask-cors>=4.0.0
-
+firebase-admin>=6.5.0
