@@ -15,8 +15,7 @@ import re
 import time
 import logging
 import unicodedata
-from math import radians, sin, cos, asin, sqrt
-from typing import Dict, List, Any, Tuple, Set, Optional
+from typing import Dict, List, Any, Tuple, Optional
 
 # Import Flask and related frameworks
 from flask import Flask, request, jsonify, send_from_directory, abort
@@ -26,8 +25,9 @@ from rapidfuzz import process, fuzz
 from openai import OpenAI
 from dotenv import load_dotenv
 
-# Route planning (per-day optimization, schedules, fares, JR Pass)
+# Route planning (per-day optimization, schedules, fares, JR Pass) and the AI review
 import route_planner
+import ai_reviewer
 
 # Trying to import MongoDB - falls back to JSON files if not available
 try:
@@ -137,8 +137,9 @@ OPENAI_MODEL   = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 MONGO_URI = os.getenv("MONGO_URI")
 
-# Initialize OpenAI client for AI reviews
-client = OpenAI(api_key=OPENAI_API_KEY)
+# Initialize OpenAI client for AI reviews. Few retries and a timeout so that,
+# if OpenAI is down or out of credits, the rule-based review is shown quickly.
+client = OpenAI(api_key=OPENAI_API_KEY, max_retries=1, timeout=30)
 
 # Initialize Flask app
 app = Flask(__name__, static_folder=None)
@@ -303,821 +304,6 @@ def _load_kb_uncached(cities: List[str]) -> Dict[str, List[Dict[str, Any]]]:
                 kb[c].append(item)
     return kb
 
-def fuzzy_lookup(city_kb: List[Dict[str, Any]], name: str, limit=3, score_cut=70) -> List[Dict[str, Any]]:
-    """
-    Finds places even if users misspell them.
-    Example: "Shibuya starbux" → Matches "Starbucks Shibuya"
-    """
-    # Clean up what the user typed
-    query = (name or "").strip()
-    
-    # Return nothing if query is empty or no data available
-    if not query or not city_kb:
-        return []
-    
-    # Extract all place names from the knowledge base
-    all_place_names = [place.get("name", "") for place in city_kb]
-    
-    # Use fuzzy matching to find similar names (handles typos)
-    matches = process.extract(query, all_place_names, scorer=fuzz.WRatio, limit=limit)
-    
-    # Keep only the good matches (score 70+)
-    results = []
-    for matched_name, score, index in matches:
-        # Check if match is good enough and index is valid
-        if score >= score_cut and 0 <= index < len(city_kb):
-            results.append(city_kb[index])
-    
-    return results
-
-def _tokenize_activities(text: str) -> List[str]:
-    """
-    Splits activity lists into separate items.
-    Example: "Shibuya shopping / Ramen / Meiji Shrine" → ["Shibuya shopping", "Ramen", "Meiji Shrine"]
-    Also removes duplicates while keeping the order.
-    """
-    if not text:
-        return []
-    
-    # Split by common separators: / | ; , or newlines
-    raw_items = []
-    current_item = []
-    
-    for character in text:
-        # Hit a separator - save current item
-        if character in "/|;\n,":
-            item = "".join(current_item)
-            raw_items.append(item)
-            current_item = []  # Start fresh for next item
-        else:
-            current_item.append(character)
-    
-    # Don't forget the last item
-    if current_item:
-        final_item = "".join(current_item)
-        raw_items.append(final_item)
-
-    # Remove duplicates but keep the order
-    unique_items = []
-    seen_items = set()
-    
-    for item in raw_items:
-        cleaned_item = item.strip()
-        lowercase_key = cleaned_item.lower()
-        
-        # Only add if not empty and not seen before
-        if cleaned_item and lowercase_key not in seen_items:
-            seen_items.add(lowercase_key)
-            unique_items.append(cleaned_item)
-    
-    return unique_items
-
-def enrich_with_kb(plan: Dict[str, Any], kb: Dict[str, List[Dict[str, Any]]]) -> Dict[str, List[Dict[str, Any]]]:
-    """
-    Adds details to the user's plan by matching location names to real places.
-    
-    Input: User types "Shibuya" 
-    Output: Adds GPS coordinates, Google Maps link, category, etc.
-    
-    Helps the AI understand what the user actually wants to visit.
-    """
-    enriched: Dict[str, List[Dict[str, Any]]] = {}
-    for city, days in (plan or {}).items():
-        if not isinstance(days, list):
-            continue
-        city_kb = kb.get(city, [])
-        enriched[city] = []
-        for d in days or []:
-            if not isinstance(d, dict):
-                continue
-            loc = (d.get("location") or "").strip()
-            best = fuzzy_lookup(city_kb, loc, limit=1, score_cut=70)
-            match = best[0] if best else {}
-            enriched[city].append({
-                "day": d.get("day"),
-                "location": loc,
-                "activities": d.get("activities", ""),
-                "kbMatch": {
-                    "name": match.get("name"),
-                    "lat": match.get("lat"),
-                    "lng": match.get("lng"),
-                    "url": match.get("google_maps_url") or match.get("google_map_url"),
-                    "category": match.get("type") or match.get("category"),
-                }
-            })
-    return enriched
-
-def _build_allowed_map(enriched: Dict[str, List[Dict[str, Any]]]) -> Dict[str, Dict[int, List[str]]]:
-    """
-    Create a map of what places the user actually typed for each day.
-    
-    Example output:
-    {
-      "tokyo": {
-        1: ["Shibuya", "Harajuku", "Ramen"],
-        2: ["Asakusa", "Senso-ji", "Tokyo Skytree"]
-      }
-    }
-    
-    The AI can only suggest changes using these exact places.
-    """
-    allowed_places = {}
-    
-    # Go through each city/region in the plan
-    for region, days in enriched.items():
-        allowed_places[region] = {}
-        
-        # Go through each day in this region
-        for day_info in days:
-            # Get the day number (skip if invalid)
-            day_number = int(day_info.get("day") or 0) or 0
-            if day_number <= 0:
-                continue
-            
-            # Collect all places mentioned for this day
-            places_for_day = []
-            
-            # Add the main location
-            location = (day_info.get("location") or "").strip()
-            if location:
-                places_for_day.append(location)
-            
-            # Add activities (split them first)
-            activities_text = day_info.get("activities") or ""
-            activity_list = _tokenize_activities(activities_text)
-            for activity in activity_list:
-                places_for_day.append(activity)
-            
-            # Remove duplicates while keeping order
-            unique_places = []
-            seen_places = set()
-            
-            for place in places_for_day:
-                cleaned_place = place.strip()
-                lowercase_key = cleaned_place.lower()
-                
-                if cleaned_place and lowercase_key not in seen_places:
-                    seen_places.add(lowercase_key)
-                    unique_places.append(cleaned_place)
-            
-            # Only save if there are actual places (skip empty days)
-            if unique_places:
-                allowed_places[region][day_number] = unique_places
-    
-    return allowed_places
-
-def _has_legal_option(allowed: Dict[str, Dict[int, List[str]]]) -> bool:
-    """
-    Check if the AI can make any suggestions.
-    Returns True if there are:
-    - Days with 2+ items (can swap order)
-    - Adjacent days (can move items between them)
-    """
-    for region, days in allowed.items():
-        # Skip if no days in this region
-        if not days:
-            continue
-        
-        day_numbers = sorted(days.keys())
-        
-        # Check if any day has 2+ items (means we can swap)
-        for day_num in day_numbers:
-            if len(days[day_num]) >= 2:
-                return True  # Can swap items within this day
-        
-        # Check if any day has adjacent days (means we can move items)
-        for day_num in day_numbers:
-            has_items = len(days[day_num]) >= 1
-            has_previous_day = (day_num - 1) in days
-            has_next_day = (day_num + 1) in days
-            
-            if has_items and (has_previous_day or has_next_day):
-                return True  # Can move items to adjacent day
-    
-    # No legal options found
-    return False
-
-# =============================================================================
-# AI REVIEW CONFIGURATION
-# =============================================================================
-# Keywords to identify different types of activities
-
-# Words that indicate meal/food activities
-MEAL_WORDS = {
-    "breakfast", "brunch", "lunch", "dinner", "ramen", "sushi", "yakitori", 
-    "katsu", "tempura", "restaurant", "cafe", "coffee", "curry", "tonkatsu", 
-    "udon", "soba", "izakaya", "yakiniku", "tatsunoya", "ichiran", "afuri", 
-    "ippudo", "maisen", "gyukatsu", "zurrirola"
-}
-
-# Words that indicate shopping activities
-SHOP_WORDS = {
-    "shopping", "mall", "department store", "donki", "don quijote", "vintage", 
-    "thrift", "uniqlo", "gu", "beams", "isetan", "marui", "parco", "loft", 
-    "tokyu hands"
-}
-
-# Words that indicate evening/night activities
-EVENING_WORDS = {
-    "sky", "observatory", "tower", "night view", "sunset", "illumination"
-}
-
-# Thresholds for day analysis
-OVERLOAD_THRESHOLD = 8  # Days with 8+ activities might be too packed
-LIGHT_THRESHOLD = 2      # Days with 2 or fewer activities might be too light
-MEAL_GAP_THRESHOLD = 4   # Days with 4+ activities but no meals need a meal break
-
-def _tag_token(token: str) -> Dict[str, bool]:
-    """
-    Identify what type of activity this is.
-    Example: "Ramen Tatsunoya" → {is_meal: True, is_shop: False, is_evening: False}
-    """
-    t = (token or "").lower()
-    return {
-        "is_meal":     any(w in t for w in MEAL_WORDS),      # Is this food-related?
-        "is_shop":     any(w in t for w in SHOP_WORDS),      # Is this shopping?
-        "is_evening":  any(w in t for w in EVENING_WORDS),   # Is this a night activity?
-    }
-
-def _collect_all_items(allowed: Dict[str, Dict[int, List[str]]]) -> Dict[str, List[Tuple[str,int]]]:
-    """
-    Find all occurrences of each place across all days.
-    Used to detect duplicates (visiting same place on multiple days).
-    """
-    place_occurrences = {}
-    
-    # Go through each region and day
-    for region, days in allowed.items():
-        for day_number, items in days.items():
-            for item in items:
-                # Use lowercase as key to catch duplicates (e.g., "Shibuya" = "shibuya")
-                lowercase_item = item.lower()
-                
-                # Track where this place appears
-                if lowercase_item not in place_occurrences:
-                    place_occurrences[lowercase_item] = []
-                
-                place_occurrences[lowercase_item].append((region, day_number))
-    
-    return place_occurrences
-
-def _summarize_region_day(day_entry: Dict[str, Any]) -> str:
-    parts = [f"{day_entry['count']} items"]
-    if day_entry.get("meals"):
-        parts.append(f"{day_entry['meals']} meal")
-    if day_entry.get("evening"):
-        parts.append(f"{day_entry['evening']} night view")
-    if day_entry.get("shops"):
-        parts.append(f"{day_entry['shops']} shopping")
-    return ", ".join(parts)
-
-# =============================================================================
-# AI ANALYSIS FUNCTIONS
-# =============================================================================
-# These functions analyze itineraries and detect issues
-
-def _analyze_plan(enriched: Dict[str, List[Dict[str, Any]]],
-                  allowed: Dict[str, Dict[int, List[str]]]) -> Dict[str, Any]:
-    """
-    Analyze the entire itinerary and find potential issues.
-    
-    Detects:
-    - Overloaded days (too many activities)
-    - Light days (too few activities)
-    - Missing meals (lots of activities but no food)
-    - Duplicate places (visiting same place twice)
-    
-    Returns statistics and issue list for the AI to consider.
-    """
-    analysis: Dict[str, Any] = {
-        "regions": {},
-        "issues": {
-            "overloadedDays": [],
-            "lightDays": [],
-            "missingMeals": [],
-            "duplicates": [],
-        },
-        "summary": "",
-    }
-
-    duplicates = _collect_all_items(allowed)
-    duplicate_items = {
-        name: places for name, places in duplicates.items() if len(places) > 1
-    }
-    analysis["issues"]["duplicates"] = [
-        {
-            "item": name,
-            "occurrences": [(region, day) for region, day in places],
-        }
-        for name, places in duplicate_items.items()
-    ]
-
-    summary_lines: List[str] = []
-    total_days = 0
-    total_items = 0
-
-    for region in sorted(enriched.keys()):
-        days = allowed.get(region, {})
-        region_entries: List[Dict[str, Any]] = []
-        counts: List[int] = []
-        for day in sorted(days.keys()):
-            tokens = days[day]
-            count = len(tokens)
-            meals = sum(1 for t in tokens if _tag_token(t)["is_meal"])
-            shops = sum(1 for t in tokens if _tag_token(t)["is_shop"])
-            evening = sum(1 for t in tokens if _tag_token(t)["is_evening"])
-
-            region_entries.append({
-                "day": day,
-                "count": count,
-                "meals": meals,
-                "shops": shops,
-                "evening": evening,
-            })
-
-            counts.append(count)
-            total_items += count
-            total_days += 1
-
-            if count >= OVERLOAD_THRESHOLD:
-                analysis["issues"]["overloadedDays"].append({
-                    "region": region,
-                    "day": day,
-                    "count": count,
-                })
-            if count <= LIGHT_THRESHOLD:
-                analysis["issues"]["lightDays"].append({
-                    "region": region,
-                    "day": day,
-                    "count": count,
-                })
-            if count >= MEAL_GAP_THRESHOLD and meals == 0:
-                analysis["issues"]["missingMeals"].append({
-                    "region": region,
-                    "day": day,
-                    "count": count,
-                })
-
-        if region_entries:
-            analysis["regions"][region] = region_entries
-            counts_str = "/".join(str(entry["count"]) for entry in region_entries)
-            summary_lines.append(
-                f"{region.title()}: {len(region_entries)} day(s), items per day {counts_str}"
-            )
-
-    if duplicate_items:
-        summary_lines.append(
-            f"Duplicates: {', '.join(sorted(name.title() for name in duplicate_items.keys()))}"
-        )
-
-    if total_days:
-        avg = round(total_items / total_days, 2)
-        summary_lines.append(f"Average items/day: {avg}")
-
-    analysis["summary"] = " | ".join(summary_lines) if summary_lines else ""
-    return analysis
-
-def _pick_move_candidate(items: List[str]) -> Optional[str]:
-    """Choose a token to move, preferring non-meal/non-primary entries."""
-    for token in reversed(items):
-        tags = _tag_token(token)
-        if not tags["is_meal"]:
-            return token
-    return items[-1] if items else None
-
-def _heuristic_suggestions(enriched: Dict[str, List[Dict[str, Any]]],
-                           allowed: Dict[str, Dict[int, List[str]]],
-                           analysis: Optional[Dict[str, Any]] = None,
-                           max_sugs: int = 3) -> List[Dict[str, Any]]:
-    """
-    Deterministic micro-edits to guarantee useful, concrete suggestions:
-      1) Within a day: if 'shopping' appears before a meal, suggest SWAP so meal comes first.
-      2) Within a day: if an 'evening' thing is first, swap it later.
-      3) Across days: if the exact same item appears on multiple days, TRIM the later one.
-    """
-    suggestions: List[Dict[str, Any]] = []
-
-    # (1) & (2) within-day ordering
-    for region, days in allowed.items():
-        for day in sorted(days.keys()):
-            items = allowed[region][day]
-            if len(items) < 2:
-                continue
-            tags = [_tag_token(x) for x in items]
-
-            meal_idx = next((i for i,t in enumerate(tags) if t["is_meal"]), None)
-            shop_idx = next((i for i,t in enumerate(tags) if t["is_shop"]), None)
-            if meal_idx is not None and shop_idx is not None and shop_idx < meal_idx:
-                a, b = items[shop_idx], items[meal_idx]
-                suggestions.append({
-                    "region": region, "day": day, "action": "swap",
-                    "title": f"[{region}] Swap “{a}” ⇄ “{b}” (Day {day})",
-                    "reason": "Eat before shopping to reduce fatigue and queue risk.",
-                    "impact": "Smoother pacing; better energy for browsing.",
-                    "confidence": 0.8,
-                    "details": {"a": a, "b": b}
-                })
-
-            eve_idx = next((i for i,t in enumerate(tags) if t["is_evening"]), None)
-            if eve_idx is not None and eve_idx == 0 and len(items) >= 2:
-                a, b = items[0], items[1]
-                suggestions.append({
-                    "region": region, "day": day, "action": "swap",
-                    "title": f"[{region}] Swap “{a}” ⇄ “{b}” (Day {day})",
-                    "reason": "Move observatory/night view later for best timing.",
-                    "impact": "Better views; natural day→night flow.",
-                    "confidence": 0.75,
-                    "details": {"a": a, "b": b}
-                })
-
-    # (3) duplicates across days → trim later occurrence
-    occ = _collect_all_items(allowed)
-    for item_lower, places in occ.items():
-        if len(places) <= 1:
-            continue
-        latest_region, latest_day = places[-1]
-        suggestions.append({
-            "region": latest_region, "day": latest_day, "action": "trim",
-            "title": f"[{latest_region}] Trim duplicate “{item_lower.title()}” (Day {latest_day})",
-            "reason": "Remove repeated stop to create breathing room.",
-            "impact": "Frees time; reduces redundancy.",
-            "confidence": 0.7,
-            "details": {"item": item_lower}
-        })
-
-    # (4) rebalance overloaded vs light days using analysis, if available
-    if analysis:
-        by_region = analysis.get("regions", {})
-        light_lookup = {
-            (issue["region"], issue["day"]): issue
-            for issue in analysis.get("issues", {}).get("lightDays", [])
-        }
-        for issue in analysis.get("issues", {}).get("overloadedDays", []):
-            region = issue["region"]
-            day = issue["day"]
-            items = allowed.get(region, {}).get(day, [])
-            if not items:
-                continue
-            for target_day in (day - 1, day + 1):
-                if (region, target_day) not in light_lookup:
-                    continue
-                candidate = _pick_move_candidate(items)
-                if not candidate:
-                    continue
-                suggestions.append({
-                    "region": region,
-                    "day": day,
-                    "action": "move",
-                    "title": f"[{region}] Move “{candidate}” → Day {target_day}",
-                    "reason": "Balance a heavy day with a light adjacent day.",
-                    "impact": "Creates steadier pacing between days.",
-                    "confidence": 0.7,
-                    "details": {"item": candidate, "toDay": target_day},
-                })
-                break
-
-    # Filter illegal and dedupe
-    legal = [s for s in suggestions if _suggestion_legal(s, allowed)]
-    seen, uniq = set(), []
-    for s in legal:
-        key = (s["region"], s["day"], s["action"], json.dumps(s.get("details", {}), sort_keys=True))
-        if key not in seen:
-            seen.add(key)
-            uniq.append(s)
-    return uniq[:max_sugs]
-
-# =============================================================================
-# AI PROMPT BUILDER
-# =============================================================================
-# Builds the instructions sent to ChatGPT
-
-def build_reviewer_prompt(enriched: Dict[str, List[Dict[str, Any]]], analysis: Optional[Dict[str, Any]] = None):
-    """
-    Build the detailed instructions for ChatGPT to review an itinerary.
-    
-    Includes:
-    - What to look for (pacing, meals, timing, flow)
-    - Japan-specific travel expertise
-    - What suggestions are allowed
-    - Scoring criteria
-    """
-    allowed = _build_allowed_map(enriched)
-    has_legal = _has_legal_option(allowed)
-
-    must_propose_text = (
-        "If there is literally no legal edit (per constraints), suggestions may be empty."
-        if not has_legal else
-        "Unless the plan clearly deserves a score ≥ 9, provide at least one valid suggestion."
-    )
-
-    days_available = {region: sorted(days.keys()) for region, days in allowed.items()}
-
-    # Build context about the plan
-    plan_summary = ""
-    if analysis:
-        plan_summary = analysis.get("summary", "")
-    
-    system_text = f"""
-You are an expert Japan travel itinerary reviewer with deep knowledge of:
-- Japanese culture, transportation, and local customs
-- Optimal timing for attractions (temples open early, night views best at sunset)
-- Meal timing and restaurant culture (lunch rushes, dinner reservations)
-- Efficient routing and neighborhood proximity
-- Realistic pacing for different traveler types
-
-Your goal: Provide actionable, specific feedback that helps travelers have the best experience in Japan.
-
-REVIEW GUIDELINES:
-
-1. SCORING CRITERIA (0-10) - BE GENEROUS AND REALISTIC:
-   - 9-10: Excellent - Well-balanced, realistic pacing, good meal timing, logical flow
-   - 7-8: Good - Minor optimizations possible, generally well-structured. Most solid plans should score here.
-   - 5-6: Okay - Some issues with pacing, timing, or flow that need attention
-   - 3-4: Weak - Multiple serious problems: actually overloaded, poor timing, missing meals
-   - 0-2: Very Weak - Unrealistic, too packed, or poorly organized
-   
-   DEFAULT TO 7-8 for reasonable plans. Only score 4 or below if there are MAJOR issues.
-
-2. UNDERSTAND CONTEXT:
-   - Day 1 arrival: Check-in, lighter activities, shopping-focused is NORMAL and GOOD
-   - Shopping lists: "Uniqlo, GU, Beams, Isetan" counts as 1-2 hours of activity, not 4 separate stops
-   - Restaurant names: "Ramen Tatsunoya", "Zurrirola", etc. ARE meal breaks
-   - Geography: Shinjuku, Shibuya, Harajuku are walkable clusters (15-30 min)
-   - Shopping days: 8-10 store names is realistic for a 4-5 hour shopping session
-
-3. EVALUATE THESE ASPECTS:
-   - Pacing: Days should have 3-8 actual activities (not counting individual shop names)
-   - Timing: Meals at appropriate times? Evening activities scheduled for evening?
-   - Flow: Logical sequence? Nearby places grouped? Minimize backtracking?
-   - Meals: Look for restaurant names, "lunch", "dinner", "ramen", "sushi" etc.
-   - Realism: Can this actually be done in one day? Travel time considered?
-   - Variety: Shopping-focused, culture-focused, or food-focused days are ALL valid
-
-4. STRENGTHS should highlight:
-   - What's working well (e.g., "Good meal timing", "Well-balanced days", "Logical neighborhood grouping")
-   - Smart choices (e.g., "Efficient route through Shibuya", "Good mix of modern and traditional")
-   - Recognize when shopping lists are intentional and appropriate
-   - Be specific and encouraging
-
-5. RISKS should identify:
-   - Actually overloaded days (not just long shopping lists)
-   - Truly missing meal breaks (check for restaurant names first!)
-   - Poor timing (e.g., observatory at 9am instead of evening)
-   - Geographic backtracking (Shinjuku → Ginza → Shinjuku)
-   - Unrealistic expectations
-   - Be constructive, not just critical
-
-6. SUGGESTIONS - Make SMALL, SURGICAL edits only:
-   Legal actions:
-     - "swap": Exchange two items within the SAME day (e.g., meal before shopping)
-     - "move": Move ONE item to an ADJACENT day (day±1) to balance pacing
-     - "trim": Remove a duplicate or low-value item to reduce overload
-   
-   Forbidden:
-     - Adding new places not in AllowedPlaces
-     - Moving to non-adjacent days
-     - Vague advice without concrete edits
-   
-   If the plan is already good (score 7+), provide 1-2 minor optimizations or leave suggestions empty.
-
-7. SUGGESTION QUALITY:
-   - Title: Clear, actionable (e.g., "Move lunch before shopping" not "Better timing")
-   - Reason: Specific why (e.g., "Eating before shopping prevents fatigue and long restaurant queues")
-   - Impact: Concrete benefit (e.g., "More energy for browsing, avoids 1-2 hour wait times")
-   - Confidence: 0.7-0.9 for high-confidence, 0.5-0.7 for moderate
-
-JAPAN-SPECIFIC CONSIDERATIONS:
-- Temples/shrines: Best early morning (6-9am) or late afternoon, avoid midday crowds
-- Restaurants: Lunch 11:30-2pm, dinner 6-9pm. Popular spots have 1-2 hour waits
-- Shopping clusters: Shinjuku (Isetan, Lumine, Marui), Shibuya (109, Parco), Harajuku (Laforet, Omotesando)
-  → Multiple stores in same area = 1 activity session (2-4 hours total)
-- Night views: Best 6-9pm (sunset varies by season)
-- Transportation: Factor in 15-30 min between areas, rush hour 7-9am, 5-7pm
-- Day 1 arrival: Check-in + shopping/light sightseeing is the STANDARD pattern
-
-{plan_summary and f"PLAN SUMMARY: {plan_summary}" or ""}
-
-Coverage rule: {must_propose_text}
-
-Return JSON ONLY with this exact structure:
-{{
-  "overallScore": <0-10 integer>,
-  "strengths": [
-    "<specific strength 1>",
-    "<specific strength 2>",
-    ...
-  ],
-  "risks": [
-    "<specific risk 1>",
-    "<specific risk 2>",
-    ...
-  ],
-  "suggestions": [
-    {{
-      "region": "<one of: {', '.join(enriched.keys())}>",
-      "day": <integer>,
-      "action": "swap" | "move" | "trim",
-      "title": "<Clear, actionable title (max 60 chars)>",
-      "reason": "<Specific why this helps (max 200 chars)>",
-      "impact": "<Concrete benefit (max 120 chars)>",
-      "confidence": <0.0-1.0 float>,
-      "details": {{
-        // For swap: {{"a": "<item>", "b": "<item>"}}
-        // For move: {{"item": "<item>", "toDay": <integer>}}
-        // For trim: {{"item": "<item>"}}
-      }}
-    }}
-  ]
-}}
-
-CRITICAL CONSTRAINTS:
-- Every item in suggestions MUST exist exactly in AllowedPlaces[region][day]
-- For move: toDay must be day±1 AND exist in DaysAvailable
-- Maximum 6 strengths, 6 risks, 10 suggestions
-- Be specific and actionable, not generic
-
-Respond with valid JSON only, no markdown, no explanations.
-"""
-    user_payload = {
-        "Cities": list(enriched.keys()),
-        "Days": enriched,
-        "AllowedPlaces": allowed,
-        "DaysAvailable": days_available,
-    }
-    
-    # Add analysis if available
-    if analysis:
-        user_payload["Analysis"] = {
-            "Summary": analysis.get("summary", ""),
-            "Issues": {
-                "OverloadedDays": analysis.get("issues", {}).get("overloadedDays", []),
-                "LightDays": analysis.get("issues", {}).get("lightDays", []),
-                "MissingMeals": analysis.get("issues", {}).get("missingMeals", []),
-                "Duplicates": analysis.get("issues", {}).get("duplicates", []),
-            }
-        }
-    
-    return system_text, user_payload, allowed
-
-def _suggestion_legal(s: Dict[str, Any], allowed: Dict[str, Dict[int, List[str]]]) -> bool:
-    """
-    Verify that a suggestion is valid and can actually be applied.
-    
-    Checks:
-    - The places mentioned actually exist in the plan
-    - Swap: Both items are on the same day
-    - Move: Target day exists and is adjacent (day±1)
-    - Trim: Item appears on multiple days
-    """
-    try:
-        region = s.get("region")
-        day    = int(s.get("day"))
-        action = (s.get("action") or "").lower()
-        d      = s.get("details", {}) or {}
-        if region not in allowed or day not in allowed[region]:
-            return False
-        items = allowed[region][day]
-        canon = lambda x: (x or "").strip().lower()
-
-        if action == "swap":
-            a, b = d.get("a"), d.get("b")
-            return bool(
-                a and b and
-                any(canon(a)==canon(x) for x in items) and
-                any(canon(b)==canon(y) for y in items)
-            )
-
-        if action == "move":
-            item, toDay = d.get("item"), d.get("toDay")
-            if not (item and isinstance(toDay, int)):
-                return False
-            if toDay not in allowed[region]:
-                return False
-            return (toDay in (day-1, day+1)) and any(canon(item)==canon(x) for x in items)
-
-        if action == "trim":
-            item = (d.get("item") or "").strip()
-            if not item or not any(canon(item)==canon(x) for x in items):
-                return False
-            # Only allow a trim if the same item exists on a different day in the same region
-            exists_elsewhere = any(
-                (other_day != day) and any(canon(item)==canon(x) for x in allowed[region][other_day])
-                for other_day in allowed[region].keys()
-            )
-            return exists_elsewhere
-
-        return False
-    except Exception:
-        return False
-
-def _pick_fallback_suggestion(allowed: Dict[str, Dict[int, List[str]]]) -> Dict[str, Any]:
-    for region, days in allowed.items():
-        for d in sorted(days.keys()):
-            items = days[d]
-            if len(items) >= 3:
-                return {
-                    "region": region, "day": d, "action": "trim",
-                    "title": f"[{region}] Trim “{items[-1]}” (Day {d})",
-                    "reason": "Slightly reduce overload in this day.",
-                    "impact": "Creates breathing room.",
-                    "confidence": 0.6,
-                    "details": {"item": items[-1]}
-                }
-    for region, days in allowed.items():
-        for d in sorted(days.keys()):
-            items = days[d]
-            if len(items) >= 2:
-                return {
-                    "region": region, "day": d, "action": "swap",
-                    "title": f"[{region}] Swap “{items[0]}” ⇄ “{items[1]}” (Day {d})",
-                    "reason": "Small reordering for better flow.",
-                    "impact": "Smoother sequence.",
-                    "confidence": 0.6,
-                    "details": {"a": items[0], "b": items[1]}
-                }
-    for region, days in allowed.items():
-        day_nums = sorted(days.keys())
-        for d in day_nums:
-            items = days[d]
-            if not items:
-                continue
-            for toDay in (d+1, d-1):
-                if toDay in days:
-                    return {
-                        "region": region, "day": d, "action": "move",
-                        "title": f"[{region}] Move “{items[-1]}” → Day {toDay} (Day {d})",
-                        "reason": "Balance adjacent days.",
-                        "impact": "Evens out pacing.",
-                        "confidence": 0.6,
-                        "details": {"item": items[-1], "toDay": toDay}
-                    }
-    return {}
-
-def _validate_and_polish(model_json: Dict[str, Any], allowed: Dict[str, Dict[int, List[str]]]) -> Dict[str, Any]:
-    """
-    Clean up ChatGPT's response and verify all suggestions are legal.
-    
-    - Validates suggestions against actual plan
-    - Limits text lengths (titles, reasons, impacts)
-    - Sorts by confidence
-    - Ensures score is 0-10
-    """
-    out = {
-        "overallScore": model_json.get("overallScore", 0),
-        "strengths":    model_json.get("strengths") or [],
-        "risks":        model_json.get("risks") or [],
-        "suggestions":  model_json.get("suggestions") or [],
-    }
-    if not isinstance(out["strengths"], list): out["strengths"] = []
-    if not isinstance(out["risks"], list):     out["risks"] = []
-    if not isinstance(out["suggestions"], list): out["suggestions"] = []
-
-    # Clean and validate strengths/risks
-    out["strengths"] = [str(s).strip() for s in out["strengths"] if s and str(s).strip()][:6]
-    out["risks"] = [str(r).strip() for r in out["risks"] if r and str(r).strip()][:6]
-    
-    # Remove empty strings
-    out["strengths"] = [s for s in out["strengths"] if s]
-    out["risks"] = [r for r in out["risks"] if r]
-
-    legal: List[Dict[str, Any]] = []
-    for s in out["suggestions"]:
-        if not isinstance(s, dict):
-            continue
-        if _suggestion_legal(s, allowed):
-            s["action"]     = str(s.get("action", "")).lower()
-            s["reason"]     = (s.get("reason") or "").strip()[:200]
-            s["impact"]     = (s.get("impact") or "").strip()[:120]
-            s["title"]      = (s.get("title")  or "").strip()[:60] or None
-            try:
-                conf = float(s.get("confidence", 0.6))
-                s["confidence"] = max(0.0, min(1.0, conf))
-            except Exception:
-                s["confidence"] = 0.6
-            legal.append(s)
-
-    # Sort suggestions by confidence (highest first), then limit
-    legal.sort(key=lambda x: x.get("confidence", 0), reverse=True)
-    out["suggestions"] = legal[:10]
-
-    try:
-        score = model_json.get("overallScore", 0)
-        if isinstance(score, (int, float)):
-            out["overallScore"] = max(0, min(10, int(round(score))))
-        else:
-            out["overallScore"] = 0
-    except Exception:
-        out["overallScore"] = 0
-
-    return out
-
-def _prune_bad_risks(out: Dict[str, Any], allowed: Dict[str, Dict[int, List[str]]]) -> None:
-    """Drop ‘duplicate across days’ claims when all regions have <2 days."""
-    if not out.get("risks"):
-        return
-    few_days_everywhere = all(len(m.keys()) < 2 for m in allowed.values())
-    if few_days_everywhere:
-        out["risks"] = [x for x in out["risks"] if "duplicate" not in x.lower()]
 
 # =============================================================================
 # FLASK ROUTES - Frontend (HTML Pages & Static Files)
@@ -1931,42 +1117,32 @@ def _parse_clock(value: Any, default: int) -> int:
     return hours * 60 + minutes
 
 
-@app.route("/optimize-route", methods=["POST"])
-def optimize_route():
+class PlanInputError(ValueError):
+    """The trip sent by the page is missing something or invalid (-> HTTP 400)"""
+
+
+def prepare_trip_days(days_in: Any) -> List[Dict[str, Any]]:
     """
-    Optimize every day of a trip.
+    Normalize the days sent by a planner page and match every stop to a real place.
+    Used by both the route optimizer and the AI review.
 
-    POST body:
-    {
-      "days": [
-        {"key": "tokyo-1", "label": "Tokyo · Day 1", "city": "Tokyo", "area": "Shibuya",
-         "stops": [{"name": "Shibuya Sky", "duration": 90}, {"name": "Lunch", "duration": 60}]}
-      ],
-      "start_time": "09:00"
-    }
-
-    Optional Authorization header (Firebase ID token) lets your custom places be matched too.
-
-    Returns per-day optimized order with a timed schedule, city-to-city travel,
-    fare estimates and the best JR Pass option (see route_planner.plan_trip).
+    Input:  [{"key", "label", "city", "area", "stops": [{"name", "duration"}]}]
+    Output: same days with city_key, anchor (start point) and, per stop,
+            lat/lng/matched_name/kind (when found), type (meal/evening/...) and generic.
     """
-    body = request.get_json(silent=True) or {}
-    days_in = body.get("days")
     if not isinstance(days_in, list) or not days_in:
-        return jsonify({"error": "Send a 'days' list: [{city, area, stops: [{name, duration}]}]"}), 400
+        raise PlanInputError("Send a 'days' list: [{city, area, stops: [{name, duration}]}]")
     if len(days_in) > MAX_DAYS:
-        return jsonify({"error": f"Too many days (max {MAX_DAYS})"}), 400
-
-    start_minute = _parse_clock(body.get("start_time"), 9 * 60)
+        raise PlanInputError(f"Too many days (max {MAX_DAYS})")
 
     # Normalize input and figure out which cities we need
     days: List[Dict[str, Any]] = []
     for n, day in enumerate(days_in, start=1):
         if not isinstance(day, dict):
-            return jsonify({"error": f"Day {n} must be an object"}), 400
+            raise PlanInputError(f"Day {n} must be an object")
         city_key = str(day.get("city") or "").strip().lower()
         if city_key not in ROUTE_CITIES:
-            return jsonify({"error": f"Day {n}: unsupported city '{day.get('city')}'"}), 400
+            raise PlanInputError(f"Day {n}: unsupported city '{day.get('city')}'")
         stops = []
         for stop in (day.get("stops") or [])[:MAX_STOPS_PER_DAY]:
             if isinstance(stop, str):
@@ -1992,7 +1168,7 @@ def optimize_route():
         })
 
     if not any(d["stops"] for d in days):
-        return jsonify({"error": "Add some activities to your days first."}), 400
+        raise PlanInputError("Add some activities to your days first.")
 
     kb = load_kb_for(sorted({d["city_key"] for d in days}))
 
@@ -2032,9 +1208,39 @@ def optimize_route():
         for stop in day["stops"]:
             place = locate(stop["name"], anchor)
             if place:
-                stop.update({"lat": place["lat"], "lng": place["lng"], "matched_name": place.get("matched_name") or place.get("name")})
+                stop.update({"lat": place["lat"], "lng": place["lng"], "kind": place.get("_kind"),
+                             "matched_name": place.get("matched_name") or place.get("name")})
             stop["type"] = route_planner.classify(stop["name"], place.get("_kind") if place else None)
             stop["generic"] = _is_generic(stop["name"])
+
+    return days
+
+
+@app.route("/optimize-route", methods=["POST"])
+def optimize_route():
+    """
+    Optimize every day of a trip.
+
+    POST body:
+    {
+      "days": [
+        {"key": "tokyo-1", "label": "Tokyo · Day 1", "city": "Tokyo", "area": "Shibuya",
+         "stops": [{"name": "Shibuya Sky", "duration": 90}, {"name": "Lunch", "duration": 60}]}
+      ],
+      "start_time": "09:00"
+    }
+
+    Optional Authorization header (Firebase ID token) lets your custom places be matched too.
+
+    Returns per-day optimized order with a timed schedule, city-to-city travel,
+    fare estimates and the best JR Pass option (see route_planner.plan_trip).
+    """
+    body = request.get_json(silent=True) or {}
+    try:
+        days = prepare_trip_days(body.get("days"))
+    except PlanInputError as e:
+        return jsonify({"error": str(e)}), 400
+    start_minute = _parse_clock(body.get("start_time"), 9 * 60)
 
     try:
         result = route_planner.plan_trip(days, start_minute)
@@ -2046,167 +1252,107 @@ def optimize_route():
 # =============================================================================
 # AI REVIEW ENDPOINT
 # =============================================================================
-# This is the main AI feature - analyzes itineraries and suggests improvements
+# Reviews a trip plan: travel-time facts + rule checks (ai_reviewer.py), written up
+# by the language model, with every suggested edit checked against the real plan
+
+def _legacy_plan_to_days(plan: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Old pages sent {"tokyo": [{"day", "location", "activities"}]}; turn it into 'days'"""
+    days = []
+    for city, entries in plan.items():
+        for entry in entries if isinstance(entries, list) else []:
+            if not isinstance(entry, dict):
+                continue
+            activities = re.split(r"[\n/|;,]", str(entry.get("activities") or ""))
+            days.append({
+                "label": f"{str(city).capitalize()} · Day {entry.get('day') or len(days) + 1}",
+                "city": city,
+                "area": entry.get("location") or "",
+                "stops": [{"name": a.strip()} for a in activities if a.strip()],
+            })
+    return days
+
+
+def _ask_openai(system_text: str, user_text: str, schema: Dict[str, Any]) -> Dict[str, Any]:
+    """Call the model with a strict JSON schema and return the parsed answer"""
+    resp = client.chat.completions.create(
+        model=OPENAI_MODEL,
+        temperature=0.3,
+        max_tokens=1500,
+        messages=[
+            {"role": "system", "content": system_text},
+            {"role": "user", "content": user_text},
+        ],
+        response_format={"type": "json_schema", "json_schema": schema},
+    )
+    message = resp.choices[0].message
+    if getattr(message, "refusal", None):
+        raise RuntimeError(f"Model refused: {message.refusal}")
+    return json.loads(message.content)
+
 
 @app.route("/ai/review", methods=["POST"])
 def ai_review():
     """
-    AI-powered itinerary review using ChatGPT.
-    
-    POST body:
+    Review a trip plan and suggest edits.
+
+    POST body (same days format as /optimize-route):
     {
-      "plan": {
-        "tokyo": [
-          {"day": 1, "location": "Shibuya", "activities": "Shopping, Ramen"},
-          {"day": 2, "location": "Asakusa", "activities": "Senso-ji, Tokyo Skytree"}
-        ],
-        "kyoto": [...]
-      }
+      "days": [{"key": "tokyo-activities-1", "label": "Tokyo · Day 1", "city": "Tokyo", "area": "Asakusa",
+                "stops": [{"name": "Senso-ji", "duration": 60}, ...]}],
+      "pace": "relaxed" | "normal" | "packed"
     }
-    
+
     Returns:
     {
-      "overallScore": 7,                              // 0-10 rating
-      "strengths": ["Good meal timing", ...],         // What's working well
-      "risks": ["Day 1 might be rushed", ...],        // Potential problems
-      "suggestions": [                                 // Concrete edits
-        {
-          "region": "tokyo",
-          "day": 1,
-          "action": "swap",                            // swap, move, or trim
-          "title": "Swap shopping and ramen",
-          "reason": "Eat before shopping for better energy",
-          "impact": "Avoid hunger and long waits",
-          "confidence": 0.8,
-          "details": {"a": "Shopping", "b": "Ramen"}
-        }
-      ]
+      "overallScore": 7, "summary": "...", "strengths": [...], "risks": [...],
+      "suggestions": [{"action": "reorder" | "swap" | "move" | "remove", "dayIndex": 1, "dayKey": "...",
+                       "title": "...", "reason": "...", "impact": "...", "details": {...}}],
+      "days": [{"label", "end_time", "travel_minutes", "issues": [...]}],
+      "source": "ai" | "rules"    // "rules" when the AI is unavailable
     }
     """
-    if not OPENAI_API_KEY:
-        return jsonify({"error": "Server missing OPENAI_API_KEY"}), 500
-
     body = request.get_json(silent=True) or {}
-    plan = body.get("plan") or {}
-    if not isinstance(plan, dict):
-        return jsonify({"error": "Invalid plan payload. Expected object keyed by city."}), 400
-
-    cities = [c for c in plan.keys() if c in CITY_DIRS]
-    if not cities:
-        return jsonify({"error": "No supported cities found in plan."}), 400
+    days_in = body.get("days")
+    if days_in is None and isinstance(body.get("plan"), dict):
+        days_in = _legacy_plan_to_days(body["plan"])
+    pace = str(body.get("pace") or body.get("pacePreference") or "normal").lower()
 
     try:
-        # Step 1: Load knowledge base (travel data for these cities)
-        kb = load_kb_for(cities)
-        
-        # Step 2: Match user's location names to actual places
-        enriched = enrich_with_kb(plan, kb)
-        
-        # Step 3: Build map of what user actually typed
-        allowed = _build_allowed_map(enriched)
-        
-        # Step 4: Analyze plan for issues
-        analysis = _analyze_plan(enriched, allowed)
-    except Exception as e:
-        logger.exception("KB load/enrich failed")
-        return jsonify({"error": f"Internal: failed to load KB: {e}"}), 500
+        days = prepare_trip_days(days_in)
+    except PlanInputError as e:
+        return jsonify({"error": str(e)}), 400
 
-    # Step 5: Build the prompt for ChatGPT
-    system_text, user_payload, allowed = build_reviewer_prompt(enriched, analysis)
-
-    # Step 6: Call ChatGPT to analyze the itinerary
-    try:
-        resp = client.chat.completions.create(
-            model=OPENAI_MODEL,
-            temperature=0.2,  # Lower temp = faster, cheaper, more consistent
-            top_p=0.9,        # Tighter sampling = fewer tokens
-            max_tokens=1500,  # Limit output to reduce costs
-            presence_penalty=0.0,  # Simpler = cheaper
-            frequency_penalty=0.0,
-            messages=[
-                {"role": "system", "content": system_text},
-                {"role": "user",   "content": json.dumps(user_payload, ensure_ascii=False)},  # No indent = fewer tokens
-            ],
-            response_format={"type": "json_object"},
-        )
-        # Step 7: Parse ChatGPT's response
-        raw = resp.choices[0].message.content
-        model_json = json.loads(raw)
-        
-        # Step 8: Validate and clean up the response
-        polished = _validate_and_polish(model_json, allowed)
-        _prune_bad_risks(polished, allowed)
-
-        # Step 9: If ChatGPT didn't give enough suggestions, add our own
-        current_suggestions = polished.get("suggestions", [])
-        suggestions_count = len(current_suggestions)
-        
-        if suggestions_count < 2 and _has_legal_option(allowed):
-            # Generate backup suggestions using our own logic
-            backup_suggestions = _heuristic_suggestions(enriched, allowed, analysis=analysis, max_sugs=3)
-            
-            # Track which suggestions we already have to avoid duplicates
-            existing_keys = set()
-            for suggestion in current_suggestions:
-                key = (
-                    suggestion["region"], 
-                    suggestion["day"], 
-                    suggestion["action"], 
-                    json.dumps(suggestion.get("details", {}), sort_keys=True)
-                )
-                existing_keys.add(key)
-            
-            # Add backup suggestions if they're not duplicates
-            for suggestion in backup_suggestions:
-                key = (
-                    suggestion["region"], 
-                    suggestion["day"], 
-                    suggestion["action"],
-                    json.dumps(suggestion.get("details", {}), sort_keys=True)
-                )
-                
-                if key not in existing_keys:
-                    polished["suggestions"].append(suggestion)
-                    existing_keys.add(key)
-            
-            # Limit to 5 suggestions total
-            polished["suggestions"] = polished["suggestions"][:5]
-
-        return jsonify(polished)
-    except Exception as e:
-        logger.exception("AI error")
-        # Last-resort fallback so the UI shows something if a legal option exists
+    def ask_model(system_text: str, user_text: str, schema: Dict[str, Any]) -> Dict[str, Any]:
         try:
-            if _has_legal_option(allowed):
-                fb = _pick_fallback_suggestion(allowed)
-                return jsonify({
-                    "overallScore": 6,
-                    "strengths": [],
-                    "risks": ["AI parsing failed; using safe fallback."],
-                    "suggestions": [fb] if fb else []
-                }), 200
+            return _ask_openai(system_text, user_text, schema)
         except Exception:
-            pass
-        return jsonify({"error": f"AI error: {e}"}), 500
-@app.route("/ai/debug_allowed", methods=["POST"])
-def ai_debug_allowed():
+            logger.exception("AI review call failed; using rule-based review")
+            raise
+
+    try:
+        result = ai_reviewer.review_trip(days, pace, ask_model if OPENAI_API_KEY else None)
+    except Exception:
+        logger.exception("AI review failed")
+        return jsonify({"error": "The review failed. Please try again."}), 500
+    return jsonify(result)
+
+
+@app.route("/ai/debug_review", methods=["POST"])
+def ai_debug_review():
     """
-    Debug endpoint to see what the AI can work with.
-    Shows the "allowed places" map and enriched data.
-    Useful for troubleshooting when suggestions seem wrong.
+    Debug endpoint: the facts and rule checks the AI review is built on (no AI call).
     Only enabled when ENABLE_DEBUG_ENDPOINTS is set.
     """
     if not ENABLE_DEBUG_ENDPOINTS:
         abort(404)
     body = request.get_json(silent=True) or {}
-    plan = body.get("plan") or {}
-    cities = [c for c in plan.keys() if c in CITY_DIRS]
-    if not cities:
-        return jsonify({"error": "No supported cities in plan."}), 400
-    kb = load_kb_for(cities)
-    enriched = enrich_with_kb(plan, kb)
-    allowed = _build_allowed_map(enriched)
-    return jsonify({"allowed": allowed, "enriched": enriched})
+    try:
+        days = prepare_trip_days(body.get("days"))
+    except PlanInputError as e:
+        return jsonify({"error": str(e)}), 400
+    analysis = ai_reviewer.analyze_trip(days, str(body.get("pace") or "normal"))
+    return jsonify({"analysis": analysis, "referenceScore": ai_reviewer.rule_score(analysis),
+                    "ruleSuggestions": ai_reviewer.rule_suggestions(analysis)})
 
 
 # =============================================================================

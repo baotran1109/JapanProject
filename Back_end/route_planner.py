@@ -266,9 +266,10 @@ def time_penalty(stop_type: str, arrive_minute: float) -> float:
 
 
 def fmt_clock(minute: float) -> str:
-    """540 -> '09:00'"""
+    """540 -> '09:00', past midnight -> '01:30+1'"""
     minute = int(round(minute))
-    return f"{(minute // 60) % 24:02d}:{minute % 60:02d}"
+    clock = f"{(minute // 60) % 24:02d}:{minute % 60:02d}"
+    return clock + "+1" if minute >= 24 * 60 else clock
 
 
 # =============================================================================
@@ -485,6 +486,11 @@ class DayPlanner:
                         best, best_cost, improved = cand, c, True
         return best
 
+    def evaluate(self) -> Dict[str, Any]:
+        """Schedule and warnings for the day exactly as the user ordered it"""
+        original = list(range(len(self.stops)))
+        return self._result(original, original, "as_planned")
+
     def optimize(self) -> Dict[str, Any]:
         original = list(range(len(self.stops)))
         if len(self.stops) <= 1:
@@ -563,6 +569,7 @@ class DayPlanner:
             "unmatched": [s["name"] for s in self.stops if not self._located(s) and not s.get("generic")],
             "start_time": fmt_clock(self.start_minute),
             "end_time": fmt_clock(after["end_minute"]),
+            "end_minute": round(after["end_minute"]),
             "travel_minutes": after["travel_minutes"],
             "free_minutes": after["wait_minutes"],
             "original_travel_minutes": before["travel_minutes"],

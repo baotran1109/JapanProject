@@ -6,7 +6,7 @@
 // - Shows a timed schedule per day, travel between cities and JR Pass advice
 // - "Apply" reorders the activity cards of a day to the optimized order
 //
-// Pages only need:
+// Pages need plan-dom.js loaded first, plus:
 //   <button id="optimize-route-btn">, <aside id="route-panel" class="hidden">
 //   and optionally window.ROUTE_DEFAULT_CITY (used when day ids have no city prefix)
 // =============================================================================
@@ -17,83 +17,7 @@
   let lastResult = null;   // Response from the server
   let lastDays = null;     // Days we sent (with DOM references for "Apply")
 
-  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => (
-    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
-  ));
-  const capitalize = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
-
-  function formatMinutes(min) {
-    min = Math.round(min || 0);
-    if (min < 60) return `${min} min`;
-    const h = Math.floor(min / 60), m = min % 60;
-    return m ? `${h}h ${m}m` : `${h}h`;
-  }
-  const yen = (n) => `¥${Math.round(n || 0).toLocaleString()}`;
-
-  // ---------------------------------------------------------------------------
-  // Reading the plan from the page
-  // ---------------------------------------------------------------------------
-
-  // Matches "activities-3", "tokyo-activities-3", "kyoto-act-2", "osaka-notes-1", ...
-  const ACTIVITY_ID = /^(?:([a-z]+)-)?(activities|act|notes)-(\d+)$/;
-
-  function findActivityField(box) {
-    for (const el of box.querySelectorAll("textarea[id]")) {
-      const m = el.id.match(ACTIVITY_ID);
-      if (m) return { el, prefix: m[1] || null, fieldType: m[2], n: Number(m[3]) };
-    }
-    return null;
-  }
-
-  function findInput(box, prefix, n, kinds) {
-    for (const kind of kinds) {
-      const id = prefix ? `${prefix}-${kind}-${n}` : `${kind}-${n}`;
-      const el = box.querySelector(`#${CSS.escape(id)}`) || document.getElementById(id);
-      if (el) return el;
-    }
-    return null;
-  }
-
-  function parseDurations(text, activityCount, hasLocation) {
-    const values = (text || "").split(",").map((v) => parseInt(v.trim(), 10)).filter((v) => !Number.isNaN(v));
-    // Older plans put the day's location first in the duration list
-    const leadingLocation = hasLocation && values.length === activityCount + 1;
-    const forActivities = leadingLocation ? values.slice(1) : values;
-    return { values: forActivities, leadingLocation, leadingValue: leadingLocation ? values[0] : null };
-  }
-
-  function collectDays() {
-    const defaultCity = window.ROUTE_DEFAULT_CITY || "Tokyo";
-    const days = [];
-    document.querySelectorAll(".day-box").forEach((box) => {
-      const field = findActivityField(box);
-      if (!field) return;
-
-      const container = box.closest("[id$='-days']");
-      const containerCity = container && container.id !== "days" ? container.id.replace(/-days$/, "") : null;
-      const city = capitalize(field.prefix || containerCity || defaultCity);
-
-      const locationEl = findInput(box, field.prefix, field.n, ["location", "loc", "place"]);
-      const durationsEl = findInput(box, field.prefix, field.n, ["durations", "dur", "time"]);
-      const area = (locationEl?.value || "").trim();
-
-      const activities = (field.el.value || "").split("\n").map((a) => a.trim()).filter(Boolean);
-      const durations = parseDurations(durationsEl?.value, activities.length, Boolean(area));
-
-      days.push({
-        key: field.el.id,
-        label: `${city} · Day ${field.n}`,
-        city,
-        area,
-        stops: activities.map((name, i) => ({ name, duration: durations.values[i] || 60 })),
-        // Kept for "Apply" (not sent to the server)
-        _field: field,
-        _durationsEl: durationsEl,
-        _durations: durations,
-      });
-    });
-    return days;
-  }
+  const { esc, formatMinutes, yen } = window.PlanDom;
 
   // ---------------------------------------------------------------------------
   // Applying the optimized order back to the page
@@ -101,36 +25,7 @@
 
   function applyDay(day, result) {
     if (!result || !result.changed) return false;
-    const { el, prefix, fieldType, n } = day._field;
-    const order = result.optimized_order;
-
-    // Reorder durations the same way (only when the user filled them in)
-    if (day._durationsEl && day._durations.values.length) {
-      const byName = new Map();
-      day.stops.forEach((s, i) => {
-        const list = byName.get(s.name) || [];
-        list.push(day._durations.values[i] ?? s.duration);
-        byName.set(s.name, list);
-      });
-      const reordered = order.map((name) => (byName.get(name) || []).shift() ?? 60);
-      if (day._durations.leadingLocation) reordered.unshift(day._durations.leadingValue);
-      day._durationsEl.value = reordered.join(", ");
-      day._durationsEl.dispatchEvent(new Event("input", { bubbles: true }));
-    }
-
-    // Use the page's own helper so the activity cards and autosave update
-    if (typeof window.setActivities === "function") {
-      if (prefix) window.setActivities(prefix, n, order, fieldType);
-      else window.setActivities(n, order);
-    } else {
-      el.value = order.join("\n");
-      el.dispatchEvent(new Event("input", { bubbles: true }));
-      if (typeof window.syncTextareaToCards === "function") {
-        if (prefix) window.syncTextareaToCards(prefix, n, fieldType);
-        else window.syncTextareaToCards(n);
-      }
-    }
-    return true;
+    return window.PlanDom.reorderDay(day.key, result.optimized_order);
   }
 
   function applyAll() {
@@ -314,7 +209,7 @@
   // ---------------------------------------------------------------------------
 
   async function optimize(button) {
-    const days = collectDays();
+    const days = window.PlanDom.collectDays();
     if (!days.some((d) => d.stops.length)) {
       alert("Add some activities to your days first.");
       return;
@@ -330,7 +225,7 @@
         headers: { "Content-Type": "application/json", ...authHeaders },
         body: JSON.stringify({
           start_time: "09:00",
-          days: days.map(({ key, label, city, area, stops }) => ({ key, label, city, area, stops })),
+          days: window.PlanDom.forServer(days),
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -356,5 +251,5 @@
   else init();
 
   // Exposed for debugging in the browser console
-  window.RouteOptimizer = { collectDays, optimize: () => optimize(document.getElementById("optimize-route-btn")) };
+  window.RouteOptimizer = { optimize: () => optimize(document.getElementById("optimize-route-btn")) };
 })();

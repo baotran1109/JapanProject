@@ -1039,154 +1039,7 @@
 
   <!-- ===== AI Review (no custom CSS; relies on /ai/review backend) ===== -->
   <script>
-    function collectPlanForAI_Tokyo() {
-      const days = (window.collectPlan?.() || []).filter(d => (d.location || "").trim() || (d.activities||"").trim());
-      return { tokyo: days };
-    }
-
-    // Helpers with safe escaping
-    const safeRe = (s)=> String(s||"").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    function findFields(day){
-      return {
-        loc: document.getElementById(`location-${day}`),
-        act: document.getElementById(`activities-${day}`)
-      };
-    }
-    function removeOnce(text, item){
-      if(!text) return "";
-      const re = new RegExp(safeRe(item), "i");
-      return text.replace(re, "").replace(/\s{2,}/g," ").replace(/[\/|;,]\s*(?=\/|$)/g,"").trim();
-    }
-
-    function applyMove(item, fromDay, toDay){
-      const from = findFields(fromDay), to = findFields(toDay);
-      if(!from.act) return alert("Source day not found.");
-      // create target day if missing
-      while(!document.getElementById(`activities-${toDay}`)){
-        addDay();
-      }
-      const toFields = findFields(toDay);
-
-      // remove from source (notes first, then location)
-      const re = new RegExp(safeRe(item), "i");
-      if (re.test(from.act.value)) {
-        from.act.value = removeOnce(from.act.value, item);
-      } else if (from.loc && re.test(from.loc.value)) {
-        from.loc.value = removeOnce(from.loc.value, item);
-      }
-
-      const glue = (toFields.act.value.trim() ? " / " : "");
-      toFields.act.value = `${toFields.act.value.trim()}${glue}${item}`.trim();
-    }
-
-    function applySwap(a, b, day){
-      const {act, loc} = findFields(day);
-      if(!act) return alert("Day not found.");
-      const reA = new RegExp(safeRe(a), "i"), reB = new RegExp(safeRe(b), "i");
-      if (reA.test(act.value) && reB.test(act.value)){
-        let t = act.value.replace(reA,"__TMP__").replace(reB,a).replace(/__TMP__/g,b);
-        act.value = t;
-      }
-      if (loc){
-        const hasA = reA.test(loc.value), hasB = reB.test(loc.value);
-        if (hasA && !hasB) loc.value = loc.value.replace(reA, b);
-        else if (hasB && !hasA) loc.value = loc.value.replace(reB, a);
-      }
-    }
-
-    function applyTrim(item, day){
-      const {act, loc} = findFields(day);
-      if(!act) return alert("Day not found.");
-      act.value = removeOnce(act.value, item);
-      if (loc) loc.value = removeOnce(loc.value, item);
-    }
-
-    function applySuggestionTokyo(s){
-      const d = s.details || {};
-      if (s.action === "move") return applyMove(d.item, s.day, d.toDay);
-      if (s.action === "swap") return applySwap(d.a, d.b, s.day);
-      if (s.action === "trim") return applyTrim(d.item, s.day);
-      alert("Unsupported suggestion.");
-    }
-
-    function renderReviewTokyo(r){
-      const panel = document.getElementById("ai-panel");
-      panel.classList.remove("hidden");
-      document.getElementById("ai-score").textContent = (typeof r.overallScore === "number" ? r.overallScore : "—");
-
-      const strengthsEl = document.getElementById("ai-strengths");
-      const risksEl = document.getElementById("ai-risks");
-      const suggsEl = document.getElementById("ai-suggestions");
-      strengthsEl.innerHTML = ""; risksEl.innerHTML = ""; suggsEl.innerHTML = "";
-
-      (r.strengths||[]).forEach(t=>{
-        const li = document.createElement("li"); li.textContent = t; strengthsEl.appendChild(li);
-      });
-      (r.risks||[]).forEach(t=>{
-        const li = document.createElement("li"); li.textContent = t; risksEl.appendChild(li);
-      });
-
-      (r.suggestions||[]).forEach(s=>{
-        const card = document.createElement("div");
-        card.className = "rounded-lg border border-slate-200 p-3";
-
-        const title = document.createElement("div");
-        title.className = "font-semibold";
-        let line = "Suggested edit";
-        if (s.action==="move") line = `Move “${s.details?.item}” Day ${s.day} → Day ${s.details?.toDay}`;
-        else if (s.action==="swap") line = `Swap “${s.details?.a}” ⇄ “${s.details?.b}” (Day ${s.day})`;
-        else if (s.action==="trim") line = `Remove “${s.details?.item}” (Day ${s.day})`;
-        title.textContent = line;
-        card.appendChild(title);
-
-        const reason = document.createElement("p");
-        reason.className = "mt-1 text-sm text-slate-600";
-        reason.textContent = s.reason || "";
-        card.appendChild(reason);
-
-        if (s.impact){
-          const imp = document.createElement("p");
-          imp.className = "mt-1 text-xs text-slate-500";
-          imp.textContent = `Impact: ${s.impact}`;
-          card.appendChild(imp);
-        }
-
-        const btn = document.createElement("button");
-        btn.className = "mt-2 rounded-md border border-slate-300 bg-white px-3 py-1 text-sm font-semibold hover:bg-slate-50";
-        btn.textContent = "Apply this suggestion";
-        btn.onclick = ()=> applySuggestionTokyo(s);
-        card.appendChild(btn);
-
-        suggsEl.appendChild(card);
-      });
-
-      panel.scrollIntoView({behavior:"smooth", block:"start"});
-    }
-
-    document.getElementById("ask-ai-review")?.addEventListener("click", async () => {
-      try{
-        const plan = collectPlanForAI_Tokyo(); // { tokyo:[{day,location,activities}] }
-        if (!plan.tokyo.length){
-          alert("Add at least one day with a location or activity before requesting an AI review.");
-          return;
-        }
-        const res = await fetch("/ai/review", {
-          method: "POST",
-          headers: {"Content-Type":"application/json"},
-          body: JSON.stringify({ plan, pacePreference: "normal" })
-        });
-        if(!res.ok){
-          let msg = `HTTP ${res.status}`;
-          try{ const j = await res.json(); if (j?.error) msg = j.error; }catch{}
-          throw new Error(msg);
-        }
-        const review = await res.json();
-        renderReviewTokyo(review);
-      }catch(e){
-        console.error(e);
-        alert("AI review failed: " + (e?.message||e));
-      }
-    });
+    // AI review lives in /static/js/ai-review.js
 
     // Route optimization lives in /static/js/route-optimizer.js
   </script>
@@ -1664,6 +1517,8 @@
       };
     });
   </script>
-  <script src="/static/js/route-optimizer.js?v=2"></script>
+  <script src="/static/js/plan-dom.js?v=1"></script>
+  <script src="/static/js/route-optimizer.js?v=3"></script>
+  <script src="/static/js/ai-review.js?v=2"></script>
 </body>
 </html>

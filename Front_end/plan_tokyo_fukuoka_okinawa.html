@@ -1070,133 +1070,7 @@
       }
     });
 
-    // ====== AI Review (multi-region) ======
-    function collectPlanForAI(){
-      const plan = collectPlan();
-      // Strip empty days
-      const trimmed = {};
-      for (const k of Object.keys(plan)){
-        trimmed[k] = (plan[k]||[]).filter(d => (d.location||"").trim());
-      }
-      return trimmed;
-    }
-
-    // Map helpers to find fields by region/day
-    function findFields(region, day){
-      return {
-        loc: document.getElementById(`${region}-loc-${day}`),
-        act: document.getElementById(`${region}-act-${day}`),
-      };
-    }
-    function textHas(t, s){ return (t||"").toLowerCase().includes((s||"").toLowerCase()); }
-
-    function applyMove(region, item, fromDay, toDay){
-      const from = findFields(region, fromDay);
-      const to   = findFields(region, toDay);
-      if (!from.act || !to.act) return alert("Day not found in UI.");
-      const oldFrom = from.act.value;
-      if (!textHas(oldFrom, item) && from.loc && textHas(from.loc.value, item)){
-        from.loc.value = from.loc.value.replace(new RegExp(item,"i"), "").trim();
-      }
-      from.act.value = oldFrom.replace(new RegExp(item,"i"), "").replace(/\s{2,}/g," ").trim();
-      const glue = to.act.value.trim() ? " / " : "";
-      to.act.value = `${to.act.value.trim()}${glue}${item}`.trim();
-    }
-    function applySwap(region, a, b, day){
-      const { act, loc } = findFields(region, day);
-      if (!act) return alert("Day not found.");
-      let t = act.value;
-      const reA = new RegExp(a,"i"), reB = new RegExp(b,"i");
-      if (loc){
-        const hasALoc = reA.test(loc.value), hasBLoc = reB.test(loc.value);
-        if (hasALoc && !hasBLoc) loc.value = loc.value.replace(reA, b);
-        else if (hasBLoc && !hasALoc) loc.value = loc.value.replace(reB, a);
-      }
-      if (reA.test(t) && reB.test(t)){
-        t = t.replace(reA,"__TMP__").replace(reB,a).replace(/__TMP__/g,b);
-        act.value = t;
-      }
-    }
-    function applyTrim(region, item, day){
-      const { act, loc } = findFields(region, day);
-      if (!act) return alert("Day not found.");
-      act.value = act.value.replace(new RegExp(item,"i"), "").replace(/\s{2,}/g," ").trim();
-      if (loc) loc.value = loc.value.replace(new RegExp(item,"i"), "").trim();
-    }
-    function applySuggestion(s){
-      const region = (s.region||"tokyo").toLowerCase();
-      const d = s.details||{};
-      if (s.action==="move") return applyMove(region, d.item, s.day, d.toDay);
-      if (s.action==="swap") return applySwap(region, d.a, d.b, s.day);
-      if (s.action==="trim") return applyTrim(region, d.item, s.day);
-      alert("Unsupported suggestion type.");
-    }
-
-    function renderReview(r){
-      const panel = document.getElementById("ai-panel");
-      panel.classList.remove("hidden");
-
-      document.getElementById("ai-score").textContent =
-        (typeof r.overallScore==="number" ? r.overallScore : "—");
-
-      const strengths = document.getElementById("ai-strengths");
-      const risks = document.getElementById("ai-risks");
-      const suggs = document.getElementById("ai-suggestions");
-      strengths.innerHTML=""; risks.innerHTML=""; suggs.innerHTML="";
-
-      (r.strengths||[]).forEach(t=>{ const li=document.createElement("li"); li.textContent=t; strengths.appendChild(li); });
-      (r.risks||[]).forEach(t=>{ const li=document.createElement("li"); li.textContent=t; risks.appendChild(li); });
-
-      (r.suggestions||[]).forEach(s=>{
-        const card=document.createElement("div");
-        card.className="rounded-lg border border-slate-200 p-3";
-        const title=document.createElement("div");
-        title.className="font-semibold";
-        const d=s.details||{};
-        let line="";
-        if (s.action==="move") line = `[${s.region}] Move “${d.item}” Day ${s.day} → Day ${d.toDay}`;
-        else if (s.action==="swap") line = `[${s.region}] Swap “${d.a}” ⇄ “${d.b}” (Day ${s.day})`;
-        else if (s.action==="trim") line = `[${s.region}] Remove “${d.item}” (Day ${s.day})`;
-        else line = "Suggested minor edit";
-        title.textContent = line;
-        card.appendChild(title);
-
-        const reason=document.createElement("p");
-        reason.className="mt-1 text-sm text-slate-600";
-        reason.textContent=s.reason||"";
-        card.appendChild(reason);
-
-        const btn=document.createElement("button");
-        btn.className="mt-2 rounded-md border border-slate-300 bg-white px-3 py-1 text-sm font-semibold hover:bg-slate-50";
-        btn.textContent="Apply this suggestion";
-        btn.onclick=()=>applySuggestion(s);
-        card.appendChild(btn);
-
-        suggs.appendChild(card);
-      });
-    }
-
-    document.getElementById("ask-ai-review")?.addEventListener("click", async ()=>{
-      try{
-        const plan = collectPlanForAI();
-        const haveAny = Object.values(plan).some(arr => (arr||[]).length);
-        if(!haveAny){ alert("Add at least one day with a location before requesting an AI review."); return; }
-        const res = await fetch("/ai/review", {
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body: JSON.stringify({ plan, pacePreference:"normal" })
-        });
-        if(!res.ok){
-          let msg=`HTTP ${res.status}`; try{ const j=await res.json(); if(j?.error) msg=j.error; }catch{}
-          throw new Error(msg);
-        }
-        const review=await res.json();
-        renderReview(review);
-      }catch(e){
-        console.error(e);
-        alert("AI review failed: " + (e?.message||e));
-      }
-    });
+    // AI review lives in /static/js/ai-review.js
 
     // Route optimization lives in /static/js/route-optimizer.js
   </script>
@@ -1811,6 +1685,8 @@
   </script>
 
   <footer class="py-10 text-center text-sm text-slate-500">&copy; 2025 Explore Japan · Bao Tran</footer>
-  <script src="/static/js/route-optimizer.js?v=2"></script>
+  <script src="/static/js/plan-dom.js?v=1"></script>
+  <script src="/static/js/route-optimizer.js?v=3"></script>
+  <script src="/static/js/ai-review.js?v=2"></script>
 </body>
 </html>
