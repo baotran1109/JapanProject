@@ -12,7 +12,9 @@
 import os
 import json
 import re
+import time
 import logging
+import unicodedata
 from math import radians, sin, cos, asin, sqrt
 from typing import Dict, List, Any, Tuple, Set, Optional
 
@@ -23,6 +25,9 @@ from werkzeug.utils import safe_join
 from rapidfuzz import process, fuzz
 from openai import OpenAI
 from dotenv import load_dotenv
+
+# Route planning (per-day optimization, schedules, fares, JR Pass)
+import route_planner
 
 # Trying to import MongoDB - falls back to JSON files if not available
 try:
@@ -179,7 +184,34 @@ def load_json(path: str) -> Any:
         return json.load(f)
 
 
+# Each city's places are cached for a few minutes so we don't reload
+# hundreds of documents from MongoDB on every request
+KB_CACHE_SECONDS = 600
+_kb_cache: Dict[str, Tuple[float, List[Dict[str, Any]]]] = {}
+
+
 def load_kb_for(cities: List[str]) -> Dict[str, List[Dict[str, Any]]]:
+    """Same as _load_kb_uncached, but reuses recently loaded cities"""
+    now = time.time()
+    kb: Dict[str, List[Dict[str, Any]]] = {}
+    missing = []
+    for city in cities:
+        cached = _kb_cache.get(city)
+        if cached and now - cached[0] < KB_CACHE_SECONDS:
+            kb[city] = cached[1]
+        else:
+            missing.append(city)
+    if missing:
+        fresh = _load_kb_uncached(missing)
+        for city in missing:
+            items = fresh.get(city, [])
+            if items:  # Don't cache an empty result (e.g. database hiccup)
+                _kb_cache[city] = (now, items)
+            kb[city] = items
+    return kb
+
+
+def _load_kb_uncached(cities: List[str]) -> Dict[str, List[Dict[str, Any]]]:
     """
     Loads travel data for specific cities (Knowledge Base for AI).
     
@@ -199,14 +231,13 @@ def load_kb_for(cities: List[str]) -> Dict[str, List[Dict[str, Any]]]:
                 city_name = city.capitalize()
                 
                 # Fetch all data types for this city from MongoDB
-                attractions = list(mongo_db["attractions"].find({"city": city_name}, {"_id": 0}))
-                restaurants = list(mongo_db["restaurants"].find({"city": city_name}, {"_id": 0}))
-                shopping = list(mongo_db["shopping"].find({"city": city_name}, {"_id": 0}))
-                daytrips = list(mongo_db["daytrips"].find({"city": city_name}, {"_id": 0}))
-                
-                # Combine all items
-                all_items = attractions + restaurants + shopping + daytrips
-                
+                # (_kind remembers which collection each place came from)
+                all_items = []
+                for kind in ("attractions", "restaurants", "shopping", "daytrips"):
+                    for item in mongo_db[kind].find({"city": city_name}, {"_id": 0}):
+                        item["_kind"] = kind
+                        all_items.append(item)
+
                 # Normalize items
                 for item in all_items:
                     if not isinstance(item, dict):
@@ -243,9 +274,25 @@ def load_kb_for(cities: List[str]) -> Dict[str, List[Dict[str, Any]]]:
                 logger.warning("Failed to parse JSON: %s (%s)", rel, e)
                 items = []
 
+            rel_lower = rel.lower()
+            if "restaurant" in rel_lower:
+                kind = "restaurants"
+            elif "shopping" in rel_lower:
+                kind = "shopping"
+            elif "day" in rel_lower and "trip" in rel_lower:
+                kind = "daytrips"
+            else:
+                kind = "attractions"
+
+            # Same area rule as import_to_mongodb.py: "Shibuya_restaurants.json" -> "Shibuya"
+            base = os.path.basename(rel).replace(".json", "")
+            file_area = base.split("_")[0] if "_" in base else "General"
+
             for item in items:
                 if not isinstance(item, dict):
                     continue
+                item["_kind"] = kind
+                item.setdefault("area", file_area)
                 item["__normname"] = (item.get("name") or "").strip().lower()
                 for k in list(item.keys()):
                     lk = k.lower()
@@ -282,457 +329,6 @@ def fuzzy_lookup(city_kb: List[Dict[str, Any]], name: str, limit=3, score_cut=70
             results.append(city_kb[index])
     
     return results
-
-def haversine_km(lat1, lon1, lat2, lon2):
-    """Calculates distance between two GPS coordinates in kilometers"""
-    try:
-        lat1, lon1, lat2, lon2 = map(float, [lat1, lon1, lat2, lon2])
-    except Exception:
-        return None
-    R = 6371.0
-    dlat = radians(lat2 - lat1)
-    dlon = radians(lon2 - lon1)
-    a = sin(dlat/2)**2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon/2)**2
-    return 2 * R * asin(sqrt(a))
-
-def estimate_travel_time(distance_km, mode='train'):
-    """
-    Estimates travel time based on distance and transport mode.
-    
-    In Japan:
-    - Train: ~30-40 km/h average (including wait times)
-    - Walk: ~4 km/h
-    - Taxi: ~25 km/h in cities
-    """
-    if distance_km is None:
-        return None
-    
-    # Add base wait time for trains
-    if mode == 'train':
-        # Average speed including wait times
-        travel_minutes = (distance_km / 35.0) * 60
-        wait_time = 5  # Average 5 min wait for trains in Japan
-        return round(travel_minutes + wait_time)
-    elif mode == 'walk':
-        # Walking speed
-        return round((distance_km / 4.0) * 60)
-    elif mode == 'taxi':
-        return round((distance_km / 25.0) * 60)
-    else:
-        return round((distance_km / 30.0) * 60)
-
-# =============================================================================
-# JR PASS COST CALCULATION
-# =============================================================================
-
-# City-specific JR line coverage based on actual rail networks
-JR_COVERAGE_BY_CITY = {
-    'Tokyo': 0.55,      # 55% - Lots of Metro (Ginza, Hibiya, Tozai, etc.)
-    'Kyoto': 0.85,      # 85% - Mostly JR (JR Nara, Sagano, etc.)
-    'Osaka': 0.75,      # 75% - Mix (JR Loop, but also Osaka Metro)
-    'Sapporo': 0.90,    # 90% - Mostly JR Hokkaido
-    'Fukuoka': 0.80,    # 80% - JR Kyushu dominates
-    'Okinawa': 0.10,    # 10% - No JR! (Okinawa monorail only)
-    'Hakodate': 0.95,   # 95% - Almost all JR
-    'Aomori': 0.95,     # 95% - JR East dominates
-    'Default': 0.70     # Fallback for unlisted cities
-}
-
-# Real JR Pass costs (2025 prices)
-JR_PASS_COSTS = {
-    7: 50000,   # 7-day pass: ¥50,000
-    14: 80000,  # 14-day pass: ¥80,000
-    21: 100000  # 21-day pass: ¥100,000
-}
-
-def get_jr_coverage(city_name):
-    """
-    Get JR coverage percentage for a city.
-    
-    Args:
-        city_name: Name of the city
-    
-    Returns:
-        JR coverage rate (0.0 to 1.0)
-    """
-    return JR_COVERAGE_BY_CITY.get(city_name, JR_COVERAGE_BY_CITY['Default'])
-
-
-def estimate_fare_by_distance(distance_km, city_from='Default', city_to='Default'):
-    """
-    Estimate train fare based on distance and cities.
-    Different distances = different train types = different costs.
-    
-    Args:
-        distance_km: Distance in kilometers
-        city_from: Starting city
-        city_to: Destination city
-    
-    Returns:
-        Tuple of (base_fare, jr_coverage_rate)
-    """
-    
-    # Within same city (local trains)
-    if city_from == city_to:
-        if distance_km < 5:
-            return round(distance_km * 140), 0.60  # Local metro/JR mix
-        elif distance_km < 15:
-            return round(distance_km * 150), 0.65  # Local JR/private
-        else:
-            return round(distance_km * 160), 0.70  # Express local trains
-    
-    # Inter-city travel
-    elif distance_km < 100:
-        # Short inter-city (e.g., Tokyo → Yokohama, Kyoto → Osaka)
-        return round(distance_km * 180), 0.80  # Likely JR express
-    
-    elif distance_km < 300:
-        # Medium distance (e.g., Tokyo → Nagano, Osaka → Hiroshima)
-        return round(distance_km * 200), 0.90  # Likely Shinkansen or Limited Express
-    
-    else:
-        # Long distance (e.g., Tokyo → Kyoto, Tokyo → Sapporo)
-        # Definitely Shinkansen
-        return round(distance_km * 210), 0.95  # Almost certainly JR Shinkansen
-
-
-def adjust_for_special_routes(city_from, city_to, distance_km, base_fare, jr_coverage):
-    """
-    Apply special rules for known routes and edge cases.
-    
-    Args:
-        city_from: Starting city
-        city_to: Destination city
-        distance_km: Distance in kilometers
-        base_fare: Calculated base fare
-        jr_coverage: Calculated JR coverage
-    
-    Returns:
-        Tuple of (adjusted_fare, adjusted_jr_coverage)
-    """
-    
-    # Okinawa has NO JR lines - everything is private
-    if city_from == 'Okinawa' or city_to == 'Okinawa':
-        return base_fare, 0.0  # JR Pass doesn't work
-    
-    # Tokyo Metro area - very low JR coverage for short trips
-    if city_from == 'Tokyo' and city_to == 'Tokyo' and distance_km < 10:
-        return base_fare, 0.40  # Mostly Metro, not JR
-    
-    # Major Shinkansen routes (Tokyo-Kyoto, Tokyo-Osaka, etc.)
-    major_routes = [
-        ('Tokyo', 'Kyoto'),
-        ('Tokyo', 'Osaka'),
-        ('Tokyo', 'Hiroshima'),
-        ('Tokyo', 'Fukuoka'),
-        ('Tokyo', 'Sapporo'),
-    ]
-    
-    if (city_from, city_to) in major_routes or (city_to, city_from) in major_routes:
-        return base_fare, 0.95  # Almost certainly JR Shinkansen
-    
-    return base_fare, jr_coverage
-
-
-def calculate_jr_pass_recommendation(jr_fares_only, trip_days=7):
-    """
-    Determine if JR Pass is worth it based on trip length and actual savings.
-    
-    Args:
-        jr_fares_only: Total yen that would be spent on JR lines
-        trip_days: Number of days in the trip
-    
-    Returns:
-        Dict with recommendation details
-    """
-    
-    # Choose appropriate pass based on trip length
-    if trip_days <= 7:
-        pass_cost = JR_PASS_COSTS[7]
-        pass_type = "7-day"
-    elif trip_days <= 14:
-        pass_cost = JR_PASS_COSTS[14]
-        pass_type = "14-day"
-    else:
-        pass_cost = JR_PASS_COSTS[21]
-        pass_type = "21-day"
-    
-    # Calculate net savings (what you save minus pass cost)
-    net_savings = jr_fares_only - pass_cost
-    is_worth_it = net_savings > 0
-    
-    # Calculate break-even percentage
-    value_percentage = round((jr_fares_only / pass_cost) * 100) if pass_cost > 0 else 0
-    
-    return {
-        "pass_type": pass_type,
-        "pass_cost": pass_cost,
-        "total_jr_fares": jr_fares_only,  # What you'd pay for JR trains without pass
-        "net_savings": net_savings,
-        "is_worth_it": is_worth_it,
-        "value_percentage": value_percentage,
-        "break_even_point": pass_cost,
-        "recommendation": (
-            f"JR Pass saves you ¥{net_savings:,}!" if is_worth_it
-            else f"JR Pass costs ¥{abs(net_savings):,} more than paying per ride"
-        )
-    }
-
-
-def optimize_route_dp(locations, start_index=0):
-    """
-    Uses Dynamic Programming (Held-Karp algorithm) to find optimal route.
-    
-    This solves the Traveling Salesman Problem (TSP) efficiently:
-    - Tries all possible routes using DP
-    - Memoizes subproblems to avoid recalculation
-    - Time complexity: O(n² × 2ⁿ) - much better than brute force O(n!)
-    
-    Args:
-        locations: List of dicts with 'name', 'lat', 'lng', 'duration' (minutes at location)
-        start_index: Index of starting location (usually hotel/first stop)
-    
-    Returns:
-        {
-            'optimal_order': [0, 2, 1, 3],  # Indices in best visit order
-            'total_time': 180,               # Total minutes including travel
-            'route_details': [...]            # Step-by-step breakdown
-        }
-    """
-    n = len(locations)
-    
-    # Edge cases
-    if n == 0:
-        return {
-            "optimal_order": [], 
-            "total_time": 0, 
-            "total_travel_time": 0,
-            "total_activity_time": 0,
-            "route_details": [],
-            "optimization_method": "none"
-        }
-    if n == 1:
-        duration = locations[0].get('duration', 60)
-        return {
-            "optimal_order": [0],
-            "total_time": duration,
-            "total_travel_time": 0,
-            "total_activity_time": duration,
-            "route_details": [{
-                "step": 1,
-                "location": locations[0]['name'], 
-                "time_at_location": duration,
-                "lat": locations[0].get('lat'),
-                "lng": locations[0].get('lng')
-            }],
-            "optimization_method": "single_location"
-        }
-    
-    # Build distance matrix (travel time between all pairs)
-    INF = float('inf')  # Define INF here so both DP and greedy can use it
-    travel_time_matrix = [[0] * n for _ in range(n)]
-    
-    for i in range(n):
-        for j in range(n):
-            if i != j:
-                lat1, lng1 = locations[i].get('lat'), locations[i].get('lng')
-                lat2, lng2 = locations[j].get('lat'), locations[j].get('lng')
-                
-                if lat1 and lng1 and lat2 and lng2:
-                    dist_km = haversine_km(lat1, lng1, lat2, lng2)
-                    
-                    # Decide transport mode based on distance
-                    if dist_km and dist_km < 1.5:
-                        # Walking distance
-                        time_estimate = estimate_travel_time(dist_km, 'walk')
-                        travel_time_matrix[i][j] = time_estimate if time_estimate else 15
-                    else:
-                        # Train distance
-                        time_estimate = estimate_travel_time(dist_km, 'train')
-                        travel_time_matrix[i][j] = time_estimate if time_estimate else 30
-                else:
-                    # Unknown location - use default estimate
-                    travel_time_matrix[i][j] = 30
-    
-    # For small number of locations (n <= 10), use exact DP solution
-    if n <= 10:
-        # DP with bitmask memoization (Held-Karp algorithm)
-        # dp[mask][last] = minimum time to visit all locations in mask, ending at 'last'
-        dp = [[INF] * n for _ in range(1 << n)]
-        parent = [[(-1, -1)] * n for _ in range(1 << n)]
-        
-        # Base case: start at start_index
-        dp[1 << start_index][start_index] = locations[start_index].get('duration', 60)
-        
-        # Fill DP table
-        for mask in range(1 << n):
-            for last in range(n):
-                # Skip if this state is impossible
-                if dp[mask][last] == INF:
-                    continue
-                
-                # Skip if 'last' is not in the mask
-                if not (mask & (1 << last)):
-                    continue
-                
-                # Try adding each unvisited location
-                for next_loc in range(n):
-                    # Skip if already visited
-                    if mask & (1 << next_loc):
-                        continue
-                    
-                    # Calculate new state
-                    new_mask = mask | (1 << next_loc)
-                    time_to_next = travel_time_matrix[last][next_loc]
-                    time_at_next = locations[next_loc].get('duration', 60)
-                    new_time = dp[mask][last] + time_to_next + time_at_next
-                    
-                    # Update if better
-                    if new_time < dp[new_mask][next_loc]:
-                        dp[new_mask][next_loc] = new_time
-                        parent[new_mask][next_loc] = (mask, last)
-        
-        # Find best final state (all locations visited)
-        full_mask = (1 << n) - 1
-        best_time = INF
-        best_last = -1
-        
-        for last in range(n):
-            if dp[full_mask][last] < best_time:
-                best_time = dp[full_mask][last]
-                best_last = last
-        
-        # Reconstruct path
-        if best_last == -1:
-            # Fallback to original order
-            total_activity = sum(loc.get('duration', 60) for loc in locations)
-            return {
-                "optimal_order": list(range(n)),
-                "total_time": total_activity,
-                "total_travel_time": 0,
-                "total_activity_time": total_activity,
-                "route_details": [],
-                "optimization_method": "original_order"
-            }
-        
-        # Backtrack to get the path
-        path = []
-        current_mask = full_mask
-        current_loc = best_last
-        
-        while current_loc != -1:
-            path.append(current_loc)
-            prev_mask, prev_loc = parent[current_mask][current_loc]
-            current_mask = prev_mask
-            current_loc = prev_loc
-        
-        path.reverse()
-        
-        # Build detailed route
-        route_details = []
-        total_travel = 0
-        total_activity = 0
-        
-        for i, loc_idx in enumerate(path):
-            loc = locations[loc_idx]
-            activity_time = loc.get('duration', 60)
-            
-            detail = {
-                "step": i + 1,
-                "location": loc['name'],
-                "time_at_location": activity_time,
-                "lat": loc.get('lat'),
-                "lng": loc.get('lng')
-            }
-            
-            if i > 0:
-                prev_idx = path[i-1]
-                travel = travel_time_matrix[prev_idx][loc_idx]
-                distance = haversine_km(
-                    locations[prev_idx].get('lat'), locations[prev_idx].get('lng'),
-                    loc.get('lat'), loc.get('lng')
-                )
-                
-                detail['travel_from_previous'] = travel
-                detail['distance_km'] = round(distance, 2) if distance else None
-                detail['transport_mode'] = 'walk' if (distance and distance < 1.5) else 'train'
-                total_travel += travel
-            
-            total_activity += activity_time
-            route_details.append(detail)
-        
-        return {
-            "optimal_order": path,
-            "total_time": round(best_time),
-            "total_travel_time": round(total_travel),
-            "total_activity_time": total_activity,
-            "route_details": route_details,
-            "optimization_method": "dynamic_programming"
-        }
-    
-    else:
-        # For larger sets (n > 10), use greedy nearest neighbor
-        # (exact DP would be too slow)
-        visited = [False] * n
-        path = [start_index]
-        visited[start_index] = True
-        current_time = locations[start_index].get('duration', 60)
-        
-        current = start_index
-        for _ in range(n - 1):
-            best_next = -1
-            best_time = INF
-            
-            # Find nearest unvisited location
-            for next_loc in range(n):
-                if not visited[next_loc]:
-                    time = travel_time_matrix[current][next_loc]
-                    if time < best_time:
-                        best_time = time
-                        best_next = next_loc
-            
-            if best_next != -1:
-                path.append(best_next)
-                visited[best_next] = True
-                current_time += best_time + locations[best_next].get('duration', 60)
-                current = best_next
-        
-        # Build route details
-        route_details = []
-        total_travel = 0
-        
-        for i, loc_idx in enumerate(path):
-            loc = locations[loc_idx]
-            detail = {
-                "step": i + 1,
-                "location": loc['name'],
-                "time_at_location": loc.get('duration', 60),
-                "lat": loc.get('lat'),
-                "lng": loc.get('lng')
-            }
-            
-            if i > 0:
-                prev_idx = path[i-1]
-                travel = travel_time_matrix[prev_idx][loc_idx]
-                distance = haversine_km(
-                    locations[prev_idx].get('lat'), locations[prev_idx].get('lng'),
-                    loc.get('lat'), loc.get('lng')
-                )
-                detail['travel_from_previous'] = travel
-                detail['distance_km'] = round(distance, 2) if distance else None
-                detail['transport_mode'] = 'walk' if (distance and distance < 1.5) else 'train'
-                total_travel += travel
-            
-            route_details.append(detail)
-        
-        return {
-            "optimal_order": path,
-            "total_time": round(current_time),
-            "total_travel_time": round(total_travel),
-            "total_activity_time": sum(loc.get('duration', 60) for loc in locations),
-            "route_details": route_details,
-            "optimization_method": "greedy_nearest_neighbor"
-        }
 
 def _tokenize_activities(text: str) -> List[str]:
     """
@@ -2118,200 +1714,334 @@ def api_areas(city):
 # =============================================================================
 # ROUTE OPTIMIZATION ENDPOINT
 # =============================================================================
-# Smart commute optimizer using dynamic programming
+# Plans the best order for each day, matching place names to GPS on the server
+
+# Supported cities (lowercase key -> name used in MongoDB)
+ROUTE_CITIES = {c: c.capitalize() for c in CITY_DIRS.keys()}
+
+# Items like "Lunch" or "Shopping" aren't a specific place - they get scheduled
+# at a good time but aren't pinned to a random spot on the map
+GENERIC_WORDS = {
+    "breakfast", "brunch", "lunch", "dinner", "snack", "coffee", "cafe", "café", "ramen", "sushi",
+    "food", "eat", "meal", "shopping", "shop", "souvenirs", "hotel", "check", "in", "out", "check-in",
+    "check-out", "rest", "free", "time", "relax", "explore", "walk", "around", "the", "a", "at", "and",
+    "local", "nearby", "street", "konbini", "convenience", "store", "night", "bar", "drinks", "izakaya",
+    "on", "to", "for", "of", "visit", "go",
+}
+ROUTE_CITY_NAMES = set(ROUTE_CITIES.keys())
+KIND_PRIORITY = {"custom": 0, "attractions": 1, "daytrips": 2, "shopping": 3, "restaurants": 4}
+MATCH_MIN_SCORE = 86     # How close a name must be to count as the same place
+MATCH_TIE_SCORE = 6      # Candidates this close to the best are compared by distance
+MAX_DAYS = 60
+MAX_STOPS_PER_DAY = 25
+
+
+def _is_generic(name: str) -> bool:
+    words = re.findall(r"[a-zA-ZÀ-ɏ'-]+", (name or "").lower())
+    return bool(words) and all(w in GENERIC_WORDS for w in words)
+
+
+# Popular neighborhoods people type as a stop ("Gion", "Namba") that the
+# database doesn't tag as an area. Approximate center points.
+KNOWN_AREAS = {
+    "tokyo": {
+        "Harajuku": (35.6702, 139.7027), "Omotesando": (35.6652, 139.7123), "Odaiba": (35.6272, 139.7757),
+        "Akihabara": (35.6984, 139.7731), "Ueno": (35.7138, 139.7773), "Shimokitazawa": (35.6616, 139.6680),
+        "Nakameguro": (35.6440, 139.6990), "Ebisu": (35.6467, 139.7101), "Toyosu": (35.6550, 139.7964),
+        "Kichijoji": (35.7033, 139.5797), "Yanaka": (35.7266, 139.7660), "Shinjuku": (35.6909, 139.7003),
+        "Shibuya": (35.6595, 139.7005), "Ginza": (35.6717, 139.7650), "Asakusa": (35.7118, 139.7966),
+        "Roppongi": (35.6628, 139.7314), "Ikebukuro": (35.7295, 139.7109),
+    },
+    "kyoto": {
+        "Gion": (35.0037, 135.7788), "Arashiyama": (35.0094, 135.6668), "Higashiyama": (34.9965, 135.7810),
+        "Pontocho": (35.0050, 135.7708), "Kawaramachi": (35.0037, 135.7690),
+    },
+    "osaka": {
+        "Namba": (34.6659, 135.5013), "Umeda": (34.7025, 135.4959), "Shinsekai": (34.6525, 135.5063),
+        "Shinsaibashi": (34.6743, 135.5010), "Tennoji": (34.6466, 135.5133), "Dotonbori": (34.6687, 135.5013),
+    },
+    "sapporo": {"Susukino": (43.0556, 141.3530)},
+    "fukuoka": {"Tenjin": (33.5911, 130.3989), "Nakasu": (33.5938, 130.4067), "Hakata": (33.5902, 130.4207)},
+    "okinawa": {"Naha": (26.2125, 127.6809), "Kokusai Street": (26.2155, 127.6866)},
+    "hakodate": {"Motomachi": (41.7660, 140.7130)},
+}
+
+_areas_cache: Dict[int, Tuple[int, Dict[str, Dict[str, Any]]]] = {}
+
+
+def _city_areas(city_kb: List[Dict[str, Any]], city_key: str = "") -> Dict[str, Dict[str, Any]]:
+    """
+    Neighborhoods / day-trip areas in a city and their center point.
+    Example: {"shibuya": {"name": "Shibuya", "lat": ..., "lng": ...}, "hakone": {...}}
+    """
+    cached = _areas_cache.get(id(city_kb))
+    if cached and cached[0] == len(city_kb):
+        return cached[1]
+    points: Dict[str, List[Tuple[float, float]]] = {}
+    labels: Dict[str, str] = {}
+    for place in city_kb:
+        area = (place.get("area") or "").strip()
+        key = area.lower()
+        # Skip "General", the whole city ("Tokyo"), and messy values like pasted URLs
+        if (not key or key == "general" or key in ROUTE_CITY_NAMES or len(key) > 40 or "/" in key
+                or place.get("lat") is None or place.get("lng") is None):
+            continue
+        try:
+            points.setdefault(key, []).append((float(place["lat"]), float(place["lng"])))
+        except (TypeError, ValueError):
+            continue
+        labels.setdefault(key, area)
+    areas = {
+        key: {
+            "name": labels[key],
+            "matched_name": f"{labels[key]} area",
+            "lat": sum(p[0] for p in pts) / len(pts),
+            "lng": sum(p[1] for p in pts) / len(pts),
+            "_kind": "area",
+        }
+        for key, pts in points.items()
+    }
+    # Well-known neighborhoods use their real center instead of an average
+    for label, (lat, lng) in KNOWN_AREAS.get(city_key, {}).items():
+        areas[label.lower()] = {"name": label, "matched_name": f"{label} area", "lat": lat, "lng": lng,
+                                "_kind": "area"}
+    _areas_cache[id(city_kb)] = (len(city_kb), areas)
+    return areas
+
+
+def _area_center(city_kb: List[Dict[str, Any]], text: str, city_key: str = "") -> Optional[Dict[str, Any]]:
+    """
+    If 'text' names an area ("Shibuya", "Lunch in Ginza", "Shopping at Shinjuku"),
+    return that area's center point.
+    """
+    areas = _city_areas(city_kb, city_key)
+    words = re.findall(r"[a-z0-9À-ɏ'-]+", (text or "").lower())
+    full = " ".join(words)
+    if full in areas:  # e.g. "Kokusai Street" (where "street" is part of the name)
+        return areas[full]
+    remaining = " ".join(w for w in words if w not in GENERIC_WORDS)
+    if not remaining:
+        return None
+    if remaining in areas:
+        return areas[remaining]
+    # "Lunch on Kokusai Street" -> "kokusai" should still find "Kokusai Street"
+    for key, area in areas.items():
+        if " ".join(w for w in key.split() if w not in GENERIC_WORDS) == remaining:
+            return area
+    return None
+
+
+# Words that don't help tell places apart ("Meiji Shrine" = "Meiji Jingu")
+PLACE_FILLER_WORDS = {"shrine", "temple", "jingu", "jinja", "taisha", "tera", "dera", "the"}
+# Different spellings of the same word ("Mount Hakodate" = "Mt. Hakodate")
+PLACE_WORD_ALIASES = {"mount": "mt", "st": "station", "stn": "station"}
+
+
+def normalize_place_name(name: str) -> str:
+    """'Sensō-ji Temple / 浅草寺' -> 'senso ji' so spelling variations still match"""
+    text = unicodedata.normalize("NFKD", name or "")
+    text = "".join(ch for ch in text if not unicodedata.combining(ch)).lower()
+    text = re.sub(r"[^a-z0-9]+", " ", text)  # drops Japanese text and punctuation
+    words = [PLACE_WORD_ALIASES.get(w, w) for w in text.split()]
+    return " ".join(w for w in words if w not in PLACE_FILLER_WORDS)
+
+
+def _place_score(query: str, choice: str, **kwargs) -> float:
+    """Best of a few fuzzy scores; 'skytree' vs 'sky tree' is handled by ignoring spaces"""
+    if not query or not choice:
+        return 0.0
+    no_space = fuzz.ratio(query.replace(" ", ""), choice.replace(" ", ""))
+    if len(choice) < 0.6 * len(query):
+        # A much shorter name ("mon") shouldn't match just because it's inside the query
+        return max(no_space, fuzz.token_sort_ratio(query, choice))
+    score = max(fuzz.WRatio(query, choice), no_space)
+    if len(query.split()) >= 2:
+        # "shibuya crossing" vs "shibuya scramble crossing"
+        score = max(score, fuzz.token_set_ratio(query, choice) - 2)
+    return score
+
+
+_normalized_names_cache: Dict[int, Tuple[int, List[str]]] = {}
+
+
+def _normalized_names(candidates: List[Dict[str, Any]]) -> List[str]:
+    cached = _normalized_names_cache.get(id(candidates))
+    if cached and cached[0] == len(candidates):
+        return cached[1]
+    names = [normalize_place_name(c.get("name") or "") for c in candidates]
+    _normalized_names_cache[id(candidates)] = (len(candidates), names)
+    return names
+
+
+def match_place(name: str, candidates: List[Dict[str, Any]],
+                near: Optional[Dict[str, Any]] = None) -> Optional[Dict[str, Any]]:
+    """
+    Find the place a user means by 'name' (handles typos and partial names).
+    When several places match about equally well, pick the one closest to 'near'.
+    """
+    if not name or not candidates or _is_generic(name):
+        return None
+    query = normalize_place_name(name)
+    if not query:
+        return None
+    if query in ROUTE_CITY_NAMES:
+        return None  # "Tokyo" alone isn't a specific place
+    normalized = _normalized_names(candidates)
+    matches = process.extract(query, normalized, scorer=_place_score, limit=8)
+    good = [(score, idx) for _, score, idx in matches if score >= MATCH_MIN_SCORE]
+
+    # One-word queries ("Ichiran", "Todaiji") should match restaurants/shops whose
+    # name starts with that word, not ones that merely contain it
+    # ("Honda Tokyo Noodle Works"). Sights can contain it anywhere ("Glico Sign Dotonbori").
+    if len(query.split()) == 1:
+        def one_word_ok(idx: int) -> bool:
+            choice = normalized[idx]
+            if candidates[idx].get("_kind") not in ("restaurants", "shopping"):
+                return True
+            first = (choice.split() or [""])[0]
+            return fuzz.ratio(query, first) >= 90 or choice.replace(" ", "").startswith(query)
+        good = [(score, idx) for score, idx in good if one_word_ok(idx)]
+    if not good:
+        return None
+
+    best_score = max(score for score, _ in good)
+    close = [candidates[idx] for score, idx in good if score >= best_score - MATCH_TIE_SCORE]
+    if len(close) > 1:
+        # Prefer your own places and sights over restaurants that share the name,
+        # then whichever is closest to where the day is
+        def rank(c):
+            dist = (route_planner.haversine_km(near["lat"], near["lng"], c.get("lat"), c.get("lng"))
+                    if near else None)
+            return (KIND_PRIORITY.get(c.get("_kind"), 5), dist if dist is not None else float("inf"))
+        close.sort(key=rank)
+    for place in close:
+        if place.get("lat") is not None and place.get("lng") is not None:
+            return place
+    return None
+
+
+def _parse_clock(value: Any, default: int) -> int:
+    """'09:30' -> 570"""
+    m = re.fullmatch(r"\s*(\d{1,2}):(\d{2})\s*", str(value or ""))
+    if not m:
+        return default
+    hours, minutes = int(m.group(1)), int(m.group(2))
+    if hours > 23 or minutes > 59:
+        return default
+    return hours * 60 + minutes
+
 
 @app.route("/optimize-route", methods=["POST"])
 def optimize_route():
     """
-    Smart Route Optimizer using Dynamic Programming (Held-Karp algorithm).
-    
-    Finds the optimal order to visit locations to minimize travel time.
-    Uses TSP (Traveling Salesman Problem) solver with DP memoization.
-    
+    Optimize every day of a trip.
+
     POST body:
     {
-        "locations": [
-            {"name": "Senso-ji", "lat": 35.7148, "lng": 139.7967, "duration": 90},
-            {"name": "Tokyo Skytree", "lat": 35.7101, "lng": 139.8107, "duration": 120},
-            {"name": "Shibuya Crossing", "lat": 35.6595, "lng": 139.7004, "duration": 60}
-        ],
-        "start_index": 0,  # Optional: which location to start from (default: 0)
-        "has_jr_pass": false  # Optional: for cost calculation
+      "days": [
+        {"key": "tokyo-1", "label": "Tokyo · Day 1", "city": "Tokyo", "area": "Shibuya",
+         "stops": [{"name": "Shibuya Sky", "duration": 90}, {"name": "Lunch", "duration": 60}]}
+      ],
+      "start_time": "09:00"
     }
-    
-    Returns:
-    {
-        "original_order": ["Senso-ji", "Skytree", "Shibuya"],
-        "original_time": 350,
-        "optimal_order": [0, 1, 2],
-        "optimal_route": ["Senso-ji", "Skytree", "Shibuya"],
-        "total_time": 320,
-        "time_saved": 30,
-        "route_details": [
-            {
-                "step": 1,
-                "location": "Senso-ji",
-                "time_at_location": 90,
-                "travel_from_previous": 0
-            },
-            {
-                "step": 2,
-                "location": "Tokyo Skytree",
-                "time_at_location": 120,
-                "travel_from_previous": 15,
-                "distance_km": 2.1,
-                "transport_mode": "train"
-            }
-        ],
-        "cost_estimate": {"total_yen": 1200, "with_jr_pass": 360, "savings": 840}
-    }
+
+    Optional Authorization header (Firebase ID token) lets your custom places be matched too.
+
+    Returns per-day optimized order with a timed schedule, city-to-city travel,
+    fare estimates and the best JR Pass option (see route_planner.plan_trip).
     """
-    try:
-        body = request.get_json(silent=True) or {}
-        locations = body.get('locations', [])
-        start_index = body.get('start_index', 0)
-        has_jr_pass = body.get('has_jr_pass', False)
-        
-        # Validation
-        if not locations:
-            return jsonify({"error": "No locations provided"}), 400
-        
-        if not isinstance(locations, list):
-            return jsonify({"error": "Locations must be a list"}), 400
-        
-        # Validate locations have required fields
-        for i, loc in enumerate(locations):
-            if not isinstance(loc, dict):
-                return jsonify({"error": f"Location {i} must be an object"}), 400
-            if 'name' not in loc:
-                return jsonify({"error": f"Location {i} missing 'name'"}), 400
-        
-        # Check if at least some locations have coordinates
-        coords_count = sum(1 for loc in locations if loc.get('lat') and loc.get('lng'))
-        if coords_count == 0:
-            return jsonify({
-                "error": "No locations have GPS coordinates",
-                "suggestion": "The optimizer needs at least some locations with lat/lng. Try typing exact place names."
-            }), 400
-        
-        # Calculate original order stats (baseline comparison)
-        original_time = 0
-        original_travel = 0
-        
-        for i in range(len(locations)):
-            original_time += locations[i].get('duration', 60)
-            
-            if i > 0:
-                lat1, lng1 = locations[i-1].get('lat'), locations[i-1].get('lng')
-                lat2, lng2 = locations[i].get('lat'), locations[i].get('lng')
-                
-                if lat1 and lng1 and lat2 and lng2:
-                    dist = haversine_km(lat1, lng1, lat2, lng2)
-                    travel = estimate_travel_time(dist, 'walk' if (dist and dist < 1.5) else 'train')
-                    original_time += travel or 30
-                    original_travel += travel or 30
-        
-        # Run the DP optimizer
-        result = optimize_route_dp(locations, start_index)
-        
-        # Calculate ACCURATE cost estimate using city-specific JR coverage
-        total_cost = 0
-        jr_fares_only = 0  # Only fares on JR lines
-        non_jr_fares = 0   # Fares on private lines
-        
-        # Build a city lookup for each location
-        location_cities = {}
-        for i, loc in enumerate(locations):
-            # Try to get city from location data (may be passed from frontend)
-            city = loc.get('city', 'Default')
-            location_cities[i] = city
-        
-        for idx, detail in enumerate(result['route_details']):
-            if 'travel_from_previous' not in detail:
+    body = request.get_json(silent=True) or {}
+    days_in = body.get("days")
+    if not isinstance(days_in, list) or not days_in:
+        return jsonify({"error": "Send a 'days' list: [{city, area, stops: [{name, duration}]}]"}), 400
+    if len(days_in) > MAX_DAYS:
+        return jsonify({"error": f"Too many days (max {MAX_DAYS})"}), 400
+
+    start_minute = _parse_clock(body.get("start_time"), 9 * 60)
+
+    # Normalize input and figure out which cities we need
+    days: List[Dict[str, Any]] = []
+    for n, day in enumerate(days_in, start=1):
+        if not isinstance(day, dict):
+            return jsonify({"error": f"Day {n} must be an object"}), 400
+        city_key = str(day.get("city") or "").strip().lower()
+        if city_key not in ROUTE_CITIES:
+            return jsonify({"error": f"Day {n}: unsupported city '{day.get('city')}'"}), 400
+        stops = []
+        for stop in (day.get("stops") or [])[:MAX_STOPS_PER_DAY]:
+            if isinstance(stop, str):
+                stop = {"name": stop}
+            if not isinstance(stop, dict):
                 continue
-            
-            if detail.get('transport_mode') != 'train':
+            name = str(stop.get("name") or "").strip()
+            if not name:
                 continue
-            
-            distance_km = detail.get('distance_km', 0)
-            if distance_km == 0:
-                continue
-            
-            # Get cities for this segment
-            loc_index = detail.get('location_index', 0)
-            prev_index = loc_index - 1 if loc_index > 0 else 0
-            
-            city_from = location_cities.get(prev_index, 'Default')
-            city_to = location_cities.get(loc_index, 'Default')
-            
-            # Calculate fare based on distance and cities
-            base_fare, jr_coverage = estimate_fare_by_distance(distance_km, city_from, city_to)
-            
-            # Apply special route adjustments
-            base_fare, jr_coverage = adjust_for_special_routes(
-                city_from, city_to, distance_km, base_fare, jr_coverage
-            )
-            
-            # Calculate JR vs non-JR split
-            jr_portion = round(base_fare * jr_coverage)
-            non_jr_portion = base_fare - jr_portion
-            
-            total_cost += base_fare
-            jr_fares_only += jr_portion
-            non_jr_fares += non_jr_portion
-        
-        # Calculate JR Pass recommendation (assume 7-day trip by default)
-        trip_days = 7  # Could be passed from frontend in future
-        jr_pass_analysis = calculate_jr_pass_recommendation(jr_fares_only, trip_days)
-        
-        # Cost WITH JR Pass = pass cost + non-JR fares
-        cost_with_jr_pass = jr_pass_analysis['pass_cost'] + non_jr_fares
-        actual_net_savings = total_cost - cost_with_jr_pass
-        
-        # Build response
-        optimal_route_names = [locations[i]['name'] for i in result['optimal_order']]
-        original_route_names = [loc['name'] for loc in locations]
-        
-        return jsonify({
-            "original_order": original_route_names,
-            "original_time": round(original_time),
-            "original_travel_time": round(original_travel),
-            "optimal_order": result['optimal_order'],
-            "optimal_route": optimal_route_names,
-            "total_time": result['total_time'],
-            "time_saved": max(0, round(original_time - result['total_time'])),
-            "time_saved_percentage": round((max(0, original_time - result['total_time']) / original_time * 100)) if original_time > 0 else 0,
-            "total_travel_time": result['total_travel_time'],
-            "total_activity_time": result['total_activity_time'],
-            "route_details": result['route_details'],
-            "optimization_method": result['optimization_method'],
-            "algorithm_used": "Held-Karp DP" if len(locations) <= 10 else "Greedy Nearest Neighbor",
-            "cost_estimate": {
-                "total_without_pass": total_cost,
-                "total_with_pass": cost_with_jr_pass,
-                "actual_net_savings": actual_net_savings,
-                "jr_fares_only": jr_fares_only,
-                "private_line_fares": non_jr_fares,
-                "pass_type": jr_pass_analysis['pass_type'],
-                "pass_cost": jr_pass_analysis['pass_cost'],
-                "is_worth_it": jr_pass_analysis['is_worth_it'],
-                "recommendation": jr_pass_analysis['recommendation'],
-                "value_percentage": jr_pass_analysis['value_percentage'],
-                "breakdown_note": f"Total train fares: ¥{total_cost:,} | JR lines: ¥{jr_fares_only:,} | Private lines: ¥{non_jr_fares:,}"
-            }
+            try:
+                duration = int(stop.get("duration") or 60)
+            except (TypeError, ValueError):
+                duration = 60
+            stops.append({"name": name[:120], "duration": max(5, min(duration, 600))})
+        days.append({
+            "day": day.get("day") or n,
+            "key": day.get("key"),
+            "label": str(day.get("label") or f"Day {n}")[:60],
+            "city_key": city_key,
+            "city": ROUTE_CITIES[city_key],
+            "area": str(day.get("area") or "").strip()[:80],
+            "stops": stops,
         })
-    
-    except Exception as e:
+
+    if not any(d["stops"] for d in days):
+        return jsonify({"error": "Add some activities to your days first."}), 400
+
+    kb = load_kb_for(sorted({d["city_key"] for d in days}))
+
+    # The user's own places (hotels, friends' houses...) are matched first
+    user_places_by_city: Dict[str, List[Dict[str, Any]]] = {}
+    user_id = get_verified_user_id()
+    if user_id and MONGODB_AVAILABLE and mongo_db is not None:
+        for place in mongo_db["user_places"].find({"user_id": user_id}, {"_id": 0}):
+            city = str(place.get("city") or "").strip().lower()
+            try:
+                place["lat"], place["lng"] = float(place["lat"]), float(place["lng"])
+            except (KeyError, TypeError, ValueError):
+                continue
+            place["_kind"] = "custom"
+            user_places_by_city.setdefault(city, []).append(place)
+
+    # Match every stop to a real place
+    for day in days:
+        city_kb = kb.get(day["city_key"], [])
+        custom = user_places_by_city.get(day["city_key"], [])
+
+        def locate(text: str, near: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+            # Your own places first, then neighborhoods ("Shibuya"), then the database
+            return (match_place(text, custom, near)
+                    or _area_center(city_kb, text, day["city_key"])
+                    or match_place(text, city_kb, near))
+
+        # Where the day starts (hotel, the day's area...), if we can find it
+        anchor = None
+        if day["area"]:
+            place = locate(day["area"], None)
+            if place:
+                anchor = {"name": day["area"], "matched_name": place.get("matched_name") or place.get("name"),
+                          "lat": place["lat"], "lng": place["lng"]}
+        day["anchor"] = anchor
+
+        for stop in day["stops"]:
+            place = locate(stop["name"], anchor)
+            if place:
+                stop.update({"lat": place["lat"], "lng": place["lng"], "matched_name": place.get("matched_name") or place.get("name")})
+            stop["type"] = route_planner.classify(stop["name"], place.get("_kind") if place else None)
+            stop["generic"] = _is_generic(stop["name"])
+
+    try:
+        result = route_planner.plan_trip(days, start_minute)
+    except Exception:
         logger.exception("Route optimization failed")
-        # Return detailed error for debugging
-        import traceback
-        error_details = traceback.format_exc()
-        logger.error(f"Full traceback: {error_details}")
-        return jsonify({
-            "error": str(e),
-            "type": type(e).__name__,
-            "suggestion": "Make sure locations have GPS coordinates (lat/lng). Check server console for details."
-        }), 500
+        return jsonify({"error": "Route optimization failed. Please try again."}), 500
+    return jsonify(result)
 
 # =============================================================================
 # AI REVIEW ENDPOINT

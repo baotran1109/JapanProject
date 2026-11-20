@@ -382,7 +382,7 @@
         const n = idx + 1;
         box.querySelector("h3").textContent = `Day ${n}`;
         const loc = box.querySelector("[id^='location-']");
-        const act = box.querySelector("[id^='activities-']");
+        const act = box.querySelector("textarea[id^='activities-']");
         if (loc) loc.id = `location-${n}`;
         if (act) act.id = `activities-${n}`;
         // Renumber activity-related elements
@@ -814,7 +814,7 @@
       return Array.from(boxes).map((box,i)=>({
         day: i+1,
         location: box.querySelector(`[id^="location-"]`)?.value || "",
-        activities: box.querySelector(`[id^="activities-"]`)?.value || "",
+        activities: box.querySelector(`textarea[id^="activities-"]`)?.value || "",
       }));
     }
     
@@ -1188,278 +1188,7 @@
       }
     });
 
-    // Route Optimization with Dynamic Programming
-    let optimizedRouteData = null;
-
-    document.getElementById("optimize-route-btn")?.addEventListener("click", async () => {
-      try {
-        // Collect all activities from all days
-        const boxes = document.querySelectorAll(".day-box");
-        const allLocations = [];
-        
-        boxes.forEach((box, dayIndex) => {
-          const location = box.querySelector(`input[id^="location-"]`)?.value.trim();
-          const activities = box.querySelector(`textarea[id^="activities-"]`)?.value.trim();
-          const durationsInput = box.querySelector(`input[id^="durations-"]`)?.value.trim();
-          
-          // Parse durations (comma-separated)
-          const durationValues = durationsInput 
-            ? durationsInput.split(',').map(d => parseInt(d.trim()) || 60)
-            : [];
-          
-          // Add main location
-          if (location) {
-            allLocations.push({
-              name: location,
-              duration: durationValues[0] || 60,  // First duration or default 60
-              day: dayIndex + 1
-            });
-          }
-          
-          // Add activities with their corresponding durations
-          if (activities) {
-            const acts = activities.split(/[/,;\n]/).map(a => a.trim()).filter(a => a);
-            acts.forEach((act, actIndex) => {
-              // Get duration for this activity (offset by 1 if location exists)
-              const durationIndex = location ? actIndex + 1 : actIndex;
-              allLocations.push({
-                name: act,
-                duration: durationValues[durationIndex] || 60,
-                day: dayIndex + 1
-              });
-            });
-          }
-        });
-        
-        if (allLocations.length < 2) {
-          alert("Add at least 2 locations to optimize the route!");
-          return;
-        }
-        
-        // Try to enrich with GPS coordinates from knowledge base
-        const enrichedLocations = [];
-        
-        // Get the main location/area from Day 1 to prioritize nearby places
-        const firstBox = document.querySelector(".day-box");
-        const mainLocation = firstBox?.querySelector(`input[id^="location-"]`)?.value.trim() || "Tokyo";
-        
-        for (const loc of allLocations) {
-          try {
-            // Search for this location in MongoDB + user's custom places
-            console.log(`🔍 Searching for: "${loc.name}"`);
-            const searchUrl = `/search/combined?q=${encodeURIComponent(loc.name)}&limit=10`;
-            const searchHeaders = await window.getAuthHeaders();
-            const searchRes = await fetch(searchUrl, { headers: searchHeaders });
-            const searchData = await searchRes.json();
-            console.log(`  → Search returned ${searchData.total_results || 0} results`);
-            
-            // Show what came back before filtering
-            const beforeFilter = [
-              ...(searchData.attractions || []),
-              ...(searchData.restaurants || []),
-              ...(searchData.shopping || []),
-              ...(searchData.daytrips || [])
-            ];
-            console.log(`  → Before filter: ${beforeFilter.length} items`, beforeFilter.map(r => `${r.name} (${r.city})`));
-            
-            // Combine all results and filter to Tokyo only
-            let allResults = [
-              ...(searchData.attractions || []),
-              ...(searchData.restaurants || []),
-              ...(searchData.shopping || []),
-              ...(searchData.daytrips || [])
-            ];
-            
-            // CRITICAL: Filter to Tokyo only!
-            allResults = allResults.filter(r => 
-              r.city === 'Tokyo' || r.city === 'tokyo'
-            );
-            console.log(`  → After Tokyo filter: ${allResults.length} items`, allResults.map(r => `${r.name} (lat:${r.lat}, lng:${r.lng})`));
-            
-            if (allResults.length === 0) {
-              // No Tokyo results - skip this location
-              console.warn(`⚠️ No Tokyo results found for "${loc.name}" - all results were from other cities!`);
-              enrichedLocations.push({
-                name: loc.name,
-                lat: null,
-                lng: null,
-                duration: loc.duration,
-                original_day: loc.day
-              });
-              continue;
-            }
-            
-            // Prioritize results in the same area (e.g., Shinjuku, Shibuya)
-            let best = allResults[0];
-            
-            // If main location mentions an area, prioritize matches in that area
-            const areaKeywords = ['Shinjuku', 'Shibuya', 'Asakusa', 'Ginza', 'Harajuku', 'Akihabara', 'Roppongi', 'Ikebukuro'];
-            for (const area of areaKeywords) {
-              if (mainLocation.toLowerCase().includes(area.toLowerCase())) {
-                // Find result in this area
-                const areaMatch = allResults.find(r => 
-                  r.area?.toLowerCase().includes(area.toLowerCase()) ||
-                  r.name?.toLowerCase().includes(area.toLowerCase())
-                );
-                if (areaMatch) {
-                  best = areaMatch;
-                  break;
-                }
-              }
-            }
-            
-            console.log(`  ✅ Matched "${loc.name}" to "${best.name}" (${best.lat}, ${best.lng})`);
-            enrichedLocations.push({
-              name: loc.name,
-              lat: best.lat,
-              lng: best.lng,
-              duration: loc.duration,
-              original_day: loc.day,
-              matched_place: best.name,  // Show what we actually matched
-              matched_area: best.area
-            });
-          } catch (err) {
-            // Add without coordinates
-            console.error(`  ❌ Error searching for "${loc.name}":`, err);
-            enrichedLocations.push({
-              name: loc.name,
-              lat: null,
-              lng: null,
-              duration: loc.duration,
-              original_day: loc.day
-            });
-          }
-        }
-        
-        // Log what we're sending to the optimizer
-        console.log('📍 Enriched locations:', enrichedLocations);
-        const locationsWithCoords = enrichedLocations.filter(l => l.lat && l.lng);
-        console.log(`✅ ${locationsWithCoords.length}/${enrichedLocations.length} locations have GPS coordinates`);
-        
-        // Call optimization API
-        const res = await fetch("/optimize-route", {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({
-            locations: enrichedLocations,
-            start_index: 0,
-            has_jr_pass: false  // TODO: Add checkbox for user to specify
-          })
-        });
-        
-        if (!res.ok) {
-          const errorData = await res.json().catch(() => ({}));
-          console.error('Backend error:', errorData);
-          throw new Error(errorData.error || errorData.suggestion || `HTTP ${res.status}`);
-        }
-        
-        const optimized = await res.json();
-        optimizedRouteData = optimized;
-        renderOptimizedRoute(optimized);
-        
-      } catch (e) {
-        console.error('Optimization error:', e);
-        alert("Route optimization failed: " + (e?.message || e));
-      }
-    });
-
-    function renderOptimizedRoute(data) {
-      const panel = document.getElementById("route-panel");
-      if (!panel) return;
-      
-      panel.classList.remove("hidden");
-      
-      // Update stats
-      document.getElementById("time-saved").textContent = 
-        `${data.time_saved} (${data.time_saved_percentage}%)`;
-      document.getElementById("activity-time").textContent = 
-        `${data.total_activity_time} min`;
-      document.getElementById("travel-time").textContent = 
-        `${data.total_travel_time} min`;
-      document.getElementById("total-time").textContent = 
-        `${data.total_time} min`;
-      
-      // Update costs with new accurate calculation
-      const costEst = data.cost_estimate;
-      document.getElementById("cost-total").textContent = 
-        `¥${costEst.total_without_pass.toLocaleString()}`;
-      document.getElementById("cost-jr-pass").textContent = 
-        `¥${costEst.total_with_pass.toLocaleString()} (${costEst.pass_type})`;
-      
-      const jrTip = document.getElementById("jr-pass-tip");
-      if (costEst.is_worth_it) {
-        jrTip.innerHTML = `
-          <strong>${costEst.recommendation}</strong><br>
-          <span class="text-xs">
-            ${costEst.pass_type} JR Pass: ¥${costEst.pass_cost.toLocaleString()} | 
-            JR fares: ¥${costEst.jr_fares_only.toLocaleString()} (${costEst.value_percentage}% value) | 
-            Private lines: ¥${costEst.private_line_fares.toLocaleString()}
-          </span>
-        `;
-        jrTip.className = "mt-2 rounded bg-green-50 p-2 text-xs text-green-800";
-      } else {
-        jrTip.innerHTML = `
-          <strong>${costEst.recommendation}</strong><br>
-          <span class="text-xs">
-            Better to pay per ride. ${costEst.pass_type} JR Pass costs ¥${costEst.pass_cost.toLocaleString()}, 
-            but you'd only use ¥${costEst.jr_fares_only.toLocaleString()} in JR fares (${costEst.value_percentage}% value).
-          </span>
-        `;
-        jrTip.className = "mt-2 rounded bg-yellow-50 p-2 text-xs text-yellow-800";
-      }
-      
-      // Render step-by-step route
-      const stepsContainer = document.getElementById("route-steps");
-      stepsContainer.innerHTML = "";
-      
-      data.route_details.forEach((step, idx) => {
-        const stepDiv = document.createElement("div");
-        stepDiv.className = "flex items-start gap-3 rounded-lg bg-white p-3 shadow-sm";
-        
-        let html = `
-          <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-green-600 text-sm font-bold text-white">
-            ${step.step}
-          </div>
-          <div class="flex-1">
-            <div class="font-semibold">${step.location}</div>
-            <div class="text-sm text-slate-600">Spend ${step.time_at_location} minutes here</div>
-        `;
-        
-        if (step.travel_from_previous) {
-          const icon = step.transport_mode === 'walk' ? '🚶' : '🚃';
-          const distKm = step.distance_km || 0;
-          
-          // Warning if distance seems unrealistic (> 50km in a day trip)
-          const warningClass = distKm > 50 ? 'text-red-600 font-bold' : 'text-slate-500';
-          const warningIcon = distKm > 50 ? '⚠️ ' : '';
-          
-          html += `
-            <div class="mt-1 text-xs ${warningClass}">
-              ${warningIcon}${icon} ${step.travel_from_previous} min from previous (${distKm} km)
-            </div>
-          `;
-        }
-        
-        html += `</div>`;
-        stepDiv.innerHTML = html;
-        stepsContainer.appendChild(stepDiv);
-      });
-      
-      panel.scrollIntoView({behavior: "smooth", block: "start"});
-    }
-
-    // Apply optimized route to the plan
-    document.getElementById("apply-optimized-route")?.addEventListener("click", () => {
-      if (!optimizedRouteData) return;
-      
-      if (!confirm("This will reorder your activities to match the optimized route. Continue?")) {
-        return;
-      }
-      
-      // TODO: Implement applying the optimized order to the day boxes
-      // For now, show a message
-      alert(`Optimized route:\n${optimizedRouteData.optimal_route.join(' → ')}\n\nManually reorder your activities to match this sequence for best results!`);
-    });
+    // Route optimization lives in /static/js/route-optimizer.js
   </script>
 
   <!-- Firebase Save/Load -->
@@ -1935,5 +1664,6 @@
       };
     });
   </script>
+  <script src="/static/js/route-optimizer.js?v=2"></script>
 </body>
 </html>

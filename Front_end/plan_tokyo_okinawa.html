@@ -901,7 +901,7 @@
           // Try to load from localStorage first
           const savedPlan = loadFromLocalStorage();
           if (savedPlan) {
-            renderPlan(savedPlan);
+            window.renderPlan(savedPlan);
           } else {
             regions.forEach(r=>{ regionEl(r).innerHTML=""; addDay(r); });
           }
@@ -1056,70 +1056,7 @@
       }
     });
 
-    // Route Optimization with DP
-    let optimizedRouteData = null;
-    document.getElementById("optimize-route-btn")?.addEventListener("click", async () => {
-      try {
-        const allLocations = [];
-        const cityMap = {tokyo: 'Tokyo', okinawa: 'Okinawa'};
-        for (const [cityKey, cityName] of Object.entries(cityMap)) {
-          const boxes = document.querySelectorAll(`#${cityKey}-days .day-box`);
-          boxes.forEach(box => {
-            const location = box.querySelector(`input[id^="${cityKey}-loc-"]`)?.value.trim();
-            const activities = box.querySelector(`textarea[id^="${cityKey}-act-"]`)?.value.trim();
-            const durationsInput = box.querySelector(`input[id^="${cityKey}-dur-"]`)?.value.trim();
-            const durationValues = durationsInput ? durationsInput.split(',').map(d => parseInt(d.trim()) || 60) : [];
-            if (location) allLocations.push({name: location, duration: durationValues[0] || 60, city: cityName});
-            if (activities) {
-              const acts = activities.split(/[/,;\n]/).map(a => a.trim()).filter(a => a);
-              acts.forEach((act, actIndex) => {
-                const durationIndex = location ? actIndex + 1 : actIndex;
-                allLocations.push({name: act, duration: durationValues[durationIndex] || 60, city: cityName});
-              });
-            }
-          });
-        }
-        if (allLocations.length < 2) { alert("Add at least 2 locations!"); return; }
-        const enriched = [];
-        for (const loc of allLocations) {
-          try {
-            const searchUrl = `/search/combined?q=${encodeURIComponent(loc.name)}&limit=10`;
-            const searchHeaders = await window.getAuthHeaders();
-            const searchRes = await fetch(searchUrl, { headers: searchHeaders });
-            const searchData = await searchRes.json();
-            let allResults = [...(searchData.attractions || []), ...(searchData.restaurants || []), ...(searchData.shopping || [])].filter(r => r.city === loc.city);
-            if (allResults.length > 0) enriched.push({name: loc.name, lat: allResults[0].lat, lng: allResults[0].lng, duration: loc.duration});
-            else enriched.push({name: loc.name, lat: null, lng: null, duration: loc.duration});
-          } catch { enriched.push({name: loc.name, lat: null, lng: null, duration: loc.duration}); }
-        }
-        const res = await fetch("/optimize-route", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({locations: enriched, start_index: 0, has_jr_pass: false})});
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const optimized = await res.json();
-        optimizedRouteData = optimized;
-        const panel = document.getElementById("route-panel");
-        panel.classList.remove("hidden");
-        document.getElementById("time-saved").textContent = `${optimized.time_saved} min (${optimized.time_saved_percentage}%)`;
-        document.getElementById("activity-time").textContent = `${optimized.total_activity_time} min`;
-        document.getElementById("travel-time").textContent = `${optimized.total_travel_time} min`;
-        document.getElementById("total-time").textContent = `${optimized.total_time} min`;
-        document.getElementById("cost-total").textContent = `¥${optimized.cost_estimate.total_yen.toLocaleString()}`;
-        document.getElementById("cost-jr-pass").textContent = `¥${optimized.cost_estimate.with_jr_pass.toLocaleString()}`;
-        document.getElementById("jr-pass-tip").textContent = optimized.cost_estimate.jr_pass_recommended ? `💡 JR Pass recommended! Saves ¥${optimized.cost_estimate.jr_pass_savings.toLocaleString()}` : `ℹ️ JR Pass saves ¥${optimized.cost_estimate.jr_pass_savings.toLocaleString()}`;
-        const stepsContainer = document.getElementById("route-steps");
-        stepsContainer.innerHTML = "";
-        optimized.route_details.forEach(step => {
-          const div = document.createElement("div");
-          div.className = "flex gap-3 rounded-lg bg-white p-3 shadow-sm";
-          const icon = step.transport_mode === 'walk' ? '🚶' : '🚃';
-          const distKm = step.distance_km || 0;
-          const warning = distKm > 50 ? '⚠️ ' : '';
-          div.innerHTML = `<div class="flex h-8 w-8 items-center justify-center rounded-full bg-green-600 text-sm font-bold text-white">${step.step}</div><div class="flex-1"><div class="font-semibold">${step.location}</div><div class="text-sm text-slate-600">${step.time_at_location} min</div>${step.travel_from_previous ? `<div class="text-xs text-slate-500">${warning}${icon} ${step.travel_from_previous} min (${distKm} km)</div>` : ''}</div>`;
-          stepsContainer.appendChild(div);
-        });
-        panel.scrollIntoView({behavior: "smooth"});
-      } catch (e) { console.error(e); alert("Route optimization failed: " + (e?.message || e)); }
-    });
-    document.getElementById("apply-optimized-route")?.addEventListener("click", () => { if (!optimizedRouteData) return; alert(`Optimized route:\n${optimizedRouteData.optimal_route.join(' → ')}\n\nManually reorder!`); });
+    // Route optimization lives in /static/js/route-optimizer.js
   </script>
 
   <!-- ===== Fetch recommendation lists ===== -->
@@ -1269,6 +1206,10 @@
         console.error("Error loading custom places:", e);
       }
     }
+
+    // Exposed so the localStorage restore (in a classic script) can call it
+
+    window.renderPlan = renderPlan;
 
     function renderPlan(p){
       const plan = p || { tokyo:[], okinawa:[] };
@@ -1718,5 +1659,6 @@
   </script>
 
   <footer class="py-10 text-center text-sm text-slate-500">&copy; 2025 Explore Japan · Bao Tran</footer>
+  <script src="/static/js/route-optimizer.js?v=2"></script>
 </body>
 </html>

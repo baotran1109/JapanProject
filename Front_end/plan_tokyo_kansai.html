@@ -341,7 +341,7 @@
         counters[city] = n;
         box.querySelector("[data-day-label]").textContent = `Day ${n}`;
         box.querySelector(`[id^="${city}-location-"]`).id   = `${city}-location-${n}`;
-        box.querySelector(`[id^="${city}-activities-"]`).id = `${city}-activities-${n}`;
+        box.querySelector(`textarea[id^="${city}-activities-"]`).id = `${city}-activities-${n}`;
         box.setAttribute("data-day", n);
       });
     }
@@ -863,7 +863,7 @@
         const boxes = document.querySelectorAll(`#${city}-days .day-box`);
         boxes.forEach((box, i) => {
           const location  = box.querySelector(`[id^="${city}-location-"]`)?.value || "";
-          const activities = box.querySelector(`[id^="${city}-activities-"]`)?.value || "";
+          const activities = box.querySelector(`textarea[id^="${city}-activities-"]`)?.value || "";
           plan[city].push({ day:i+1, location, activities });
         });
       });
@@ -930,7 +930,7 @@
           // Try to load from localStorage first
           const savedPlan = loadFromLocalStorage();
           if (savedPlan) {
-            renderPlanMulti(savedPlan);
+            window.renderPlanMulti(savedPlan);
           } else {
             ["tokyo","kyoto","osaka"].forEach(c => {
               cityContainer(c).innerHTML = "";
@@ -1017,7 +1017,7 @@
         const days = [];
         boxes.forEach((box,i)=>{
           const locEl = box.querySelector(`[id^="${r}-location-"]`);
-          const actEl = box.querySelector(`[id^="${r}-activities-"]`);
+          const actEl = box.querySelector(`textarea[id^="${r}-activities-"]`);
           const loc = (locEl?.value || "").trim();
           const act = (actEl?.value || "").trim();
           if (loc || act){
@@ -1209,196 +1209,7 @@
       }
     });
 
-    // Route Optimization with DP
-    let optimizedRouteData = null;
-    document.getElementById("optimize-route-btn")?.addEventListener("click", async () => {
-      try {
-        // Group locations by city (don't mix cities!)
-        const locationsByCity = {Tokyo: [], Kyoto: [], Osaka: []};
-        const cityMap = {tokyo: 'Tokyo', kyoto: 'Kyoto', osaka: 'Osaka'};
-        
-        for (const [cityKey, cityName] of Object.entries(cityMap)) {
-          const boxes = document.querySelectorAll(`#${cityKey}-days .day-box`);
-          boxes.forEach(box => {
-            const location = box.querySelector(`input[id^="${cityKey}-location-"]`)?.value.trim();
-            const activities = box.querySelector(`textarea[id^="${cityKey}-activities-"]`)?.value.trim();
-            const durationsInput = box.querySelector(`input[id^="${cityKey}-durations-"]`)?.value.trim();
-            
-            // Parse durations (comma-separated)
-            const durationValues = durationsInput 
-              ? durationsInput.split(',').map(d => parseInt(d.trim()) || 60)
-              : [];
-            
-            // Add main location with first duration
-            if (location) {
-              locationsByCity[cityName].push({
-                name: location, 
-                duration: durationValues[0] || 60, 
-                city: cityName
-              });
-            }
-            
-            // Add activities with their corresponding durations
-            if (activities) {
-              const acts = activities.split(/[/,;\n]/).map(a => a.trim()).filter(a => a);
-              acts.forEach((act, actIndex) => {
-                // Get duration for this activity (offset by 1 if location exists)
-                const durationIndex = location ? actIndex + 1 : actIndex;
-                locationsByCity[cityName].push({
-                  name: act, 
-                  duration: durationValues[durationIndex] || 60, 
-                  city: cityName
-                });
-              });
-            }
-          });
-        }
-        
-        // Optimize each city separately
-        const cityResults = [];
-        for (const [cityName, locs] of Object.entries(locationsByCity)) {
-          if (locs.length === 0) continue;
-          
-          // Enrich with GPS from MongoDB
-          const enriched = [];
-          console.log(`🔍 Searching for locations in ${cityName}:`, locs.map(l => l.name));
-          
-          for (const loc of locs) {
-            try {
-              // Use /search/combined to include user's custom places
-              const searchUrl = `/search/combined?q=${encodeURIComponent(loc.name)}&limit=10`;
-              const searchHeaders = await window.getAuthHeaders();
-              const searchRes = await fetch(searchUrl, { headers: searchHeaders });
-              const searchData = await searchRes.json();
-              
-              let allResults = [
-                ...(searchData.attractions || []), 
-                ...(searchData.restaurants || []), 
-                ...(searchData.shopping || [])
-              ];
-              
-              console.log(`  📍 "${loc.name}" - Found ${allResults.length} total results`);
-              
-              // Filter to correct city
-              allResults = allResults.filter(r => r.city === loc.city);
-              console.log(`  ✓ After city filter (${loc.city}): ${allResults.length} results`);
-              
-              if (allResults.length > 0 && allResults[0].lat && allResults[0].lng) {
-                enriched.push({name: loc.name, lat: allResults[0].lat, lng: allResults[0].lng, duration: loc.duration});
-                console.log(`  ✅ Added: ${loc.name} at (${allResults[0].lat}, ${allResults[0].lng})`);
-              } else {
-                console.warn(`  ⚠️ No coordinates found for "${loc.name}" in ${loc.city}`);
-              }
-            } catch (err) {
-              console.error(`  ❌ Error searching for ${loc.name}:`, err);
-            }
-          }
-          
-          console.log(`✅ ${cityName}: ${enriched.length}/${locs.length} locations have coordinates`);
-          
-          // Only optimize if we have 2+ locations with coordinates
-          if (enriched.length >= 2) {
-            const res = await fetch("/optimize-route", {
-              method: "POST", 
-              headers: {"Content-Type": "application/json"}, 
-              body: JSON.stringify({locations: enriched, start_index: 0, has_jr_pass: true})  // Always calculate JR Pass
-            });
-            
-            if (res.ok) {
-              const optimized = await res.json();
-              cityResults.push({city: cityName, ...optimized});
-              console.log(`✅ ${cityName} optimized:`, optimized);
-            } else {
-              console.error(`❌ ${cityName} optimization failed: HTTP ${res.status}`);
-            }
-          } else {
-            console.warn(`⚠️ ${cityName}: Not enough locations with coordinates (need 2+, have ${enriched.length})`);
-            if (enriched.length === 1) {
-              alert(`${cityName}: Only found 1 location with GPS. Need at least 2 to optimize.\nMissing: ${locs.filter(l => !enriched.find(e => e.name === l.name)).map(l => l.name).join(', ')}`);
-            } else if (enriched.length === 0) {
-              alert(`${cityName}: No locations found in database. Try:\n- "Senso-ji Temple" (not just "Senso-ji")\n- "Tokyo Skytree"\n- "Shibuya Crossing"`);
-            }
-          }
-        }
-        
-        if (cityResults.length === 0) {
-          alert("Could not find GPS coordinates for your locations. Try using specific place names like 'Senso-ji Temple' or 'Tokyo Skytree'.");
-          return;
-        }
-        
-        // Combine results and render
-        optimizedRouteData = cityResults;
-        
-        const panel = document.getElementById("route-panel");
-        panel.classList.remove("hidden");
-        
-        // Calculate totals across all cities
-        const totalTimeSaved = cityResults.reduce((sum, city) => sum + city.time_saved, 0);
-        const totalActivityTime = cityResults.reduce((sum, city) => sum + city.total_activity_time, 0);
-        const totalTravelTime = cityResults.reduce((sum, city) => sum + city.total_travel_time, 0);
-        const totalTime = totalActivityTime + totalTravelTime;
-        // Calculate totals with new accurate cost structure
-        const totalCost = cityResults.reduce((sum, city) => sum + city.cost_estimate.total_without_pass, 0);
-        const totalCostJR = cityResults.reduce((sum, city) => sum + city.cost_estimate.total_with_pass, 0);
-        const totalSavings = totalCost - totalCostJR;
-        const isWorthIt = cityResults.some(city => city.cost_estimate.is_worth_it);
-        
-        // Update summary stats
-        document.getElementById("time-saved").textContent = `${totalTimeSaved} min`;
-        document.getElementById("activity-time").textContent = `${totalActivityTime} min`;
-        document.getElementById("travel-time").textContent = `${totalTravelTime} min`;
-        document.getElementById("total-time").textContent = `${totalTime} min`;
-        document.getElementById("cost-total").textContent = `¥${totalCost.toLocaleString()}`;
-        document.getElementById("cost-jr-pass").textContent = `¥${totalCostJR.toLocaleString()}`;
-        
-        // Display JR Pass recommendation
-        const jrTip = document.getElementById("jr-pass-tip");
-        if (isWorthIt) {
-          jrTip.innerHTML = `<strong>✅ JR Pass saves you ¥${totalSavings.toLocaleString()}!</strong><br>
-            <span class="text-xs">7-day pass: ¥50,000 | Your JR fare value: ¥${cityResults.reduce((sum, c) => sum + c.cost_estimate.jr_fares_only, 0).toLocaleString()}</span>`;
-          jrTip.className = "mt-2 rounded bg-green-50 p-2 text-xs text-green-800";
-        } else {
-          jrTip.innerHTML = `<strong>❌ JR Pass costs ¥${Math.abs(totalSavings).toLocaleString()} more</strong><br>
-            <span class="text-xs">Better to pay per ride for this itinerary.</span>`;
-          jrTip.className = "mt-2 rounded bg-yellow-50 p-2 text-xs text-yellow-800";
-        }
-        
-        // Render routes by city
-        const stepsContainer = document.getElementById("route-steps");
-        stepsContainer.innerHTML = "";
-        
-        cityResults.forEach(cityData => {
-          // City header
-          const cityHeader = document.createElement("div");
-          cityHeader.className = "font-bold text-lg text-green-800 mt-4 first:mt-0";
-          cityHeader.textContent = `🏙️ ${cityData.city}`;
-          stepsContainer.appendChild(cityHeader);
-          
-          // Route steps for this city
-          cityData.route_details.forEach(step => {
-            const div = document.createElement("div");
-            div.className = "flex gap-3 rounded-lg bg-white p-3 shadow-sm";
-            const icon = step.transport_mode === 'walk' ? '🚶' : '🚃';
-            const distKm = step.distance_km || 0;
-            const warningClass = distKm > 50 ? 'text-red-600 font-bold' : 'text-slate-500';
-            const warningIcon = distKm > 50 ? '⚠️ ' : '';
-            
-            div.innerHTML = `
-              <div class="flex h-8 w-8 items-center justify-center rounded-full bg-green-600 text-sm font-bold text-white">${step.step}</div>
-              <div class="flex-1">
-                <div class="font-semibold">${step.location}</div>
-                <div class="text-sm text-slate-600">${step.time_at_location} min</div>
-                ${step.travel_from_previous ? `<div class="text-xs ${warningClass}">${warningIcon}${icon} ${step.travel_from_previous} min (${distKm.toFixed(2)} km)</div>` : ''}
-              </div>
-            `;
-            stepsContainer.appendChild(div);
-          });
-        });
-        
-        panel.scrollIntoView({behavior: "smooth"});
-      } catch (e) { console.error(e); alert("Route optimization failed: " + (e?.message || e)); }
-    });
-    document.getElementById("apply-optimized-route")?.addEventListener("click", () => { if (!optimizedRouteData) return; alert(`Optimized route:\n${optimizedRouteData.optimal_route.join(' → ')}\n\nManually reorder to match!`); });
+    // Route optimization lives in /static/js/route-optimizer.js
   </script>
 
   <!-- Firebase Save/Load -->
@@ -1476,6 +1287,10 @@
       
       return plan;
     }
+
+    // Exposed so the localStorage restore (in a classic script) can call it
+
+    window.renderPlanMulti = renderPlanMulti;
 
     function renderPlanMulti(p){
       const cities = ["tokyo","kyoto","osaka"];
@@ -2052,5 +1867,6 @@
       } catch (err) { console.error('❌ Error:', err); }
     })();
   </script>
+  <script src="/static/js/route-optimizer.js?v=2"></script>
 </body>
 </html>
