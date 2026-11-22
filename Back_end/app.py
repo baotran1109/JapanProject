@@ -29,6 +29,7 @@ from dotenv import load_dotenv
 import route_planner
 import ai_reviewer
 import place_picks
+import trip_generator
 
 # Trying to import MongoDB - falls back to JSON files if not available
 try:
@@ -991,7 +992,7 @@ def _city_areas(city_kb: List[Dict[str, Any]], city_key: str = "") -> Dict[str, 
     # Well-known neighborhoods use their real center instead of an average
     for label, (lat, lng) in KNOWN_AREAS.get(city_key, {}).items():
         areas[label.lower()] = {"name": label, "matched_name": f"{label} area", "lat": lat, "lng": lng,
-                                "_kind": "area"}
+                                "_kind": "area", "known": True}
     _areas_cache[id(city_kb)] = (len(city_kb), areas)
     return areas
 
@@ -1213,7 +1214,9 @@ def prepare_trip_days(days_in: Any) -> List[Dict[str, Any]]:
         day["anchor"] = anchor
 
         for stop in day["stops"]:
-            place = locate(stop["name"], anchor)
+            # "Lunch: Ichiran Shibuya" = a meal at that restaurant (found by its name)
+            meal = MEAL_PREFIX.match(stop["name"])
+            place = locate(meal.group(2) if meal else stop["name"], anchor)
             if place:
                 stop.update({"lat": place["lat"], "lng": place["lng"], "kind": place.get("_kind"),
                              "matched_name": place.get("matched_name") or place.get("name")})
@@ -1230,6 +1233,10 @@ def prepare_trip_days(days_in: Any) -> List[Dict[str, Any]]:
                 stop["duration_estimated"] = True
 
     return days
+
+
+# "Lunch: <restaurant>", "Dinner - <restaurant>" (written by "Plan my trip", or by hand)
+MEAL_PREFIX = re.compile(r"^\s*(breakfast|brunch|lunch|dinner)(?:\s*[:：]|\s+[-–])\s*(.+)$", re.IGNORECASE)
 
 
 def too_many_stops_text(day: Dict[str, Any]) -> str:
@@ -1285,6 +1292,74 @@ def optimize_route():
         logger.exception("Route optimization failed")
         return jsonify({"error": "Route optimization failed. Please try again."}), 500
     return jsonify(result)
+
+# =============================================================================
+# PLAN MY TRIP (trip_generator.py)
+# =============================================================================
+
+@app.route("/plan-trip", methods=["POST"])
+def plan_trip_for_me():
+    """
+    Build a whole itinerary from the database.
+
+    POST body:
+    {"cities": [{"city": "Tokyo", "days": 3}, {"city": "Kyoto", "days": 2}],
+     "interests": ["food", "temples", "vintage"], "pace": "relaxed" | "normal" | "packed"}
+
+    Returns:
+    {"days": [{"label", "city", "city_key", "day_in_city", "area", "theme",
+               "stops": [{"name", "duration", "type"}], "start_time", "end_time", "travel_minutes"}],
+     "check": {"score", "issues"}, "notes": [...], "interests": {id: label}}
+    """
+    body = request.get_json(silent=True) or {}
+    try:
+        req = trip_generator.parse_request(body, ROUTE_CITIES)
+    except trip_generator.GeneratorInputError as e:
+        return jsonify({"error": str(e)}), 400
+
+    try:
+        kb = load_kb_for(sorted({c["key"] for c in req["cities"]}))
+        plan = trip_generator.generate_trip(req, kb, lambda key: _city_areas(kb.get(key, []), key))
+        days = plan["days"]
+        # The same checks the AI review starts from, so the plan comes with its own score
+        for day in days:
+            day.setdefault("dropped_stops", [])
+        analysis = ai_reviewer.analyze_trip(days, req["pace"]) if days else {"days": []}
+        score = ai_reviewer.rule_score(analysis) if days else None
+    except Exception:
+        logger.exception("Trip generation failed")
+        return jsonify({"error": "Couldn't build a plan. Please try again."}), 500
+
+    out_days = []
+    for day, checked in zip(days, analysis.get("days", [])):
+        sched = day["schedule"]
+        out_days.append({
+            "label": day["label"],
+            "city": day["city"],
+            "city_key": day["city_key"],
+            "day_in_city": day["day_in_city"],
+            "area": day["area"],
+            "theme": day["theme"],
+            "stops": [{"name": s["name"], "duration": s["duration"], "type": s["type"]} for s in day["stops"]],
+            "start_time": sched["start_time"],
+            "end_time": sched["end_time"],
+            "travel_minutes": sched["travel_minutes"],
+            "issues": [i["text"] for i in checked.get("issues", [])],
+        })
+    return jsonify({
+        "days": out_days,
+        "pace": req["pace"],
+        "check": {"score": score},
+        "notes": plan["notes"],
+        "interests": trip_generator.INTERESTS,
+    })
+
+
+@app.route("/plan-trip/options")
+def plan_trip_options():
+    """Interests and paces the 'Plan my trip' form can offer"""
+    return jsonify({"interests": trip_generator.INTERESTS, "paces": list(ai_reviewer.PACE_LIMITS.keys())})
+
 
 # =============================================================================
 # AI REVIEW ENDPOINT

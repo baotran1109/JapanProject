@@ -153,6 +153,19 @@
     return writeDay(key, [...ordered, ...remaining]);
   }
 
+  /** Set a day's area / location field ("Asakusa") */
+  function writeArea(key, text) {
+    const day = getDay(key);
+    if (!day) return false;
+    const { prefix, n } = day._field;
+    const box = document.getElementById(key).closest(".day-box");
+    const el = findInput(box, prefix, n, ["location", "loc", "place"]);
+    if (!el) return false;
+    el.value = text || "";
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+    return true;
+  }
+
   /** Swap one stop for another (e.g. "Lunch" -> a restaurant), keeping its duration */
   function replaceStop(key, oldName, newName) {
     const day = getDay(key);
@@ -203,7 +216,10 @@
   function bindPicks(container, onUsed) {
     container.querySelectorAll("[data-pick-name]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        const { pickKey, pickStop, pickName } = btn.dataset;
+        const { pickKey, pickStop } = btn.dataset;
+        // "Lunch" -> "Lunch: <restaurant>", so it stays scheduled at lunchtime
+        const pickName = /^(breakfast|brunch|lunch|dinner)$/i.test(pickStop.trim())
+          ? `${pickStop.trim()}: ${btn.dataset.pickName}` : btn.dataset.pickName;
         if (!replaceStop(pickKey, pickStop, pickName)) {
           alert(`“${pickStop}” isn't on that day anymore.`);
           return;
@@ -216,7 +232,7 @@
   }
 
   window.PlanDom = {
-    collectDays, getDay, forServer, writeDay, reorderDay, replaceStop, renderPicks, bindPicks,
+    collectDays, getDay, forServer, writeDay, writeArea, reorderDay, replaceStop, renderPicks, bindPicks,
     esc, formatMinutes, yen,
   };
 })();
