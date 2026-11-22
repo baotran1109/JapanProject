@@ -97,7 +97,7 @@
   </header>
 
   <!-- MAIN -->
-  <main class="mx-auto grid max-w-6xl gap-8 px-4 py-8 md:grid-cols-[1fr_420px]">
+  <main class="mx-auto grid max-w-6xl gap-8 px-4 py-8 md:grid-cols-[1fr_420px] [&>*]:min-w-0">
     <!-- Planner -->
     <section>
       <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:p-6">
@@ -333,7 +333,7 @@
               <input type="text" 
                      id="quick-add-${i}"
                      placeholder="Type activity and press Enter or click +"
-                     class="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                     class="min-w-0 flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                      onkeypress="if(event.key==='Enter') addActivityQuick(${i})" />
               <button type="button" onclick="addActivityQuick(${i})"
                       class="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 transition-colors font-medium">
@@ -1518,7 +1518,8 @@
     });
   </script>
   <script src="/static/js/plan-dom.js?v=3"></script>
-  <script src="/static/js/route-optimizer.js?v=5"></script>
+  <script src="/static/js/route-map.js?v=2"></script>
+  <script src="/static/js/route-optimizer.js?v=6"></script>
   <script src="/static/js/ai-review.js?v=3"></script>
 </body>
 </html>

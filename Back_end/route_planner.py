@@ -746,7 +746,11 @@ def plan_trip(days: List[Dict[str, Any]], start_minute: int = 9 * 60) -> Dict[st
         result = planner.optimize()
         result.update({"day": day.get("day"), "label": day.get("label"), "city": day["city"],
                        "key": day.get("key"),
-                       "anchor": (day.get("anchor") or {}).get("matched_name")})
+                       "anchor": (day.get("anchor") or {}).get("matched_name"),
+                       # Where the day starts, for drawing the route on a map
+                       "anchor_point": ({"name": day["anchor"].get("matched_name") or day["anchor"].get("name"),
+                                         "lat": day["anchor"]["lat"], "lng": day["anchor"]["lng"]}
+                                        if day.get("anchor") else None)})
         results.append(result)
         day_jr_fares.append(result["jr_fares_yen"])
 

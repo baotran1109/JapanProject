@@ -182,6 +182,8 @@
         </div>
       </div>
 
+      <div class="mt-4" data-route-map></div>
+
       <div class="mt-4 space-y-4">
         ${renderIntercity(data.intercity)}
         ${data.days.map(renderDay).join("")}
@@ -194,6 +196,11 @@
       </div>`;
 
     panel.classList.remove("hidden");
+    // Map of each day's route (route-map.js), drawn after the panel is visible
+    const mapBox = panel.querySelector("[data-route-map]");
+    if (mapBox && window.RouteMap) {
+      window.RouteMap.render(mapBox, data).catch((e) => console.error("Route map failed:", e));
+    }
     panel.querySelector("#route-apply-all")?.addEventListener("click", applyAll);
     panel.querySelectorAll("[data-apply-day]").forEach((btn) => {
       btn.addEventListener("click", () => {
