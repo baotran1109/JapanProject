@@ -28,6 +28,7 @@ from dotenv import load_dotenv
 # Route planning (per-day optimization, schedules, fares, JR Pass) and the AI review
 import route_planner
 import ai_reviewer
+import place_picks
 
 # Trying to import MongoDB - falls back to JSON files if not available
 try:
@@ -919,7 +920,7 @@ KIND_PRIORITY = {"custom": 0, "attractions": 1, "daytrips": 2, "shopping": 3, "r
 MATCH_MIN_SCORE = 86     # How close a name must be to count as the same place
 MATCH_TIE_SCORE = 6      # Candidates this close to the best are compared by distance
 MAX_DAYS = 60
-MAX_STOPS_PER_DAY = 25
+MAX_STOPS_PER_DAY = 40
 
 
 def _is_generic(name: str) -> bool:
@@ -1144,7 +1145,7 @@ def prepare_trip_days(days_in: Any) -> List[Dict[str, Any]]:
         if city_key not in ROUTE_CITIES:
             raise PlanInputError(f"Day {n}: unsupported city '{day.get('city')}'")
         stops = []
-        for stop in (day.get("stops") or [])[:MAX_STOPS_PER_DAY]:
+        for stop in day.get("stops") or []:
             if isinstance(stop, str):
                 stop = {"name": stop}
             if not isinstance(stop, dict):
@@ -1152,11 +1153,16 @@ def prepare_trip_days(days_in: Any) -> List[Dict[str, Any]]:
             name = str(stop.get("name") or "").strip()
             if not name:
                 continue
+            # No duration given -> filled in later with a default for the stop's type
             try:
-                duration = int(stop.get("duration") or 60)
+                duration = int(stop.get("duration"))
+                duration = max(5, min(duration, 600))
             except (TypeError, ValueError):
-                duration = 60
-            stops.append({"name": name[:120], "duration": max(5, min(duration, 600))})
+                duration = None
+            stops.append({"name": name[:120], "duration": duration})
+        # Too many stops for one day: plan the first ones and say which were left out
+        dropped = [s["name"] for s in stops[MAX_STOPS_PER_DAY:]]
+        stops = stops[:MAX_STOPS_PER_DAY]
         days.append({
             "day": day.get("day") or n,
             "key": day.get("key"),
@@ -1165,6 +1171,7 @@ def prepare_trip_days(days_in: Any) -> List[Dict[str, Any]]:
             "city": ROUTE_CITIES[city_key],
             "area": str(day.get("area") or "").strip()[:80],
             "stops": stops,
+            "dropped_stops": dropped,
         })
 
     if not any(d["stops"] for d in days):
@@ -1210,10 +1217,32 @@ def prepare_trip_days(days_in: Any) -> List[Dict[str, Any]]:
             if place:
                 stop.update({"lat": place["lat"], "lng": place["lng"], "kind": place.get("_kind"),
                              "matched_name": place.get("matched_name") or place.get("name")})
-            stop["type"] = route_planner.classify(stop["name"], place.get("_kind") if place else None)
+            stop["type"] = route_planner.classify(stop["name"], place.get("_kind") if place else None,
+                                                  place.get("cuisine") if place else None)
             stop["generic"] = _is_generic(stop["name"])
 
+        # Unknown places on a shopping day are probably shops, then fill in missing durations
+        route_planner.classify_unknown_by_context(day["stops"])
+        for stop in day["stops"]:
+            if stop["duration"] is None:
+                stop["duration"] = route_planner.default_duration(
+                    stop["name"], stop["type"], stop.get("kind"), stop["generic"])
+                stop["duration_estimated"] = True
+
     return days
+
+
+def too_many_stops_text(day: Dict[str, Any]) -> str:
+    dropped = day["dropped_stops"]
+    names = ", ".join(f"“{n}”" for n in dropped[:3]) + (f" and {len(dropped) - 3} more" if len(dropped) > 3 else "")
+    return (f"{day['label']} has more than {MAX_STOPS_PER_DAY} stops, so the last {len(dropped)} "
+            f"({names}) weren't included. Try splitting this day.")
+
+
+def day_picks(day: Dict[str, Any], schedule: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Nearby restaurant / shop suggestions for one day's general stops (see place_picks.py)"""
+    city_kb = load_kb_for([day["city_key"]]).get(day["city_key"], [])
+    return place_picks.picks_for_schedule(schedule, city_kb, day.get("anchor"))
 
 
 @app.route("/optimize-route", methods=["POST"])
@@ -1244,6 +1273,14 @@ def optimize_route():
 
     try:
         result = route_planner.plan_trip(days, start_minute)
+        # Restaurants / shops from the database for "Lunch", "Ramen", "Shopping"...
+        for day, day_result in zip(days, result["days"]):
+            if day["dropped_stops"]:
+                day_result["warnings"].insert(0, too_many_stops_text(day))
+            for pick in day_picks(day, day_result["stops"]):
+                stop = day_result["stops"][pick["step"] - 1]
+                stop["picks"] = pick["options"]
+                stop["picks_near"] = pick["near"]
     except Exception:
         logger.exception("Route optimization failed")
         return jsonify({"error": "Route optimization failed. Please try again."}), 500
@@ -1330,7 +1367,7 @@ def ai_review():
             raise
 
     try:
-        result = ai_reviewer.review_trip(days, pace, ask_model if OPENAI_API_KEY else None)
+        result = ai_reviewer.review_trip(days, pace, ask_model if OPENAI_API_KEY else None, picks=day_picks)
     except Exception:
         logger.exception("AI review failed")
         return jsonify({"error": "The review failed. Please try again."}), 500

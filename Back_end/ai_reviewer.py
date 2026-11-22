@@ -40,6 +40,7 @@ TRAVEL_HEAVY_SHARE = 0.4           # Travel taking >40% of the active day is a l
 MAX_SUGGESTIONS = 6
 
 ACTIONS = ("reorder", "swap", "move", "remove")
+MEAL_TYPES = ("breakfast", "lunch", "dinner", "meal")
 
 # Short local knowledge per city, only sent for cities in the plan
 CITY_TIPS = {
@@ -100,9 +101,13 @@ def analyze_trip(days: List[Dict[str, Any]], pace: str, start_minute: int = 9 * 
         travel = current["travel_minutes"]
         active = activity + travel
         end = current["end_minute"]
-        meals = [s for s in day["stops"] if s.get("type") in ("breakfast", "lunch", "dinner", "meal")]
+        meals = [s for s in day["stops"] if s.get("type") in MEAL_TYPES]
 
         issues = []
+        if day.get("dropped_stops"):
+            issues.append({"type": "too_many_stops",
+                           "text": f"More than {len(day['stops'])} stops: the last {len(day['dropped_stops'])} "
+                                   f"weren't checked (split this day)"})
         if day["stops"] and active > limits["active_minutes"]:
             issues.append({"type": "overloaded", "excess": active - limits["active_minutes"],
                            "text": f"{_hours(active)} of sights and travel (more than {_hours(limits['active_minutes'])} for a {pace} pace)"})
@@ -168,7 +173,7 @@ def rule_score(analysis: Dict[str, Any]) -> int:
     Each day loses points per issue (more for bigger overloads / later finishes);
     the trip score is the average day, but never more than 2 above the worst day.
     """
-    weights = {"no_meal": 0.7, "travel_heavy": 0.8, "backtracking": 0.7, "timing": 0.5,
+    weights = {"too_many_stops": 1.0, "no_meal": 0.7, "travel_heavy": 0.8, "backtracking": 0.7, "timing": 0.5,
                "unknown_place": 0.1, "duplicate": 0.5, "far_stop": 1.0}
     day_scores = []
     for day in analysis["days"]:
@@ -221,7 +226,7 @@ def rule_suggestions(analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
             same_city = [d for d in days if d["city"] == day["city"] and d["index"] != day["index"]]
             target = min(same_city, key=lambda d: d["activity_minutes"], default=None)
             item = next((s["name"] for s in reversed(day["schedule"])
-                         if s["type"] not in ("breakfast", "lunch", "dinner", "meal")), None)
+                         if s["type"] not in MEAL_TYPES), None)
             if item and target and target["activity_minutes"] + 120 < day["activity_minutes"]:
                 suggestions.append({
                     "action": "move", "day": day["index"], "item": item, "to_day": target["index"],
@@ -249,6 +254,21 @@ You get FACTS computed by a route planner: for each day, the stops in the travel
 estimated arrival times, travel times between stops, detected issues, and how much a better order
 would save. Trust these facts; don't invent travel times or opening hours that contradict them.
 
+Each stop has a "kind" that tells you WHEN it should happen. Respect it, never contradict it:
+- "evening": night views, observation decks, illuminations, bars. Best between 17:00 and 22:00.
+  Never recommend moving these to the morning or daytime.
+- "daytime": shrines, temples, museums, gardens, zoos, castles. Most close around 17:00, so
+  they should start by 16:00.
+- "breakfast" / "lunch" / "dinner" / "meal": meal breaks (lunch ~11:30-14:00, dinner ~17:30-20:30).
+- "shopping": shops, usually open about 10:30-20:00.
+- "snack": coffee / sweets break, any time (not a meal).
+- "visit": anything else, no particular time.
+"minutes" marked minutesEstimated are typical times we assumed (the traveler didn't give one),
+so say "about" rather than treating them as exact.
+"arrive" times follow the traveler's CURRENT order. "optimizedOrder" (when given) is the
+planner's better order that fixes travel and timing; recommend "reorder" to apply it rather than
+describing a different order yourself.
+
 Write an honest, specific review:
 - overallScore (1-10). Use the full range:
     9-10 realistic, well-paced, smart grouping, nothing important to fix
@@ -268,6 +288,8 @@ Write an honest, specific review:
   Use stop names EXACTLY as written in the plan. Day numbers are the "day" field of each day.
   Fill unused fields with "" or 0. Prefer fixing the detected issues; don't suggest edits for
   days that are fine. Respect the traveler's pace.
+  Never suggest removing a meal (breakfast/lunch/dinner/meal): travelers need to eat. A badly
+  timed meal is fixed by "reorder", not by removing it.
 - Each suggestion: short title (max 60 chars), reason (why, max 200 chars), impact (benefit, max 120 chars).
 
 In all text (summary, strengths, risks, titles, reasons), refer to days by their "label"
@@ -328,6 +350,7 @@ def build_user_message(analysis: Dict[str, Any], reference_score: int) -> str:
                     "name": s["name"],
                     "arrive": s["arrive"],
                     "minutes": s["duration"],
+                    **({"minutesEstimated": True} if s.get("duration_estimated") else {}),
                     "kind": s["type"],
                     **({"travelFromPrevious": f"{s['travel_minutes']} min by {s['mode']}"}
                        if s.get("travel_minutes") is not None else {}),
@@ -359,6 +382,17 @@ def _find_item(name: str, stops: List[str]) -> Optional[str]:
     """Return the stop exactly as written in the plan, matching case-insensitively"""
     target = _canon(name)
     return next((s for s in stops if _canon(s) == target), None) if target else None
+
+
+def _is_meal(day: Dict[str, Any], item: str) -> bool:
+    return any(stop["name"] == item and stop["type"] in MEAL_TYPES for stop in day["schedule"])
+
+
+def _can_remove(day: Dict[str, Any], item: str) -> bool:
+    """Removing is for days that are too full, or for a stop that repeats another day"""
+    types = {issue["type"] for issue in day["issues"]}
+    is_repeat = any(issue["type"] == "duplicate" and issue.get("item") == item for issue in day["issues"])
+    return is_repeat or bool(types & {"overloaded", "late_finish"})
 
 
 def validate_suggestion(s: Dict[str, Any], analysis: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -399,6 +433,8 @@ def validate_suggestion(s: Dict[str, Any], analysis: Dict[str, Any]) -> Optional
         target = days.get(_to_int(s.get("toDay") or s.get("to_day")))
         if not item or not target or target["index"] == day["index"] or target["city"] != day["city"]:
             return None
+        if _is_meal(day, item):
+            return None  # Each day needs its own meals
         out["details"] = {"item": item, "toDayIndex": target["index"], "toDayKey": target["key"],
                           "toDayLabel": target["label"]}
         out["title"] = out["title"] or f"Move “{item}” to {target['label']}"
@@ -407,6 +443,8 @@ def validate_suggestion(s: Dict[str, Any], analysis: Dict[str, Any]) -> Optional
         item = _find_item(s.get("item"), day["stops"])
         if not item:
             return None
+        if _is_meal(day, item) or not _can_remove(day, item):
+            return None  # Never drop a meal; only trim days that are too full
         out["details"] = {"item": item}
         out["title"] = out["title"] or f"Remove “{item}”"
 
@@ -435,7 +473,9 @@ def _clean_list(items: Any, limit: int) -> List[str]:
 # =============================================================================
 
 def review_trip(days: List[Dict[str, Any]], pace: str,
-                ask_model: Optional[Callable[[str, str, Dict[str, Any]], Dict[str, Any]]]) -> Dict[str, Any]:
+                ask_model: Optional[Callable[[str, str, Dict[str, Any]], Dict[str, Any]]],
+                picks: Optional[Callable[[Dict[str, Any], List[Dict[str, Any]]], List[Dict[str, Any]]]] = None
+                ) -> Dict[str, Any]:
     """
     Full review. 'ask_model(system, user, schema)' calls the language model and
     returns its parsed JSON; pass None (or let it raise) to use the rule-based review only.
@@ -471,7 +511,8 @@ def review_trip(days: List[Dict[str, Any]], pace: str,
             score = int(model_out.get("overallScore"))
         except (TypeError, ValueError):
             score = reference
-        score = max(1, min(10, score))
+        # The model may adjust the fact-based score a little, not overrule it
+        score = max(1, min(10, max(reference - 2, min(reference + 2, score))))
         result = {
             "overallScore": score,
             "summary": str(model_out.get("summary") or "").strip()[:400],
@@ -509,7 +550,9 @@ def review_trip(days: List[Dict[str, Any]], pace: str,
             "travel_saved_minutes": d["travel_saved_minutes"],
             "issues": [i["text"] for i in d["issues"]],
             "empty": d["empty"],
+            # Restaurants / shops near general stops like "Lunch" (as currently ordered)
+            "picks": picks(day_in, d["schedule"]) if picks and not d["empty"] else [],
         }
-        for d in analysis["days"]
+        for d, day_in in zip(analysis["days"], days)
     ]
     return result

@@ -47,8 +47,13 @@
     return null;
   }
 
+  // "20, , 90" -> [20, null, 90]: a blank means "no duration given" (the server estimates it)
   function parseDurations(text, activityCount, hasLocation) {
-    const values = (text || "").split(",").map((v) => parseInt(v.trim(), 10)).filter((v) => !Number.isNaN(v));
+    const raw = (text || "").trim();
+    const values = raw ? raw.split(",").map((v) => {
+      const n = parseInt(v.trim(), 10);
+      return Number.isNaN(n) ? null : n;
+    }) : [];
     // Older plans put the day's location first in the duration list
     const leadingLocation = hasLocation && values.length === activityCount + 1;
     const forActivities = leadingLocation ? values.slice(1) : values;
@@ -75,7 +80,7 @@
       label: `${city} · Day ${field.n}`,
       city,
       area,
-      stops: activities.map((name, i) => ({ name, duration: durations.values[i] || 60 })),
+      stops: activities.map((name, i) => ({ name, duration: durations.values[i] ?? null })),
       // Kept for writing back (not sent to the server)
       _field: field,
       _durationsEl: durationsEl,
@@ -100,7 +105,7 @@
 
   /**
    * Replace a day's activities with 'stops' ([{name, duration}]).
-   * Durations are written only if the user had filled them in (or a stop has a custom one).
+   * Durations are written only if the user had filled some in; stops without one stay blank.
    */
   function writeDay(key, stops) {
     const day = getDay(key);
@@ -108,11 +113,11 @@
     const { el, prefix, fieldType, n } = day._field;
     const names = stops.map((s) => s.name);
 
-    const hadDurations = day._durations.values.length > 0;
-    const customDuration = stops.some((s) => s.duration && s.duration !== 60);
-    if (day._durationsEl && (hadDurations || customDuration)) {
-      const values = stops.map((s) => s.duration || 60);
-      if (day._durations.leadingLocation) values.unshift(day._durations.leadingValue);
+    const hasAnyDuration = stops.some((s) => s.duration != null);
+    if (day._durationsEl && (day._durations.values.length || hasAnyDuration)) {
+      const values = stops.map((s) => s.duration ?? "");
+      if (day._durations.leadingLocation) values.unshift(day._durations.leadingValue ?? "");
+      while (values.length && values[values.length - 1] === "") values.pop();  // no trailing blanks
       day._durationsEl.value = values.join(", ");
       day._durationsEl.dispatchEvent(new Event("input", { bubbles: true }));
     }
@@ -148,5 +153,70 @@
     return writeDay(key, [...ordered, ...remaining]);
   }
 
-  window.PlanDom = { collectDays, getDay, forServer, writeDay, reorderDay, esc, formatMinutes, yen };
+  /** Swap one stop for another (e.g. "Lunch" -> a restaurant), keeping its duration */
+  function replaceStop(key, oldName, newName) {
+    const day = getDay(key);
+    if (!day) return false;
+    const i = day.stops.findIndex((s) => s.name === oldName);
+    if (i < 0) return false;
+    const stops = [...day.stops];
+    stops[i] = { ...stops[i], name: newName };
+    return writeDay(key, stops);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Nearby picks ("Lunch" -> restaurants from the database), shared by both panels
+  // ---------------------------------------------------------------------------
+
+  const PICK_ICON = { shopping: "🛍️", snack: "☕" };
+  const MODE_WORD = { walk: "walk", train: "by train", "bus/car": "by bus/car" };
+
+  /** HTML for a list of picks with "Use" buttons; 'key' is the day, 'stop' the stop to replace */
+  function renderPicks(key, stop, type, near, options) {
+    if (!options || !options.length) return "";
+    const rows = options.map((o) => {
+      const facts = [
+        o.cuisine ? esc(o.cuisine) : "",
+        o.rating ? `★${esc(o.rating)}` : "",
+        o.price_level ? "¥".repeat(o.price_level) : "",
+        `${formatMinutes(o.minutes)} ${MODE_WORD[o.mode] || ""}`.trim(),
+      ].filter(Boolean).join(" · ");
+      const name = o.google_maps_url
+        ? `<a href="${esc(o.google_maps_url)}" target="_blank" rel="noopener" class="font-medium text-slate-800 hover:underline">${esc(o.name)}</a>`
+        : `<span class="font-medium text-slate-800">${esc(o.name)}</span>`;
+      return `
+        <li class="flex items-center justify-between gap-2 py-1">
+          <div class="min-w-0 text-xs">${name}<div class="text-slate-500">${facts}</div></div>
+          <button type="button" data-pick-key="${esc(key)}" data-pick-stop="${esc(stop)}" data-pick-name="${esc(o.name)}"
+            class="shrink-0 rounded border border-orange-300 bg-white px-2 py-0.5 text-xs font-semibold text-orange-800 hover:bg-orange-50 disabled:opacity-60">
+            Use</button>
+        </li>`;
+    }).join("");
+    return `
+      <div class="mt-1 rounded-md bg-orange-50 px-2 py-1.5" data-pick-group>
+        <div class="text-xs font-medium text-orange-900">${PICK_ICON[type] || "🍽️"} Ideas for “${esc(stop)}” near ${esc(near)}</div>
+        <ul class="divide-y divide-orange-100">${rows}</ul>
+      </div>`;
+  }
+
+  /** Wire the "Use" buttons inside 'container'; onUsed(key, oldName, newName) after a swap */
+  function bindPicks(container, onUsed) {
+    container.querySelectorAll("[data-pick-name]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const { pickKey, pickStop, pickName } = btn.dataset;
+        if (!replaceStop(pickKey, pickStop, pickName)) {
+          alert(`“${pickStop}” isn't on that day anymore.`);
+          return;
+        }
+        btn.closest("[data-pick-group]").querySelectorAll("[data-pick-name]").forEach((b) => { b.disabled = true; });
+        btn.textContent = "✓ Added";
+        onUsed?.(pickKey, pickStop, pickName);
+      });
+    });
+  }
+
+  window.PlanDom = {
+    collectDays, getDay, forServer, writeDay, reorderDay, replaceStop, renderPicks, bindPicks,
+    esc, formatMinutes, yen,
+  };
 })();

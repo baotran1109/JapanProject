@@ -173,11 +173,33 @@ MEAL_WORDS = {
     "breakfast", "brunch", "lunch", "dinner", "ramen", "sushi", "yakitori", "katsu",
     "tempura", "restaurant", "cafe", "café", "coffee", "curry", "tonkatsu", "udon", "soba",
     "izakaya", "yakiniku", "okonomiyaki", "takoyaki", "gyoza", "bakery", "food", "eat",
+    "taco", "tacos", "burger", "pizza", "steak", "malatang", "noodle", "noodles", "dumpling", "bistro",
+    "diner", "grill",
 }
+# Temples whose name is written without the hyphen ("Kinkakuji"). We can't treat every
+# word ending in "-ji" as a temple: Kichijoji and Koenji are neighborhoods.
+TEMPLE_NAMES = {
+    "sensoji", "kinkakuji", "ginkakuji", "kiyomizudera", "todaiji", "ryoanji", "nanzenji", "kenninji",
+    "tofukuji", "zojoji", "gotokuji", "sengakuji", "daitokuji", "toji", "chusonji", "kotokuin",
+}
+# Cuisines (from the database) that are a coffee / sweets stop rather than a meal
+SNACK_CUISINES = ("cafe", "coffee", "bakery", "pastry", "patisserie", "cake", "dessert", "confectionery",
+                  "ice cream", "chocolate", "taiyaki", "sweets")
 EVENING_WORDS = {
     "night view", "night", "sunset", "illumination", "observatory", "observation deck",
     "sky tree", "skytree", "tokyo tower", "shibuya sky", "bar", "izakaya", "nightlife",
 }
+# Coffee / sweets breaks: food, but not a meal, and no particular time
+SNACK_WORDS = {"coffee", "cafe", "café", "tea", "dessert", "sweets", "cake", "ice cream", "snack", "bakery"}
+# Shops (most open ~10:00-11:00 and close ~20:00-21:00). Markets open early, so they aren't here.
+SHOP_WORDS = {
+    "shopping", "shop", "souvenir", "souvenirs", "mall", "department store", "don quijote", "donki",
+    "uniqlo", "outlet", "boutique", "bookoff", "loft", "parco", "isetan", "takashimaya", "mitsukoshi",
+    "store", "vintage", "second hand", "secondhand", "thrift", "used clothing", "select shop", "flagship",
+    "古着", "ストア", "ショップ", "百貨店",
+}
+# An unknown stop on a day where at least this share of known stops are shops is probably a shop too
+SHOPPING_DAY_SHARE = 0.5
 # Places that usually close around 16:30-17:30 (shrine/temple halls, museums, gardens...)
 DAYTIME_WORDS = {
     "shrine", "temple", "jingu", "jinja", "taisha", "-ji", "-dera", "museum", "garden", "gardens",
@@ -190,22 +212,30 @@ LUNCH_WINDOW = (11 * 60 + 30, 14 * 60)
 DINNER_WINDOW = (17 * 60 + 30, 20 * 60 + 30)
 EVENING_WINDOW = (17 * 60, 22 * 60)
 DAYTIME_WINDOW = (9 * 60, 16 * 60)  # Arrive by 4pm so there's time before closing
+SHOPPING_WINDOW = (10 * 60 + 30, 20 * 60)  # Most shops are open by 10:30 and until ~20:00
 DAY_END_WARNING = 22 * 60  # Warn when a day runs past 10pm
 
 MEAL_PENALTY_PER_MIN = 1.5     # How much we care about eating at normal times
 EVENING_PENALTY_PER_MIN = 0.6  # Night views are nicer at night, but fine in the day
 DAYTIME_PENALTY_PER_MIN = 2.0  # Arriving after closing time is a real problem
+SHOPPING_PENALTY_PER_MIN = 1.0 # Shops are closed early in the morning and late at night
 WAIT_COST_PER_MIN = 0.25       # Waiting for lunch/evening is OK, but not free
 FIRST_STOP_WAIT_COST = 1.0     # Waiting before the first stop just wastes the morning
-MAX_WAIT_MIN = 240             # Longest free time we'll leave before a stop
+MAX_WAIT_MIN = 240             # Longest free time we'll leave before a stop...
+MAX_WAIT_REST_OF_DAY_MIN = 600 # ...unless only evening stops / meals are left (a free afternoon)
+MAX_FIRST_STOP_WAIT_MIN = 90   # Never start the day with a long wait
+LATE_TYPES = ("evening", "dinner", "meal")
 
 
-def classify(name: str, kind: Optional[str]) -> str:
+def classify(name: str, kind: Optional[str], cuisine: Optional[str] = None) -> str:
     """
-    Decide what type of stop this is: breakfast / lunch / dinner / meal / evening / visit.
-    'kind' is the database collection the place came from (restaurants, shopping, ...).
+    Decide what type of stop this is: breakfast / lunch / dinner / meal / snack /
+    evening / daytime / shopping / visit.
+    'kind' is the database collection the place came from (restaurants, shopping, ...)
+    and 'cuisine' the restaurant's cuisine when the database has it.
     """
     text = (name or "").lower()
+    cuisine = (cuisine or "").lower()
     if "breakfast" in text:
         return "breakfast"
     if "lunch" in text or "brunch" in text:
@@ -214,10 +244,19 @@ def classify(name: str, kind: Optional[str]) -> str:
         return "dinner"
     if any(w in text for w in EVENING_WORDS):
         return "evening"
-    if kind == "restaurants" or any(w in text for w in MEAL_WORDS):
+    # Whole words only, so "tea" doesn't match "teamLab" or "steak"
+    words = set(re.findall(r"[a-zà-ÿ]+", text))
+    has_word = lambda vocab: any((w in text) if " " in w else (w in words) for w in vocab)
+
+    # Cafés / bakeries / sweets: by cuisine, or by name ("BAM BI COFFEE")
+    if any(w in cuisine for w in SNACK_CUISINES) or has_word(SNACK_WORDS):
+        return "snack"
+    if kind == "restaurants" or has_word(MEAL_WORDS) or "ラーメン" in text:
         return "meal"
-    if any(w in text for w in DAYTIME_WORDS) or re.search(r"\w(ji|dera)\b", text):
+    if any(w in text for w in DAYTIME_WORDS) or words & TEMPLE_NAMES:
         return "daytime"
+    if kind == "shopping" or any(w in text for w in SHOP_WORDS):
+        return "shopping"
     return "visit"
 
 
@@ -228,6 +267,60 @@ def _window_penalty(minute: float, window: Tuple[int, int], weight: float) -> fl
     if minute > end:
         return (minute - end) * weight
     return 0.0
+
+
+# How long a stop usually takes when the traveler didn't say (minutes)
+THEME_PARK_WORDS = ("disneyland", "disneysea", "disney sea", "universal studios", "usj", "fuji-q", "sanrio puroland")
+HOTEL_WORDS = ("check in", "check-in", "checkin", "check out", "check-out", "checkout", "hotel")
+DEPARTMENT_STORE_WORDS = ("department store", "isetan", "takashimaya", "mitsukoshi", "daimaru", "hankyu",
+                          "matsuya", "sogo", "seibu", "tokyu", "lumine", "parco", "shibuya 109", "don quijote",
+                          "donki", "mall", "outlet")
+BIG_DAYTIME_WORDS = ("museum", "aquarium", "zoo", "teamlab", "gallery")
+DEFAULT_DURATIONS = {
+    "breakfast": 40, "lunch": 60, "dinner": 75, "meal": 60, "snack": 30,
+    "evening": 75, "daytime": 60, "shopping": 20, "visit": 60,
+}
+
+
+def classify_unknown_by_context(stops: List[Dict[str, Any]]) -> None:
+    """
+    Stops we couldn't find on the map default to "visit". On a shopping-heavy day
+    ("CC STORE", "THE ELEPHANT" between other boutiques) they're almost certainly shops.
+    """
+    known = [s for s in stops if s.get("lat") is not None and not s.get("generic")]
+    if not known:
+        return
+    share = sum(1 for s in known if s.get("type") == "shopping") / len(known)
+    if share < SHOPPING_DAY_SHARE:
+        return
+    for s in stops:
+        if s.get("type") == "visit" and s.get("lat") is None and not s.get("generic"):
+            s["type"] = "shopping"
+
+
+def default_duration(name: str, stop_type: str, kind: Optional[str] = None, generic: bool = False) -> int:
+    """
+    A realistic time for a stop the traveler didn't give a duration for.
+    Example: a boutique ~20 min, a department store ~60, a museum ~2h, "Shopping in Ginza" ~90.
+    """
+    text = (name or "").lower()
+    if any(w in text for w in THEME_PARK_WORDS):
+        return 480
+    if any(w in text for w in HOTEL_WORDS):
+        return 20
+    if stop_type == "shopping":
+        if generic or kind == "area":
+            return 90   # A shopping session in an area, not one shop
+        if any(w in text for w in DEPARTMENT_STORE_WORDS):
+            return 60
+        return 20       # One shop / boutique
+    if stop_type == "daytime" and any(w in text for w in BIG_DAYTIME_WORDS):
+        return 120
+    if kind == "daytrips":
+        return 120
+    if kind == "area" and stop_type == "visit":
+        return 90       # Walking around a neighborhood
+    return DEFAULT_DURATIONS.get(stop_type, 60)
 
 
 def window_start(stop_type: str, arrive_minute: float) -> Optional[int]:
@@ -241,6 +334,8 @@ def window_start(stop_type: str, arrive_minute: float) -> Optional[int]:
         return LUNCH_WINDOW[0] if arrive_minute <= LUNCH_WINDOW[1] else DINNER_WINDOW[0]
     if stop_type == "evening":
         return EVENING_WINDOW[0]
+    if stop_type == "shopping":
+        return SHOPPING_WINDOW[0]
     return None
 
 
@@ -262,6 +357,8 @@ def time_penalty(stop_type: str, arrive_minute: float) -> float:
         return _window_penalty(arrive_minute, EVENING_WINDOW, EVENING_PENALTY_PER_MIN)
     if stop_type == "daytime":
         return _window_penalty(arrive_minute, DAYTIME_WINDOW, DAYTIME_PENALTY_PER_MIN)
+    if stop_type == "shopping":
+        return _window_penalty(arrive_minute, SHOPPING_WINDOW, SHOPPING_PENALTY_PER_MIN)
     return 0.0
 
 
@@ -345,7 +442,13 @@ class DayPlanner:
             # Arrived too early for lunch / dinner / a night view? Wait (free time)
             wait = 0.0
             earliest = window_start(stop["type"], clock)
-            if earliest is not None and clock < earliest and earliest - clock <= MAX_WAIT_MIN:
+            if position == 0:
+                max_wait = MAX_FIRST_STOP_WAIT_MIN
+            elif all(self.stops[i]["type"] in LATE_TYPES for i in order[position:]):
+                max_wait = MAX_WAIT_REST_OF_DAY_MIN
+            else:
+                max_wait = MAX_WAIT_MIN
+            if earliest is not None and clock < earliest and earliest - clock <= max_wait:
                 wait = earliest - clock
                 clock = earliest
                 wait_total += wait
@@ -527,9 +630,12 @@ class DayPlanner:
                 "lat": stop.get("lat"),
                 "lng": stop.get("lng"),
                 "duration": stop["duration"],
+                "duration_estimated": bool(stop.get("duration_estimated")),
                 "arrive": fmt_clock(entry["arrive"]),
                 "depart": fmt_clock(entry["depart"]),
                 "located": self._located(stop),
+                "kind": stop.get("kind"),
+                "generic": bool(stop.get("generic")),
                 "free_time_before": round(entry["wait"]),
             }
             if leg:
@@ -547,7 +653,8 @@ class DayPlanner:
 
             if time_penalty(stop["type"], entry["arrive"]) > 30:
                 label = {"evening": "best visited in the evening",
-                         "daytime": "usually closed by early evening"}.get(stop["type"], "a meal")
+                         "daytime": "usually closed by early evening",
+                         "shopping": "a shop (most are open about 10:30–20:00)"}.get(stop["type"], "a meal")
                 warnings.append(f"“{stop['name']}” is {label} but is scheduled at {fmt_clock(entry['arrive'])}.")
             if not self._located(stop) and not stop.get("generic"):
                 warnings.append(f"Couldn't find “{stop['name']}” on the map, so travel to it isn't counted. "

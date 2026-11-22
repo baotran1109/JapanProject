@@ -58,9 +58,10 @@
   const MODE_ICON = { walk: "🚶", train: "🚃", "bus/car": "🚌", "long-distance": "🚄", shinkansen: "🚄", flight: "✈️" };
   const TYPE_BADGE = {
     breakfast: "🍳 Breakfast", lunch: "🍱 Lunch", dinner: "🍽️ Dinner", meal: "🍜 Meal", evening: "🌆 Evening",
+    snack: "☕ Snack", shopping: "🛍️ Shopping",
   };
 
-  function renderStop(stop) {
+  function renderStop(stop, dayKey) {
     const travel = stop.travel_minutes != null
       ? `<div class="text-xs text-slate-500">${MODE_ICON[stop.mode] || "🚃"} ${formatMinutes(stop.travel_minutes)}
            · ${stop.distance_km} km${stop.fare_yen ? ` · ${yen(stop.fare_yen)}` : ""}</div>`
@@ -80,7 +81,9 @@
         <div class="min-w-0 flex-1 border-l-2 border-green-200 pb-3 pl-3">
           ${travel}${free}
           <div class="font-medium text-slate-800">${esc(stop.name)}${badge}${notOnMap}</div>
+          <div class="text-xs text-slate-400">⏱ ${formatMinutes(stop.duration)}${stop.duration_estimated ? " (estimated)" : ""}</div>
           ${matched}
+          ${window.PlanDom.renderPicks(dayKey, stop.name, stop.type, stop.picks_near, stop.picks)}
         </div>
       </li>`;
   }
@@ -114,7 +117,7 @@
           </div>
         </div>
         ${warnings ? `<ul class="mt-2 space-y-1 rounded-lg bg-amber-50 p-2">${warnings}</ul>` : ""}
-        <ol class="mt-3">${result.stops.map(renderStop).join("")}</ol>
+        <ol class="mt-3">${result.stops.map((stop) => renderStop(stop, result.key)).join("")}</ol>
       </section>`;
   }
 
@@ -200,6 +203,12 @@
           setStatus(`Applied to ${lastResult.days[i].label}. Don't forget to save your plan.`);
         }
       });
+    });
+    // "Use" a restaurant / shop: keep the optimized order pointing at the new name
+    window.PlanDom.bindPicks(panel, (key, oldName, newName) => {
+      const day = lastResult.days.find((d) => d.key === key);
+      if (day) day.optimized_order = day.optimized_order.map((n) => (n === oldName ? newName : n));
+      setStatus(`Added “${newName}” instead of “${oldName}”. Don't forget to save your plan.`);
     });
     panel.scrollIntoView({ behavior: "smooth", block: "start" });
   }

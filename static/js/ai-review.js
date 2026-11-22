@@ -122,10 +122,12 @@
         ${d.issues.length
           ? `<ul class="mt-1 space-y-0.5">${d.issues.map((t) => `<li class="text-xs text-amber-800">⚠️ ${esc(t)}</li>`).join("")}</ul>`
           : `<div class="mt-1 text-xs text-green-700">✓ Looks good</div>`}
+        ${(d.picks || []).map((p) => window.PlanDom.renderPicks(d.key, p.stop, p.type, p.near, p.options)).join("")}
       </li>`).join("");
     return `
       <details class="mt-4 rounded-lg bg-slate-50 p-3">
-        <summary class="cursor-pointer text-sm font-semibold text-slate-700">Day-by-day checks</summary>
+        <summary class="cursor-pointer text-sm font-semibold text-slate-700">Day-by-day checks${
+          days.some((d) => d.picks && d.picks.length) ? " · restaurant & shop ideas" : ""}</summary>
         <ul class="mt-2 divide-y divide-slate-200">${rows}</ul>
       </details>`;
   }
@@ -172,6 +174,18 @@
     panel.querySelector("#ai-pace")?.addEventListener("change", (e) => {
       rememberPace(e.target.value);
       requestReview();
+    });
+    // "Use" a restaurant / shop: keep suggestions for that day pointing at the new name
+    window.PlanDom.bindPicks(panel, (key, oldName, newName) => {
+      const rename = (n) => (n === oldName ? newName : n);
+      lastReview.suggestions.filter((s) => s.dayKey === key || s.details?.toDayKey === key).forEach((s) => {
+        const d = s.details || {};
+        if (d.order) d.order = d.order.map(rename);
+        ["a", "b", "item"].forEach((f) => { if (d[f]) d[f] = rename(d[f]); });
+      });
+      const status = panel.querySelector("#ai-status");
+      status.className = "mt-2 text-sm text-green-800";
+      status.textContent = `Added “${newName}” instead of “${oldName}”. Don't forget to save your plan.`;
     });
     panel.querySelectorAll("[data-apply-suggestion]").forEach((btn) => {
       btn.addEventListener("click", () => {
