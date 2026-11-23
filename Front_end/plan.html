@@ -6,6 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Plan a Japan trip day by day across any cities: optimized routes, map, weather, AI review and chat edits." />
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    #planner-tabs { scrollbar-width: none; }
+    #planner-tabs::-webkit-scrollbar { display: none; }
+    details#export-menu > summary { list-style: none; }
+    details#export-menu > summary::-webkit-details-marker { display: none; }
+  </style>
 </head>
 <body class="bg-slate-50 text-slate-800 selection:bg-blue-100 selection:text-blue-900">
 
@@ -14,6 +20,7 @@
     <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-3">
       <div class="flex flex-wrap items-center gap-3">
         <a href="/index.html" class="font-semibold tracking-wide">Home</a>
+        <a href="/plan.html" class="rounded-md bg-white/15 px-2 py-0.5 font-semibold" aria-current="page">Plan a trip</a>
         <a href="/itineraries.html" class="hover:underline">Recommended Itineraries</a>
         <a href="/cities.html" class="hover:underline">Explore Cities</a>
         <a href="/tips.html" class="hover:underline">Travel Tips</a>
@@ -27,28 +34,16 @@
     </div>
   </nav>
 
-  <!-- HERO -->
-  <header class="relative">
-    <img src="/static/Image/japan.jpg" alt="" class="absolute inset-0 -z-10 h-40 w-full object-cover md:h-48" />
-    <div class="absolute inset-0 -z-10 h-40 bg-black/40 md:h-48"></div>
-    <div class="mx-auto flex h-40 max-w-6xl items-center px-4 md:h-48">
-      <div class="text-white">
-        <h1 class="text-2xl font-bold tracking-tight drop-shadow md:text-4xl">🗾 Trip Planner</h1>
-        <p class="mt-1 text-white/90">Any cities, in any order. Plan day by day, then optimize, check and share it.</p>
-      </div>
-    </div>
-  </header>
-
   <main class="mx-auto grid max-w-6xl gap-6 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_22rem] [&>*]:min-w-0">
     <!-- LEFT: the trip -->
     <section class="space-y-4">
-      <!-- Trip bar -->
+      <!-- Trip bar: name, dates, save, share -->
       <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-        <div class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+        <div class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_11rem]">
           <label class="block">
             <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Trip name</span>
             <input id="trip-title" maxlength="100" placeholder="e.g. Spring in Japan"
-              class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200" />
+              class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-blue-200" />
           </label>
           <label class="block">
             <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Start date</span>
@@ -56,57 +51,114 @@
               class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200" />
           </label>
         </div>
-        <p id="trip-summary" class="mt-2 text-sm text-slate-500"></p>
         <div class="mt-3 flex flex-wrap items-center gap-2">
-          <button id="save-btn" type="button" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60">💾 Save</button>
-          <button id="undo-btn" type="button" disabled class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40">↶ Undo</button>
-          <span class="mx-1 hidden h-6 w-px bg-slate-200 sm:inline-block"></span>
-          <button id="share-btn" type="button" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">🔗 Share</button>
-          <button id="calendar-btn" type="button" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">📅 Calendar</button>
-          <button id="print-btn" type="button" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">🖨️ Print / PDF</button>
+          <p id="trip-summary" class="mr-auto text-sm text-slate-500"></p>
           <span id="save-msg" class="text-sm font-medium text-emerald-700"></span>
+          <button id="undo-btn" type="button" disabled title="Undo the last change"
+            class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40">↶ Undo</button>
+          <details id="export-menu" class="relative">
+            <summary class="cursor-pointer select-none rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">📤 Share & export ▾</summary>
+            <div class="absolute right-0 z-20 mt-1 w-60 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
+              <button id="share-btn" type="button" class="block w-full px-4 py-2 text-left text-sm hover:bg-slate-50">
+                🔗 Share link<span class="block text-xs text-slate-500">Anyone with the link can view</span></button>
+              <button id="calendar-btn" type="button" class="block w-full px-4 py-2 text-left text-sm hover:bg-slate-50">
+                📅 Add to calendar<span class="block text-xs text-slate-500">Download an .ics file</span></button>
+              <button id="print-btn" type="button" class="block w-full px-4 py-2 text-left text-sm hover:bg-slate-50">
+                🖨️ Print / PDF<span class="block text-xs text-slate-500">A clean day-by-day page</span></button>
+            </div>
+          </details>
+          <button id="save-btn" type="button" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60">💾 Save</button>
         </div>
         <div id="share-result" class="mt-3 hidden"></div>
       </div>
 
-      <!-- Tools -->
-      <div class="flex flex-wrap items-center gap-2">
-        <button id="optimize-route-btn" type="button" class="rounded-lg bg-gradient-to-r from-green-600 to-teal-600 px-4 py-2 font-semibold text-white hover:from-green-700 hover:to-teal-700">🚀 Optimize Route</button>
-        <button id="ask-ai" type="button" class="rounded-lg border border-slate-300 bg-white px-4 py-2 font-semibold text-slate-800 hover:bg-slate-50">🤖 AI review</button>
-        <button id="chat-btn" type="button" class="rounded-lg border border-violet-300 bg-violet-50 px-4 py-2 font-semibold text-violet-800 hover:bg-violet-100">💬 Edit by chat</button>
+      <!-- Tabs -->
+      <div id="planner-tabs" role="tablist" aria-label="Planner sections"
+        class="flex gap-1 overflow-x-auto border-b border-slate-200 bg-slate-50 lg:sticky lg:top-[52px] lg:z-10">
+        <button type="button" role="tab" data-tab="itinerary">📝 Itinerary</button>
+        <button type="button" role="tab" data-tab="schedule">🗺️ Schedule & map</button>
+        <button type="button" role="tab" data-tab="review">🤖 AI review</button>
+        <button type="button" role="tab" data-tab="chat">💬 Edit by chat</button>
+        <button type="button" role="tab" data-tab="places">🔎 Places & dates</button>
       </div>
 
-      <section id="chat-panel" class="hidden rounded-2xl border border-violet-200 bg-white p-4 shadow-sm sm:p-5"></section>
-      <aside id="ai-panel" class="hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"></aside>
-      <aside id="route-panel" class="hidden rounded-2xl border-2 border-green-200 bg-gradient-to-br from-green-50 to-teal-50 p-5 shadow-sm"></aside>
+      <!-- ITINERARY -->
+      <div data-pane="itinerary" role="tabpanel" class="space-y-3">
+        <div id="welcome-card" class="hidden rounded-2xl border border-violet-200 bg-gradient-to-br from-violet-50 to-white p-5 shadow-sm">
+          <h2 class="text-lg font-semibold text-slate-900">How would you like to start?</h2>
+          <div class="mt-3 grid gap-3 sm:grid-cols-3">
+            <button id="welcome-plan" type="button" class="rounded-xl border border-violet-300 bg-white p-4 text-left hover:border-violet-500 hover:shadow-sm">
+              <div class="text-2xl">✨</div>
+              <div class="mt-1 font-semibold text-slate-900">Plan it for me</div>
+              <div class="text-sm text-slate-500">Pick cities, days and interests. We build every day for you.</div>
+            </button>
+            <button id="welcome-scratch" type="button" class="rounded-xl border border-slate-200 bg-white p-4 text-left hover:border-blue-400 hover:shadow-sm">
+              <div class="text-2xl">✍️</div>
+              <div class="mt-1 font-semibold text-slate-900">Start from scratch</div>
+              <div class="text-sm text-slate-500">Add places yourself, or from the list on the right.</div>
+            </button>
+            <a href="/my_itineraries.html" class="rounded-xl border border-slate-200 bg-white p-4 text-left hover:border-blue-400 hover:shadow-sm">
+              <div class="text-2xl">📂</div>
+              <div class="mt-1 font-semibold text-slate-900">Open a saved trip</div>
+              <div class="text-sm text-slate-500">Continue a trip saved to your account.</div>
+            </a>
+          </div>
+        </div>
 
-      <!-- Days, grouped by city -->
-      <div id="trip-days" class="space-y-3"></div>
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <p class="text-sm text-slate-500">Add stops to each day. Minutes are optional: blank ones are estimated.</p>
+          <button id="plan-trip-btn" type="button" class="rounded-lg bg-gradient-to-r from-violet-600 to-fuchsia-600 px-3 py-1.5 text-sm font-semibold text-white hover:from-violet-700 hover:to-fuchsia-700">✨ Plan it for me</button>
+        </div>
+        <section id="plan-trip-panel" class="hidden rounded-2xl border border-violet-200 bg-white p-5 shadow-sm"></section>
 
-      <div class="flex flex-wrap items-center gap-2 rounded-2xl border border-dashed border-slate-300 bg-white/60 p-4">
-        <span class="text-sm font-medium text-slate-700">Next city:</span>
-        <select id="add-city-select" class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm">
-          <option value="tokyo">🗼 Tokyo</option>
-          <option value="kyoto">⛩️ Kyoto</option>
-          <option value="osaka">🏯 Osaka</option>
-          <option value="fukuoka">🍜 Fukuoka</option>
-          <option value="okinawa">🏝️ Okinawa</option>
-          <option value="aomori">🍎 Aomori</option>
-          <option value="hakodate">🌉 Hakodate</option>
-          <option value="sapporo">❄️ Sapporo</option>
-        </select>
-        <button id="add-city-btn" type="button" class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-black">+ Add city</button>
+        <div id="trip-days" class="space-y-3"></div>
+
+        <div class="flex flex-wrap items-center gap-2 rounded-2xl border border-dashed border-slate-300 bg-white/60 p-4">
+          <span class="text-sm font-medium text-slate-700">Next city:</span>
+          <select id="add-city-select" class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm">
+            <option value="tokyo">🗼 Tokyo</option>
+            <option value="kyoto">⛩️ Kyoto</option>
+            <option value="osaka">🏯 Osaka</option>
+            <option value="fukuoka">🍜 Fukuoka</option>
+            <option value="okinawa">🏝️ Okinawa</option>
+            <option value="aomori">🍎 Aomori</option>
+            <option value="hakodate">🌉 Hakodate</option>
+            <option value="sapporo">❄️ Sapporo</option>
+          </select>
+          <button id="add-city-btn" type="button" class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-black">+ Add city</button>
+        </div>
+      </div>
+
+      <!-- SCHEDULE & MAP -->
+      <div data-pane="schedule" role="tabpanel" class="hidden space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <p class="text-sm text-slate-500">Each day in the best order, with times, travel, fares and a map. Updates when you open this tab.</p>
+          <button id="optimize-route-btn" type="button" class="rounded-lg bg-gradient-to-r from-green-600 to-teal-600 px-3 py-1.5 text-sm font-semibold text-white hover:from-green-700 hover:to-teal-700">🔄 Optimize again</button>
+        </div>
+        <div id="schedule-empty" class="hidden rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500">
+          Add some stops to your days first.
+          <button id="schedule-go-itinerary" type="button" class="ml-1 font-semibold text-blue-700 hover:underline">Go to the itinerary</button>
+        </div>
+        <aside id="route-panel" class="hidden rounded-2xl border-2 border-green-200 bg-gradient-to-br from-green-50 to-teal-50 p-5 shadow-sm"></aside>
+      </div>
+
+      <!-- AI REVIEW -->
+      <div data-pane="review" role="tabpanel" class="hidden space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <p class="text-sm text-slate-600">Get a score, the main risks and one-click fixes for your trip (timing, travel, meals, pace).</p>
+          <button id="ask-ai" type="button" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-black">🤖 Review my trip</button>
+        </div>
+        <aside id="ai-panel" class="hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"></aside>
+      </div>
+
+      <!-- CHAT -->
+      <div data-pane="chat" role="tabpanel" class="hidden">
+        <section id="chat-panel" class="rounded-2xl border border-violet-200 bg-white p-4 shadow-sm sm:p-5"></section>
       </div>
     </section>
 
-    <!-- RIGHT: dates & weather, places -->
-    <aside class="space-y-4 lg:sticky lg:top-16 lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto">
-      <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <h2 class="font-semibold">📅 Dates, weather & opening days</h2>
-        <p id="check-status" class="mt-1 text-xs text-slate-500"></p>
-        <div id="check-panel" class="mt-2"></div>
-      </div>
-
+    <!-- RIGHT: places, dates & weather, my places (a tab on phones) -->
+    <aside id="planner-side" class="hidden space-y-4 lg:sticky lg:top-16 lg:block lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto">
       <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <h2 class="font-semibold">🔎 Places</h2>
         <div id="browser-cities" class="mt-2 flex flex-wrap gap-1.5"></div>
@@ -122,15 +174,21 @@
         <label class="mt-2 flex items-center gap-2 text-xs text-slate-600">Add to
           <select id="browser-target" class="min-w-0 flex-1 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs"></select>
         </label>
-        <ul id="browser-list" class="mt-2 max-h-[28rem] divide-y divide-slate-100 overflow-y-auto pr-1"></ul>
+        <ul id="browser-list" class="mt-2 max-h-[26rem] divide-y divide-slate-100 overflow-y-auto pr-1"></ul>
       </div>
 
-      <div class="rounded-2xl border border-purple-200 bg-purple-50 p-4 shadow-sm">
-        <div class="flex items-center justify-between gap-2">
-          <h2 class="font-semibold text-purple-900">➕ My places</h2>
-          <button id="my-places-toggle" type="button" class="rounded-md bg-purple-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-purple-700">New</button>
+      <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <h2 class="font-semibold">📅 Dates, weather & opening days</h2>
+        <p id="check-status" class="mt-1 text-xs text-slate-500"></p>
+        <div id="check-panel" class="mt-2"></div>
+      </div>
+
+      <details class="rounded-2xl border border-purple-200 bg-purple-50 p-4 shadow-sm">
+        <summary class="cursor-pointer font-semibold text-purple-900">➕ My places <span class="text-xs font-normal text-purple-700">(hotels, friends' homes…)</span></summary>
+        <div class="mt-2 flex items-center justify-between gap-2">
+          <p class="text-xs text-purple-800">Add a place once, then use its name in any day.</p>
+          <button id="my-places-toggle" type="button" class="shrink-0 rounded-md bg-purple-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-purple-700">New</button>
         </div>
-        <p class="mt-1 text-xs text-purple-800">Hotels, friends' homes, hidden spots: add them once and use their names in any day.</p>
         <form id="my-places-form" class="mt-2 hidden space-y-2">
           <input id="my-place-name" required maxlength="120" placeholder="Name, e.g. Hotel Gracery" class="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
           <div class="grid grid-cols-2 gap-2">
@@ -142,7 +200,7 @@
           <p class="text-[11px] text-slate-500">Tip: in Google Maps, right-click a spot to copy its coordinates.</p>
         </form>
         <ul id="my-places-list" class="mt-2 space-y-1 text-xs text-slate-700"></ul>
-      </div>
+      </details>
     </aside>
   </main>
 
@@ -154,9 +212,10 @@
   <script src="/static/js/route-map.js?v=3"></script>
   <script src="/static/js/route-optimizer.js?v=7"></script>
   <script src="/static/js/ai-review.js?v=4"></script>
-  <script src="/static/js/trip-planner.js?v=4"></script>
-  <script src="/static/js/chat-edit.js?v=1"></script>
+  <script src="/static/js/trip-planner.js?v=5"></script>
+  <script src="/static/js/chat-edit.js?v=2"></script>
   <script src="/static/js/planner-share.js?v=1"></script>
+  <script src="/static/js/planner-layout.js?v=1"></script>
   <script type="module" src="/static/js/planner-cloud.js?v=1"></script>
 </body>
 </html>

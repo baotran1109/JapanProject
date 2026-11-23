@@ -158,18 +158,19 @@
   }
 
   function init() {
-    const button = document.getElementById("chat-btn");
+    const button = document.getElementById("chat-btn");   // optional: with tabs the panel is always shown
     const p = panel();
-    if (!button || !p) return;
+    if (!p) return;
     p.innerHTML = shell();
-    button.addEventListener("click", () => {
+    if (!button) p.querySelector("[data-chat-close]").remove();
+    button?.addEventListener("click", () => {
       p.classList.toggle("hidden");
       if (!p.classList.contains("hidden")) {
         p.scrollIntoView({ behavior: "smooth", block: "nearest" });
         p.querySelector("[data-chat-input]").focus();
       }
     });
-    p.querySelector("[data-chat-close]").addEventListener("click", () => p.classList.add("hidden"));
+    p.querySelector("[data-chat-close]")?.addEventListener("click", () => p.classList.add("hidden"));
     p.querySelector("[data-chat-form]").addEventListener("submit", (e) => {
       e.preventDefault();
       const input = p.querySelector("[data-chat-input]");

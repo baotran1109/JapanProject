@@ -175,9 +175,12 @@
     return `
       <div class="mt-5 border-t border-slate-200 pt-4">
         <div class="flex flex-wrap items-center gap-3">
-          <span class="text-sm font-semibold text-slate-800">Plan added to your days below</span>
+          <span class="text-sm font-semibold text-slate-800">✅ Plan added to your days below</span>
           ${score != null ? `<span class="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800"
               title="Same checks as the AI review: timing, travel, meals, pace">Plan check ${esc(score)}/10</span>` : ""}
+          <button type="button" data-plan-schedule
+            class="rounded-lg border border-slate-300 bg-white px-3 py-1 text-sm font-semibold text-slate-800 hover:bg-slate-50">
+            🗺️ See schedule & map</button>
           <button type="button" data-plan-review
             class="rounded-lg border border-slate-300 bg-white px-3 py-1 text-sm font-semibold text-slate-800 hover:bg-slate-50">
             🤖 Ask AI to review it</button>
@@ -267,10 +270,15 @@
       status.textContent = "";
       panel.querySelector("[data-plan-result]").innerHTML = resultHtml(plan);
       panel.querySelector("[data-plan-review]")?.addEventListener("click", () => {
+        window.PlannerLayout?.show("review");
         (document.getElementById("ask-ai-review") || document.getElementById("ask-ai"))?.click();
       });
-      // Show the timed schedule, fares and map for the new plan
-      setTimeout(() => window.RouteOptimizer?.optimize(), 50);
+      panel.querySelector("[data-plan-schedule]")?.addEventListener("click", () => {
+        if (window.PlannerLayout) window.PlannerLayout.show("schedule");
+        else window.RouteOptimizer?.optimize();
+      });
+      // Without tabs, show the timed schedule, fares and map right away
+      if (!window.PlannerLayout) setTimeout(() => window.RouteOptimizer?.optimize(), 50);
     } catch (e) {
       status.textContent = `❌ ${e.message}`;
     } finally {
@@ -283,25 +291,31 @@
   // ---------------------------------------------------------------------------
 
   function init() {
+    if (!window.Planner) return;
+    // plan.html has its own button and panel (#plan-trip-btn / #plan-trip-panel); otherwise add them
+    let button = document.getElementById("plan-trip-btn");
+    let panel = document.getElementById("plan-trip-panel");
     const optimizeBtn = document.getElementById("optimize-route-btn");
-    if (!optimizeBtn || !window.Planner || document.getElementById("plan-trip-btn")) return;
-
-    const button = document.createElement("button");
-    button.id = "plan-trip-btn";
-    button.type = "button";
-    button.className = "rounded-lg bg-gradient-to-r from-violet-600 to-fuchsia-600 px-4 py-2 font-semibold text-white hover:from-violet-700 hover:to-fuchsia-700";
-    button.textContent = "✨ Plan my trip";
-    optimizeBtn.insertAdjacentElement("afterend", button);
-
-    const panel = document.createElement("section");
-    panel.id = "plan-trip-panel";
-    panel.className = "hidden rounded-2xl border border-violet-200 bg-white p-5 shadow-sm";
-    optimizeBtn.parentElement.insertAdjacentElement("afterend", panel);
-
+    if (!button) {
+      if (!optimizeBtn) return;
+      button = document.createElement("button");
+      button.id = "plan-trip-btn";
+      button.type = "button";
+      button.className = "rounded-lg bg-gradient-to-r from-violet-600 to-fuchsia-600 px-4 py-2 font-semibold text-white hover:from-violet-700 hover:to-fuchsia-700";
+      button.textContent = "✨ Plan my trip";
+      optimizeBtn.insertAdjacentElement("afterend", button);
+    }
+    if (!panel) {
+      panel = document.createElement("section");
+      panel.id = "plan-trip-panel";
+      panel.className = "hidden rounded-2xl border border-violet-200 bg-white p-5 shadow-sm";
+      button.parentElement.insertAdjacentElement("afterend", panel);
+    }
     button.addEventListener("click", () => {
       if (panel.classList.contains("hidden")) openPanel(panel);
       else panel.classList.add("hidden");
     });
+    window.TripGenerator = { open: () => openPanel(panel) };
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
