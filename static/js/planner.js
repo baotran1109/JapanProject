@@ -121,12 +121,15 @@
   // Loading trips (new format, older saved formats, drafts)
   // ---------------------------------------------------------------------------
 
+  // The old pages named the day's area "location" (most) or "place" (Tokyo + Kansai + Fukuoka)
+  const legacyArea = (entry) => String(entry.location ?? entry.place ?? entry.loc ?? "");
+
   function legacyDayStops(entry) {
     const text = String(entry.activities ?? entry.notes ?? entry.act ?? "");
     const names = text.split("\n").map((s) => s.trim()).filter(Boolean);
     const durations = String(entry.durations ?? "").split(",").map((v) => parseInt(v.trim(), 10));
     // Some old plans put the location first in the durations list
-    const offset = entry.location && durations.length === names.length + 1 ? 1 : 0;
+    const offset = legacyArea(entry) && durations.length === names.length + 1 ? 1 : 0;
     return names.map((name, i) => ({ name, duration: Number.isNaN(durations[i + offset]) ? null : durations[i + offset] }));
   }
 
@@ -144,13 +147,13 @@
     }
     if (Array.isArray(plan)) {
       const city = String(data?.city || "tokyo").toLowerCase();
-      return { title, startDate: "", days: plan.map((e) => makeDay(CITIES[city] ? city : "tokyo", e.location, legacyDayStops(e))) };
+      return { title, startDate: "", days: plan.map((e) => makeDay(CITIES[city] ? city : "tokyo", legacyArea(e), legacyDayStops(e))) };
     }
     const days = [];
     if (plan && typeof plan === "object") {
       for (const city of CITY_ORDER) {
         for (const entry of Array.isArray(plan[city]) ? plan[city] : []) {
-          days.push(makeDay(city, entry.location, legacyDayStops(entry)));
+          days.push(makeDay(city, legacyArea(entry), legacyDayStops(entry)));
         }
       }
     }
