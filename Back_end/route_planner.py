@@ -729,9 +729,10 @@ def best_jr_pass(day_jr_fares: List[int]) -> Dict[str, Any]:
     return best
 
 
-def plan_trip(days: List[Dict[str, Any]], start_minute: int = 9 * 60) -> Dict[str, Any]:
+def plan_trip(days: List[Dict[str, Any]], start_minute: int = 9 * 60, optimize: bool = True) -> Dict[str, Any]:
     """
     Optimize every day and add city-to-city travel + JR Pass analysis.
+    optimize=False schedules each day in the traveler's own order (calendar export, shared view).
 
     days: [{"day": 1, "label": "Tokyo Day 1", "city": "Tokyo",
             "anchor": {name, lat, lng} | None,
@@ -743,7 +744,7 @@ def plan_trip(days: List[Dict[str, Any]], start_minute: int = 9 * 60) -> Dict[st
 
     for k, day in enumerate(days):
         planner = DayPlanner(day["stops"], day["city"], start_minute, day.get("anchor"))
-        result = planner.optimize()
+        result = planner.optimize() if optimize else planner.evaluate()
         result.update({"day": day.get("day"), "label": day.get("label"), "city": day["city"],
                        "key": day.get("key"),
                        "anchor": (day.get("anchor") or {}).get("matched_name"),

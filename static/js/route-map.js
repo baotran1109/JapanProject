@@ -114,9 +114,11 @@
 
   /**
    * container: an empty element; result: the /optimize-route response.
+   * options.compare = false hides the Before / After toggle (a schedule that wasn't optimized).
    * Returns a promise (the map library loads on first use).
    */
-  async function render(container, result) {
+  async function render(container, result, options = {}) {
+    const compare = options.compare !== false;
     const days = result.days.filter((d) => d.stops.some((s) => s.located));
     if (!days.length) {
       container.innerHTML = "";
@@ -132,7 +134,7 @@
             ${days.map((d, i) => `<button type="button" data-map-day="${i}" class="rounded-full px-3 py-1 text-xs font-semibold">
                 <span style="color:${DAY_COLORS[i % DAY_COLORS.length]}">●</span> ${esc(d.label)}</button>`).join("")}
           </div>
-          <div class="inline-flex overflow-hidden rounded-lg border border-slate-300 text-xs font-semibold" data-map-modes>
+          <div class="${compare ? "inline-flex" : "hidden"} overflow-hidden rounded-lg border border-slate-300 text-xs font-semibold" data-map-modes>
             <button type="button" data-map-mode="before" class="px-3 py-1">Before</button>
             <button type="button" data-map-mode="after" class="px-3 py-1">After</button>
           </div>
@@ -167,7 +169,8 @@
       const after = shown.reduce((sum, d) => sum + d.travel_minutes, 0);
       const hidden = shown.reduce((sum, d) => sum + d.stops.filter((s) => !s.located).length, 0);
       const fmt = window.PlanDom ? window.PlanDom.formatMinutes : (m) => `${m} min`;
-      return `${state.mode === "before" ? "Your order (dashed)" : "Optimized order"} · travel ${fmt(before)} → ${fmt(after)}`
+      const travel = compare ? `travel ${fmt(before)} → ${fmt(after)}` : `travel ${fmt(after)}`;
+      return `${!compare ? "Route" : state.mode === "before" ? "Your order (dashed)" : "Optimized order"} · ${travel}`
         + (hidden ? ` · ${hidden} stop${hidden > 1 ? "s" : ""} not on the map (e.g. “Lunch”)` : "");
     }
 

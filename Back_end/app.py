@@ -30,6 +30,9 @@ import route_planner
 import ai_reviewer
 import place_picks
 import trip_generator
+import trip_checks
+import chat_editor
+import secrets
 
 # Trying to import MongoDB - falls back to JSON files if not available
 try:
@@ -1277,9 +1280,11 @@ def optimize_route():
     except PlanInputError as e:
         return jsonify({"error": str(e)}), 400
     start_minute = _parse_clock(body.get("start_time"), 9 * 60)
+    # "as_planned": schedule the days in the traveler's order (calendar / shared view)
+    optimize = str(body.get("mode") or "optimize") != "as_planned"
 
     try:
-        result = route_planner.plan_trip(days, start_minute)
+        result = route_planner.plan_trip(days, start_minute, optimize=optimize)
         # Restaurants / shops from the database for "Lunch", "Ramen", "Shopping"...
         for day, day_result in zip(days, result["days"]):
             if day["dropped_stops"]:
@@ -1359,6 +1364,260 @@ def plan_trip_for_me():
 def plan_trip_options():
     """Interests and paces the 'Plan my trip' form can offer"""
     return jsonify({"interests": trip_generator.INTERESTS, "paces": list(ai_reviewer.PACE_LIMITS.keys())})
+
+
+# =============================================================================
+# PLACES OF A CITY (planner search / "add" list)
+# =============================================================================
+
+@app.route("/places/<city>")
+def api_places(city):
+    """
+    Every place we know in a city, compact, for the planner's search box.
+    Works with MongoDB or the JSON files. Example: /places/tokyo
+    """
+    key = (city or "").strip().lower()
+    if key not in ROUTE_CITIES:
+        return jsonify({"error": f"Unsupported city '{city}'"}), 404
+    places = []
+    seen = set()
+    for p in load_kb_for([key]).get(key, []):
+        name = (p.get("name") or "").strip()
+        if not name or p.get("lat") is None or (name.lower(), p.get("_kind")) in seen:
+            continue
+        seen.add((name.lower(), p.get("_kind")))
+        area = p.get("area")
+        places.append({
+            "name": name,
+            "kind": p.get("_kind"),
+            "area": area if area and str(area).lower() not in ("general", key) and len(str(area)) <= 40 else None,
+            "cuisine": p.get("cuisine"),
+            "rating": p.get("rating") if isinstance(p.get("rating"), (int, float)) else None,
+            "price_level": p.get("price_level"),
+            "lat": p.get("lat"),
+            "lng": p.get("lng"),
+            "url": p.get("google_maps_url") or p.get("google_map_url"),
+        })
+    order = {"attractions": 0, "daytrips": 1, "shopping": 2, "restaurants": 3}
+    places.sort(key=lambda x: (order.get(x["kind"], 9), -(x["rating"] or 0), x["name"].lower()))
+    resp = jsonify({"city": ROUTE_CITIES[key], "places": places})
+    resp.headers["Cache-Control"] = "public, max-age=600"
+    return resp
+
+
+# =============================================================================
+# SHARE LINKS
+# =============================================================================
+# A shared trip is a read-only snapshot anyone with the link can open (view.html).
+# Stored in MongoDB ("shared_trips"); kept in memory when MongoDB isn't available
+# (local development only: those links disappear when the server restarts).
+
+SHARE_MAX_BYTES = 80_000
+_shared_in_memory: Dict[str, Dict[str, Any]] = {}
+
+
+def clean_trip(trip: Any) -> Dict[str, Any]:
+    """Validate a trip sent by the planner: {title, start_date, days: [{city, area, stops}]}"""
+    if not isinstance(trip, dict):
+        raise PlanInputError("Send a 'trip' object")
+    days_in = trip.get("days")
+    if not isinstance(days_in, list) or not days_in:
+        raise PlanInputError("The trip has no days")
+    if len(days_in) > MAX_DAYS:
+        raise PlanInputError(f"Too many days (max {MAX_DAYS})")
+    days = []
+    for n, day in enumerate(days_in, start=1):
+        if not isinstance(day, dict):
+            raise PlanInputError(f"Day {n} must be an object")
+        city = str(day.get("city") or "").strip().lower()
+        if city not in ROUTE_CITIES:
+            raise PlanInputError(f"Day {n}: unsupported city '{day.get('city')}'")
+        stops = []
+        for stop in (day.get("stops") or [])[:MAX_STOPS_PER_DAY]:
+            if isinstance(stop, str):
+                stop = {"name": stop}
+            if not isinstance(stop, dict) or not str(stop.get("name") or "").strip():
+                continue
+            try:
+                duration = max(5, min(int(stop.get("duration")), 600))
+            except (TypeError, ValueError):
+                duration = None
+            stops.append({"name": str(stop["name"]).strip()[:120], "duration": duration})
+        days.append({"city": city, "area": str(day.get("area") or "").strip()[:80], "stops": stops})
+    start = trip_checks.parse_date(trip.get("start_date"))
+    return {
+        "title": str(trip.get("title") or "").strip()[:100] or "My Japan trip",
+        "start_date": start.isoformat() if start else None,
+        "days": days,
+    }
+
+
+@app.route("/share", methods=["POST"])
+def create_share():
+    """Save a read-only copy of a trip and return its link: {"id", "url"}"""
+    if request.content_length and request.content_length > SHARE_MAX_BYTES:
+        return jsonify({"error": "That trip is too big to share"}), 413
+    body = request.get_json(silent=True) or {}
+    try:
+        trip = clean_trip(body.get("trip"))
+    except PlanInputError as e:
+        return jsonify({"error": str(e)}), 400
+    share_id = secrets.token_urlsafe(9)
+    record = {"_id": share_id, "trip": trip, "owner": get_verified_user_id(), "created_at": time.time()}
+    if MONGODB_AVAILABLE and mongo_db is not None:
+        try:
+            mongo_db["shared_trips"].insert_one(record)
+        except Exception:
+            logger.exception("Saving a shared trip failed")
+            return jsonify({"error": "Couldn't create the link. Please try again."}), 500
+    else:
+        _shared_in_memory[share_id] = record
+    return jsonify({"id": share_id, "url": f"/view.html?share={share_id}"})
+
+
+@app.route("/share/<share_id>")
+def get_share(share_id):
+    """A shared trip by id"""
+    if not re.fullmatch(r"[A-Za-z0-9_-]{6,40}", share_id or ""):
+        abort(404)
+    if MONGODB_AVAILABLE and mongo_db is not None:
+        record = mongo_db["shared_trips"].find_one({"_id": share_id})
+    else:
+        record = _shared_in_memory.get(share_id)
+    if not record:
+        return jsonify({"error": "This link doesn't exist or was removed."}), 404
+    return jsonify({"trip": record["trip"], "created_at": record.get("created_at")})
+
+
+# =============================================================================
+# TRIP CHECKS: dates, weather, closed days (trip_checks.py)
+# =============================================================================
+
+@app.route("/trip-check", methods=["POST"])
+def trip_check():
+    """
+    POST {"days": [...same as /optimize-route...], "start_date": "2026-04-02"}
+    Returns each day's date, weather (forecast or typical), places that are usually
+    closed that day, and suggestions (swap a rainy outdoor day, move a closed place).
+    """
+    body = request.get_json(silent=True) or {}
+    start = trip_checks.parse_date(body.get("start_date"))
+    if not start:
+        return jsonify({"error": "Choose the trip's start date first."}), 400
+    try:
+        days = prepare_trip_days(body.get("days"))
+    except PlanInputError as e:
+        return jsonify({"error": str(e)}), 400
+    try:
+        result = trip_checks.check_trip(days, start, trip_checks.weather_for_city)
+    except Exception:
+        logger.exception("Trip check failed")
+        return jsonify({"error": "The trip check failed. Please try again."}), 500
+    for out, day in zip(result["days"], days):
+        out["key"] = day.get("key")
+    for s in result["suggestions"]:
+        s["day_key"] = days[s["day"]].get("key")
+        if "to_day" in s:
+            s["to_day_key"] = days[s["to_day"]].get("key")
+        if "with_day" in s:
+            s["with_day_key"] = days[s["with_day"]].get("key")
+    return jsonify(result)
+
+
+# =============================================================================
+# CHAT EDITS (chat_editor.py)
+# =============================================================================
+
+@app.route("/ai/chat-edit", methods=["POST"])
+def ai_chat_edit():
+    """
+    POST {"days": [...same as /optimize-route...], "message": "make day 2 more relaxed",
+          "pace": "normal", "history": [{"role": "user"|"assistant", "text": "..."}]}
+    Returns {"reply", "changes": [...], "rejected": [...],
+             "days": [{"key", "label", "area", "stops": [{name, duration}], "before", "after"}]}
+    'days' are only the changed days, with stops in the optimized order. Nothing is
+    changed on the page until the traveler presses Apply.
+    """
+    if not OPENAI_API_KEY:
+        return jsonify({"error": "Chat editing needs the AI, which isn't set up on this server."}), 503
+    body = request.get_json(silent=True) or {}
+    message = str(body.get("message") or "").strip()[:500]
+    if not message:
+        return jsonify({"error": "Type what you'd like to change."}), 400
+    pace = str(body.get("pace") or "normal").lower()
+    history = [{"role": str(h.get("role"))[:10], "text": str(h.get("text"))[:500]}
+               for h in (body.get("history") or []) if isinstance(h, dict)][-chat_editor.HISTORY_TURNS:]
+    try:
+        days = prepare_trip_days(body.get("days"))
+    except PlanInputError as e:
+        return jsonify({"error": str(e)}), 400
+
+    city_keys = sorted({d["city_key"] for d in days})
+    kb = load_kb_for(city_keys)
+    analysis = ai_reviewer.analyze_trip(days, pace)
+    facts = [{"stops": day["stops"], "end_time": a["end_time"], "travel_minutes": a["travel_minutes"],
+              "issues": [i["text"] for i in a["issues"]]} for day, a in zip(days, analysis["days"])]
+    user_text = chat_editor.build_user_message(days, facts, chat_editor.build_catalog(city_keys, kb),
+                                               message, pace, history)
+    try:
+        answer = _ask_openai(chat_editor.SYSTEM_PROMPT, user_text, chat_editor.CHAT_SCHEMA)
+    except Exception:
+        logger.exception("Chat edit AI call failed")
+        return jsonify({"error": "The AI couldn't answer right now. Please try again."}), 502
+
+    # The page's days, with durations as the traveler wrote them (blank = estimated)
+    page_days, points = [], []
+    for day in days:
+        page_days.append({
+            "key": day.get("key"), "label": day["label"], "city": day["city"], "city_key": day["city_key"],
+            "area": day["area"],
+            "stops": [{"name": s["name"], "duration": None if s.get("duration_estimated") else s["duration"]}
+                      for s in day["stops"]],
+        })
+        pts = {s["name"]: (s["lat"], s["lng"]) for s in day["stops"] if s.get("lat") is not None}
+        if day.get("anchor"):
+            pts["__anchor__"] = (day["anchor"]["lat"], day["anchor"]["lng"])
+        points.append(pts)
+
+    editor = chat_editor.Editor(
+        page_days, points,
+        find_place=lambda key, text, near: match_place(text, kb.get(key, []), near),
+        kb_for=lambda key: kb.get(key, []))
+    editor.apply(answer.get("operations") or [])
+
+    changed = sorted(editor.changed)
+    out_days = []
+    if changed:
+        try:
+            after = prepare_trip_days([{k: editor.days[i][k] for k in ("key", "label", "city", "area", "stops")}
+                                       for i in changed])
+        except PlanInputError:
+            after = []
+        def facts_of(day):
+            # Both sides in their best order, so before / after compare fairly
+            best = route_planner.DayPlanner(day["stops"], day["city"], 9 * 60, day.get("anchor")).optimize()
+            return best, {"end_time": best["end_time"], "travel_minutes": best["travel_minutes"],
+                          "active_minutes": best["activity_minutes"] + best["travel_minutes"],
+                          "stops": len(day["stops"])}
+
+        for i, new_day in zip(changed, after):
+            best, after_facts = facts_of(new_day)
+            _, before_facts = facts_of(days[i])
+            by_name = {s["name"]: s for s in editor.days[i]["stops"]}
+            out_days.append({
+                "key": editor.days[i]["key"],
+                "label": editor.days[i]["label"],
+                "area": editor.days[i]["area"],
+                "stops": [by_name[n] for n in best["optimized_order"] if n in by_name],
+                "before": before_facts,
+                "after": after_facts,
+            })
+    return jsonify({
+        "reply": str(answer.get("reply") or "")[:800],
+        "changes": editor.changes,
+        "rejected": editor.rejected,
+        "days": out_days,
+    })
 
 
 # =============================================================================

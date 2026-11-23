@@ -1,10 +1,10 @@
 // =============================================================================
-// PLAN MY TRIP FOR ME (uses plan-dom.js, then route-optimizer.js / ai-review.js)
+// PLAN MY TRIP FOR ME (plan.html: uses planner.js, then route-optimizer.js / ai-review.js)
 // =============================================================================
-// Adds a "✨ Plan my trip" button next to "Optimize Route". The traveler picks how
-// many days per city (the cities of this page), interests and pace; the server
-// (POST /plan-trip) builds the days from the database. The plan is written into
-// the day boxes, then the route optimizer runs on it so the schedule and map show.
+// Adds a "✨ Plan my trip" button next to "Optimize Route". The traveler picks the
+// route (cities in order, days in each), interests and pace; the server
+// (POST /plan-trip) builds the days from the database. The plan replaces the
+// planner's days, then the route optimizer runs on it so the schedule and map show.
 // =============================================================================
 
 (function () {
@@ -25,7 +25,6 @@
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => (
     { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
   ));
-  const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
   const store = {
     get(key) { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } },
     set(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* private mode */ } },
@@ -35,86 +34,56 @@
   };
 
   // ---------------------------------------------------------------------------
-  // The page's cities and day boxes
+  // The trip's cities (planner.js)
   // ---------------------------------------------------------------------------
 
-  /** [{city: "tokyo", container}] in page order ("#tokyo-days", or "#days" on the Tokyo-only page) */
-  function pageCities() {
-    const out = [];
-    document.querySelectorAll("[id$='-days']").forEach((el) => {
-      const city = el.id.replace(/-days$/, "");
-      if (/^[a-z]+$/.test(city)) out.push({ city, container: el });
-    });
-    const single = document.getElementById("days");
-    if (!out.length && single) out.push({ city: (window.ROUTE_DEFAULT_CITY || "tokyo").toLowerCase(), container: single, single: true });
-    return out;
-  }
-
-  const boxes = (entry) => [...entry.container.querySelectorAll(".day-box")];
-
-  function addDay(entry) {
-    if (typeof window.addDay !== "function") return false;
-    if (entry.single) window.addDay();
-    else window.addDay(entry.city);
-    return true;
-  }
-
-  /** Make a city section have exactly n day boxes (at least one stays, empty) */
-  function setDayCount(entry, n) {
-    let list = boxes(entry);
-    while (list.length > Math.max(n, 1)) {
-      const last = list[list.length - 1];
-      const remove = last.querySelector("button[onclick*='emove']");
-      if (remove) remove.click();
-      else last.remove();
-      const next = boxes(entry);
-      if (next.length === list.length) break;  // couldn't remove: stop instead of looping
-      list = next;
+  /**
+   * Rows for the form, in travel order: the trip's cities first (with their day counts),
+   * then the other cities with 0 days. [{city, name, icon, days}]
+   */
+  function cityRows() {
+    const P = window.Planner;
+    const trip = P.cityPlan();
+    const hasStops = window.PlanDom.collectDays().some((d) => d.stops.length);
+    const rows = trip.map((c, i) => ({ city: c.city, days: hasStops ? c.days : Math.max(c.days, i === 0 ? 3 : 2) }));
+    for (const city of P.CITY_ORDER) {
+      if (!rows.some((r) => r.city === city)) rows.push({ city, days: 0 });
     }
-    while (boxes(entry).length < n) {
-      if (!addDay(entry)) break;
-    }
-  }
-
-  function daysOfCity(city) {
-    return window.PlanDom.collectDays().filter((d) => d.city.toLowerCase() === city);
+    return rows.map((r) => ({ ...r, name: P.CITIES[r.city].name, icon: P.CITIES[r.city].icon }));
   }
 
   function pageHasActivities() {
     return window.PlanDom.collectDays().some((d) => d.stops.length);
   }
 
-  /** Write the generated plan into the day boxes */
-  function fillPage(plan, counts) {
-    for (const entry of pageCities()) {
-      const planned = plan.days.filter((d) => d.city_key === entry.city);
-      setDayCount(entry, counts[entry.city] ? planned.length || counts[entry.city] : 0);
-      const pageDays = daysOfCity(entry.city);
-      pageDays.forEach((day, i) => {
-        const p = planned[i];
-        window.PlanDom.writeDay(day.key, p ? p.stops.map((s) => ({ name: s.name, duration: s.duration })) : []);
-        window.PlanDom.writeArea(day.key, p ? p.area : "");
-      });
-    }
+  /** Put the generated plan into the planner */
+  function fillPage(plan) {
+    window.Planner.replaceDays(plan.days.map((d) => ({
+      city: d.city_key, area: d.area, stops: d.stops.map((s) => ({ name: s.name, duration: s.duration })),
+    })));
   }
 
   // ---------------------------------------------------------------------------
   // The form
   // ---------------------------------------------------------------------------
 
-  function formHtml(cities, interests, saved) {
-    const dayInputs = cities.map(({ city }, i) => {
-      const existing = daysOfCity(city).filter((d) => d.stops.length).length;
-      const value = saved?.days?.[city] ?? (existing || (i === 0 ? 3 : 2));
-      return `
-        <label class="flex items-center justify-between gap-2 rounded-lg border border-slate-200 px-3 py-2">
-          <span class="text-sm font-medium text-slate-800">${esc(capitalize(city))}</span>
-          <span class="flex items-center gap-1 text-sm text-slate-600">
-            <input type="number" min="0" max="14" value="${esc(value)}" data-plan-days="${esc(city)}"
-              class="w-16 rounded-md border border-slate-300 px-2 py-1 text-right focus:outline-none focus:ring-2 focus:ring-violet-300" />
-            days</span>
-        </label>`;
-    }).join("");
+  function cityRowHtml(r) {
+    return `
+      <li class="flex items-center justify-between gap-2 rounded-lg border border-slate-200 px-2 py-1.5" data-plan-row="${esc(r.city)}">
+        <span class="flex items-center gap-1">
+          <button type="button" data-plan-move="-1" class="rounded px-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700" aria-label="Earlier">↑</button>
+          <button type="button" data-plan-move="1" class="rounded px-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700" aria-label="Later">↓</button>
+          <span class="text-sm font-medium text-slate-800">${r.icon} ${esc(r.name)}</span>
+        </span>
+        <span class="flex items-center gap-1 text-sm text-slate-600">
+          <input type="number" min="0" max="14" value="${esc(r.days)}" data-plan-days="${esc(r.city)}"
+            class="w-16 rounded-md border border-slate-300 px-2 py-1 text-right focus:outline-none focus:ring-2 focus:ring-violet-300" />
+          days</span>
+      </li>`;
+  }
+
+  function formHtml(rows, interests, saved) {
+    const dayInputs = rows.map(cityRowHtml).join("");
     const picked = new Set(saved?.interests || DEFAULT_PICKED);
     // Keep a sensible order (the server's JSON comes back sorted alphabetically)
     const ids = [...Object.keys(DEFAULT_INTERESTS).filter((id) => id in interests),
@@ -139,8 +108,8 @@
       </div>
 
       <div class="mt-4">
-        <h4 class="text-sm font-semibold text-slate-700">Days per city <span class="font-normal text-slate-500">(0 to skip a city)</span></h4>
-        <div class="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">${dayInputs}</div>
+        <h4 class="text-sm font-semibold text-slate-700">Route and days <span class="font-normal text-slate-500">(top to bottom; 0 days skips a city)</span></h4>
+        <ol class="mt-2 grid gap-1.5 sm:grid-cols-2" data-plan-rows>${dayInputs}</ol>
       </div>
 
       <div class="mt-4">
@@ -175,10 +144,10 @@
   }
 
   function readForm(panel) {
-    const days = {};
-    panel.querySelectorAll("[data-plan-days]").forEach((el) => {
-      days[el.dataset.planDays] = Math.max(0, Math.min(14, parseInt(el.value, 10) || 0));
-    });
+    // Cities in the order shown (= travel order)
+    const days = [...panel.querySelectorAll("[data-plan-days]")].map((el) => ({
+      city: el.dataset.planDays, days: Math.max(0, Math.min(14, parseInt(el.value, 10) || 0)),
+    }));
     const interests = [...panel.querySelectorAll("[data-plan-interest][aria-pressed='true']")].map((b) => b.dataset.planInterest);
     const pace = panel.querySelector("[data-plan-pace][aria-pressed='true']")?.dataset.planPace || "normal";
     return { days, interests, pace };
@@ -235,10 +204,14 @@
   async function openPanel(panel) {
     if (!panel.dataset.ready) {
       const interests = await loadInterests();
-      panel.innerHTML = formHtml(pageCities(), interests, store.get(FORM_STORAGE_KEY));
+      panel.innerHTML = formHtml(cityRows(), interests, store.get(FORM_STORAGE_KEY));
       styleToggles(panel);
       bindPanel(panel);
       panel.dataset.ready = "1";
+    }
+    else {
+      const list = panel.querySelector("[data-plan-rows]");
+      if (list) list.innerHTML = cityRows().map(cityRowHtml).join("");
     }
     panel.classList.remove("hidden");
     panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -255,15 +228,21 @@
       styleToggles(panel);
     }));
     panel.querySelector("[data-plan-go]").addEventListener("click", () => build(panel));
+    panel.querySelector("[data-plan-rows]").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-plan-move]");
+      if (!b) return;
+      const row = b.closest("[data-plan-row]");
+      const sibling = Number(b.dataset.planMove) < 0 ? row.previousElementSibling : row.nextElementSibling;
+      if (!sibling) return;
+      if (Number(b.dataset.planMove) < 0) sibling.before(row); else sibling.after(row);
+    });
   }
 
   async function build(panel) {
     const form = readForm(panel);
     const status = panel.querySelector("[data-plan-status]");
     const go = panel.querySelector("[data-plan-go]");
-    const cities = pageCities()
-      .map(({ city }) => ({ city, days: form.days[city] || 0 }))
-      .filter((c) => c.days > 0);
+    const cities = form.days.filter((c) => c.days > 0);
     if (!cities.length) {
       status.textContent = "Give at least one city a day or more.";
       return;
@@ -284,7 +263,7 @@
       if (!res.ok) throw new Error(plan.error || `Server error (${res.status})`);
       if (!plan.days?.length) throw new Error("We couldn't find enough places for that. Try other interests.");
 
-      fillPage(plan, form.days);
+      fillPage(plan);
       status.textContent = "";
       panel.querySelector("[data-plan-result]").innerHTML = resultHtml(plan);
       panel.querySelector("[data-plan-review]")?.addEventListener("click", () => {
@@ -305,7 +284,7 @@
 
   function init() {
     const optimizeBtn = document.getElementById("optimize-route-btn");
-    if (!optimizeBtn || !window.PlanDom || document.getElementById("plan-trip-btn")) return;
+    if (!optimizeBtn || !window.Planner || document.getElementById("plan-trip-btn")) return;
 
     const button = document.createElement("button");
     button.id = "plan-trip-btn";

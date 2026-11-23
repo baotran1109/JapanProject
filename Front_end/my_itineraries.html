@@ -48,7 +48,7 @@
         <p class="mt-1 text-sm text-slate-600">Create your first plan and it will show up here.</p>
         <div class="mt-4 flex justify-center gap-3">
           <a href="/itineraries.html" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium hover:bg-slate-50">Browse Recommended</a>
-          <a href="/plan_tokyo.html" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700">Start a Tokyo Plan</a>
+          <a href="/plan.html" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700">Plan a new trip</a>
         </div>
       </div>
     </div>
@@ -138,16 +138,9 @@
       }
     }
 
+    // Every saved trip opens in the one planner page (it reads the older formats too)
     function editorUrl(it) {
-      const cities = (it.cities || []).map(c => c.toLowerCase());
-      if (cities.includes("hakodate") || cities.includes("sapporo")) return `plan_tokyo_hokkaido.html?itineraryId=${it.id}`;
-      if (cities.includes("aomori")) return `plan_tokyo_aomori_hokkaido.html?itineraryId=${it.id}`;
-      // Tokyo + Fukuoka + Okinawa (no Kyoto/Osaka)
-      if (cities.includes("fukuoka") && cities.includes("okinawa") && !cities.includes("kyoto") && !cities.includes("osaka")) return `plan_tokyo_fukuoka_okinawa.html?itineraryId=${it.id}`;
-      if (cities.includes("fukuoka")) return `plan_tokyo_kansai_fukuoka.html?itineraryId=${it.id}`;
-      if (cities.includes("kyoto") || cities.includes("osaka")) return `plan_tokyo_kansai.html?itineraryId=${it.id}`;
-      if (cities.includes("okinawa")) return `plan_tokyo_okinawa.html?itineraryId=${it.id}`;
-      return `plan_tokyo.html?itineraryId=${it.id}`;
+      return it.src === "subcol" ? `/plan.html?itineraryId=${encodeURIComponent(it.id)}` : "/plan.html";
     }
 
     function render(items, uid) {

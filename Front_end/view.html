@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Japan Trip · Explore Japan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @media print {
+      nav, footer, [data-no-print] { display: none !important; }
+      body { background: #fff !important; }
+      .print-day { break-inside: avoid; }
+      a { color: inherit !important; text-decoration: none !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <nav class="bg-[#222] text-white">
+    <div class="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-2 px-4 py-3">
+      <a href="/index.html" class="font-semibold tracking-wide">🗾 Explore Japan</a>
+      <a href="/plan.html" class="text-sm hover:underline">Plan your own trip →</a>
+    </div>
+  </nav>
+
+  <main class="mx-auto max-w-4xl px-4 py-6">
+    <div id="trip-view">
+      <p class="rounded-xl bg-white p-6 text-center text-slate-500 shadow-sm">Loading the trip…</p>
+    </div>
+  </main>
+
+  <footer class="py-10 text-center text-sm text-slate-500">Made with the Explore Japan trip planner</footer>
+
+  <script src="/static/js/plan-dom.js?v=5"></script>
+  <script src="/static/js/trip-export.js?v=1"></script>
+  <script src="/static/js/route-map.js?v=3"></script>
+  <script src="/static/js/trip-view.js?v=1"></script>
+</body>
+</html>

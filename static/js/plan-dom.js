@@ -142,7 +142,7 @@
    * (e.g. added since) stay at the end; names no longer in the day are skipped.
    */
   function reorderDay(key, order) {
-    const day = getDay(key);
+    const day = api.getDay(key);
     if (!day) return false;
     const remaining = [...day.stops];
     const ordered = [];
@@ -150,7 +150,7 @@
       const i = remaining.findIndex((s) => s.name === name);
       if (i >= 0) ordered.push(...remaining.splice(i, 1));
     }
-    return writeDay(key, [...ordered, ...remaining]);
+    return api.writeDay(key, [...ordered, ...remaining]);
   }
 
   /** Set a day's area / location field ("Asakusa") */
@@ -168,13 +168,13 @@
 
   /** Swap one stop for another (e.g. "Lunch" -> a restaurant), keeping its duration */
   function replaceStop(key, oldName, newName) {
-    const day = getDay(key);
+    const day = api.getDay(key);
     if (!day) return false;
     const i = day.stops.findIndex((s) => s.name === oldName);
     if (i < 0) return false;
     const stops = [...day.stops];
     stops[i] = { ...stops[i], name: newName };
-    return writeDay(key, stops);
+    return api.writeDay(key, stops);
   }
 
   // ---------------------------------------------------------------------------
@@ -220,7 +220,7 @@
         // "Lunch" -> "Lunch: <restaurant>", so it stays scheduled at lunchtime
         const pickName = /^(breakfast|brunch|lunch|dinner)$/i.test(pickStop.trim())
           ? `${pickStop.trim()}: ${btn.dataset.pickName}` : btn.dataset.pickName;
-        if (!replaceStop(pickKey, pickStop, pickName)) {
+        if (!api.replaceStop(pickKey, pickStop, pickName)) {
           alert(`“${pickStop}” isn't on that day anymore.`);
           return;
         }
@@ -231,8 +231,15 @@
     });
   }
 
-  window.PlanDom = {
+  const api = {
     collectDays, getDay, forServer, writeDay, writeArea, reorderDay, replaceStop, renderPicks, bindPicks,
     esc, formatMinutes, yen,
+    /**
+     * A page that keeps its trip in JavaScript (plan.html) instead of in day boxes
+     * replaces how days are read and written: {collectDays, getDay, writeDay, writeArea}.
+     * Everything else (reorder, picks, the optimizer and AI review panels) then works on it.
+     */
+    setStore(store) { Object.assign(api, store); },
   };
+  window.PlanDom = api;
 })();
