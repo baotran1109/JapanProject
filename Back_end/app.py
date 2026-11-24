@@ -32,6 +32,7 @@ import place_picks
 import trip_generator
 import trip_checks
 import geocode
+import google_import
 import chat_editor
 import secrets
 
@@ -782,6 +783,92 @@ def user_places():
     if result.deleted_count > 0:
         return jsonify({"success": True, "message": "Place deleted"})
     return jsonify({"error": "Place not found or not yours"}), 404
+
+
+# -----------------------------------------------------------------------------
+# Import My places from Google Maps (google_import.py)
+# -----------------------------------------------------------------------------
+
+IMPORT_MAX_UPLOAD = 6 * 1024 * 1024
+
+
+@app.route("/user/places/import/preview", methods=["POST"])
+def user_places_import_preview():
+    """
+    Read Google Maps links or a My Maps file and show what would be imported.
+    Nothing is saved here.
+      JSON {"links": "one link per line"}  or  multipart form with "file" (.kml / .kmz)
+    Returns {"places": [{name, lat, lng, city, category, layer, notes, status, reason}],
+             "problems": [...], "counts": {...}}
+    """
+    if not MONGODB_AVAILABLE or mongo_db is None:
+        return jsonify({"error": "Saving your own places isn't available right now."}), 503
+    user_id = get_verified_user_id()
+    if not user_id:
+        return jsonify({"error": "Sign in to import places."}), 401
+    if request.content_length and request.content_length > IMPORT_MAX_UPLOAD:
+        return jsonify({"error": "That file is too big (max 5 MB)."}), 413
+
+    try:
+        upload = request.files.get("file")
+        if upload:
+            found = google_import.places_from_kml(upload.read(google_import.MAX_FILE_BYTES + 1), upload.filename or "")
+        else:
+            body = request.get_json(silent=True) or {}
+            links = str(body.get("links") or "")[:20000]
+            found = google_import.places_from_links(links, lambda name: geocode.find(name, None))
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception:
+        logger.exception("Import preview failed")
+        return jsonify({"error": "Couldn't read that. Please try again."}), 500
+
+    existing = list(mongo_db["user_places"].find({"user_id": user_id}))
+    return jsonify(google_import.preview(found, existing))
+
+
+@app.route("/user/places/import", methods=["POST"])
+def user_places_import():
+    """
+    Save the places the traveler kept in the preview.
+    POST {"places": [{name, lat, lng, city, category, notes}]} -> {"added": [...], "skipped": [...]}
+    """
+    if not MONGODB_AVAILABLE or mongo_db is None:
+        return jsonify({"error": "Saving your own places isn't available right now."}), 503
+    user_id = get_verified_user_id()
+    if not user_id:
+        return jsonify({"error": "Sign in to import places."}), 401
+    body = request.get_json(silent=True) or {}
+    items = body.get("places")
+    if not isinstance(items, list) or not items:
+        return jsonify({"error": "Choose at least one place to import."}), 400
+
+    col = mongo_db["user_places"]
+    have = {(str(p.get("name") or "").strip().lower(), str(p.get("city") or "").lower())
+            for p in col.find({"user_id": user_id})}
+    room = MAX_USER_PLACES - len(have)
+    added, skipped = [], []
+    for item in items[:google_import.MAX_PLACES]:
+        if not isinstance(item, dict):
+            continue
+        try:
+            place = _clean_user_place(item)
+        except PlanInputError as e:
+            skipped.append({"name": str(item.get("name") or "")[:120], "reason": str(e)})
+            continue
+        key = (place["name"].lower(), place["city"].lower())
+        if key in have:
+            skipped.append({"name": place["name"], "reason": "Already in your places"})
+            continue
+        if len(added) >= room:
+            skipped.append({"name": place["name"], "reason": f"You can save up to {MAX_USER_PLACES} places"})
+            continue
+        place.update({"user_id": user_id, "created_at": time.time(), "is_public": False, "imported": True})
+        place["_id"] = col.insert_one(place).inserted_id
+        have.add(key)
+        added.append(_user_place_out(place))
+    logger.info("User %s imported %d places", user_id, len(added))
+    return jsonify({"added": added, "skipped": skipped})
 
 
 @app.route("/search/combined")

@@ -43,31 +43,34 @@ def _get(params: Dict[str, Any]) -> Any:
             return json.loads(resp.read().decode("utf-8"))
 
 
-def find(query: str, city: str) -> Optional[Dict[str, Any]]:
+def find(query: str, city: Optional[str]) -> Optional[Dict[str, Any]]:
     """
-    Look up a hotel / address near a city. Returns {name, lat, lng} or None.
-    Never raises: if the service is down, the stay just isn't on the map.
+    Look up a hotel / address near a city (city=None: anywhere in Japan).
+    Returns {name, lat, lng} or None. Never raises: if the service is down,
+    the place just isn't found.
     """
     query = " ".join((query or "").split())[:120]
-    hub = route_planner.CITY_HUBS.get(city)
-    if not query or not hub:
+    hub = route_planner.CITY_HUBS.get(city) if city else None
+    if not query or (city and not hub):
         return None
-    key = (query.lower(), city)
+    key = (query.lower(), city or "japan")
     cached = _cache.get(key)
     if cached and time.time() - cached[0] < CACHE_SECONDS:
         return cached[1]
 
-    lat, lng = hub
-    result = None
-    try:
-        rows = _get({
-            "q": query, "format": "jsonv2", "limit": 3, "countrycodes": "jp",
+    params = {"q": query, "format": "jsonv2", "limit": 3, "countrycodes": "jp"}
+    if hub:
+        lat, lng = hub
+        params.update({
             "viewbox": f"{lng - SEARCH_BOX_DEGREES},{lat + SEARCH_BOX_DEGREES},{lng + SEARCH_BOX_DEGREES},{lat - SEARCH_BOX_DEGREES}",
             "bounded": 1,
         })
+    result = None
+    try:
+        rows = _get(params)
         for row in rows or []:
             plat, plng = float(row["lat"]), float(row["lon"])
-            if (route_planner.haversine_km(lat, lng, plat, plng) or 0) <= MAX_DISTANCE_KM:
+            if not hub or (route_planner.haversine_km(hub[0], hub[1], plat, plng) or 0) <= MAX_DISTANCE_KM:
                 label = row.get("name") or (row.get("display_name") or query).split(",")[0]
                 result = {"name": label, "lat": plat, "lng": plng}
                 break

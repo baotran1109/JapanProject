@@ -150,7 +150,143 @@
     window.Planner.setMyPlaces(mine);
   }
 
+  // ---------------------------------------------------------------------------
+  // Import from Google Maps: pasted links or a My Maps file, preview, then save
+  // ---------------------------------------------------------------------------
+
+  let importRows = [];
+  let importMode = "links";
+
+  function importPreviewHtml(data) {
+    const STATUS = { duplicate: "Already saved", outside: "Outside our cities" };
+    const rows = data.places.map((p, i) => `
+      <tr class="${p.status === "new" ? "" : "text-slate-400"}">
+        <td class="py-1.5 pr-2 align-top"><input type="checkbox" data-import-keep="${i}" ${p.status === "new" ? "checked" : ""}
+          ${p.status === "outside" ? "disabled" : ""} aria-label="Import ${esc(p.name)}" /></td>
+        <td class="py-1.5 pr-2 align-top">
+          <div class="font-medium ${p.status === "new" ? "text-slate-800" : ""}">${esc(p.name)}</div>
+          <div class="text-[11px] text-slate-400">${p.layer ? `${esc(p.layer)} · ` : ""}${p.source === "looked up by name" ? "location looked up by name" : ""}
+            ${p.reason ? esc(p.reason) : ""}</div>
+        </td>
+        <td class="py-1.5 pr-2 align-top whitespace-nowrap">${p.city ? esc(p.city) : "—"}</td>
+        <td class="py-1.5 align-top">${p.city ? `<select data-import-category="${i}" class="rounded border border-slate-200 bg-white px-1 py-0.5 text-xs">
+          ${Object.entries(CATEGORIES).map(([id, label]) => `<option value="${id}" ${p.category === id ? "selected" : ""}>${label}</option>`).join("")}
+        </select>` : ""}</td>
+      </tr>`).join("");
+    const problems = (data.problems || []).map((t) => `<li>${esc(t)}</li>`).join("");
+    const c = data.counts || {};
+    return `
+      <p class="text-sm text-slate-700"><strong>${c.new || 0}</strong> new
+        ${c.duplicate ? ` · ${c.duplicate} already saved` : ""}${c.outside ? ` · ${c.outside} outside our cities` : ""}</p>
+      ${problems ? `<ul class="mt-1 list-disc pl-5 text-xs text-amber-800">${problems}</ul>` : ""}
+      ${rows ? `<div class="mt-2 overflow-x-auto"><table class="w-full text-left text-sm">
+        <thead><tr class="border-b text-xs text-slate-500"><th></th><th class="pb-1">Place</th><th class="pb-1">City</th><th class="pb-1">Category</th></tr></thead>
+        <tbody class="divide-y divide-slate-100">${rows}</tbody></table></div>
+      <div class="mt-3 flex flex-wrap items-center gap-3">
+        <button type="button" id="import-save" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"></button>
+        <span id="import-save-status" class="text-sm text-slate-500"></span>
+      </div>` : ""}`;
+  }
+
+  function updateImportButton() {
+    const button = $("#import-save");
+    if (!button) return;
+    const n = document.querySelectorAll("[data-import-keep]:checked").length;
+    button.textContent = `Import ${n} place${n === 1 ? "" : "s"}`;
+    button.disabled = !n;
+  }
+
+  function setImportMode(mode) {
+    importMode = mode;
+    document.querySelectorAll("[data-import-mode]").forEach((b) => {
+      b.className = `px-3 py-1.5 ${b.dataset.importMode === mode ? "bg-purple-600 text-white" : "bg-white text-slate-700 hover:bg-slate-50"}`;
+    });
+    document.querySelectorAll("[data-import-pane]").forEach((p) => p.classList.toggle("hidden", p.dataset.importPane !== mode));
+  }
+
+  async function runImportPreview() {
+    const status = $("#import-status");
+    const button = $("#import-preview");
+    const headers = typeof window.getAuthHeaders === "function" ? await window.getAuthHeaders() : {};
+    if (!headers.Authorization) {
+      status.innerHTML = `<a href="/auth.html" class="font-semibold text-blue-700 hover:underline">Sign in</a> to import places.`;
+      return;
+    }
+    let options;
+    if (importMode === "file") {
+      const file = $("#import-file").files[0];
+      if (!file) { status.textContent = "Choose a .kml or .kmz file first."; return; }
+      const form = new FormData();
+      form.append("file", file);
+      options = { method: "POST", headers, body: form };
+    } else {
+      const links = $("#import-links").value.trim();
+      if (!links) { status.textContent = "Paste at least one Google Maps link."; return; }
+      options = { method: "POST", headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify({ links }) };
+    }
+    button.disabled = true;
+    status.textContent = importMode === "file" ? "Reading your map…" : "Opening your links…";
+    try {
+      const res = await fetch("/user/places/import/preview", options);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      importRows = data.places;
+      $("#import-results").innerHTML = importPreviewHtml(data);
+      status.textContent = "";
+      updateImportButton();
+    } catch (e) {
+      status.textContent = `❌ ${e.message}`;
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  async function runImportSave() {
+    const keep = [...document.querySelectorAll("[data-import-keep]:checked")].map((el) => {
+      const i = Number(el.dataset.importKeep);
+      const p = importRows[i];
+      const category = document.querySelector(`[data-import-category="${i}"]`)?.value || p.category;
+      return { name: p.name, lat: p.lat, lng: p.lng, city: p.city, category, notes: p.notes || "" };
+    });
+    const button = $("#import-save");
+    const status = $("#import-save-status");
+    button.disabled = true;
+    status.textContent = "Saving…";
+    try {
+      const data = await authed("/user/places/import", { method: "POST", body: JSON.stringify({ places: keep }) });
+      mine = [...mine, ...data.added];
+      renderMine();
+      window.Planner.setMyPlaces(mine);
+      $("#import-results").innerHTML = `<p class="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">✅ Imported ${data.added.length}
+        place${data.added.length === 1 ? "" : "s"} to ⭐ My places.${data.skipped.length ? ` Skipped ${data.skipped.length}: ${
+        data.skipped.slice(0, 3).map((s) => `${esc(s.name)} (${esc(s.reason)})`).join(", ")}${data.skipped.length > 3 ? "…" : ""}` : ""}</p>`;
+      $("#import-links").value = "";
+      $("#import-file").value = "";
+    } catch (e) {
+      status.textContent = `❌ ${e.message}`;
+      button.disabled = false;
+    }
+  }
+
+  function initImport() {
+    const dialog = $("#import-dialog");
+    if (!dialog) return;
+    $("#import-open").addEventListener("click", () => {
+      $("#import-results").innerHTML = "";
+      $("#import-status").textContent = "";
+      setImportMode(importMode);
+      dialog.showModal();
+    });
+    dialog.querySelector("[data-import-close]").addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", (e) => { if (e.target === dialog) dialog.close(); });  // click outside
+    document.querySelectorAll("[data-import-mode]").forEach((b) => b.addEventListener("click", () => setImportMode(b.dataset.importMode)));
+    $("#import-preview").addEventListener("click", runImportPreview);
+    $("#import-results").addEventListener("change", (e) => { if (e.target.matches("[data-import-keep]")) updateImportButton(); });
+    $("#import-results").addEventListener("click", (e) => { if (e.target.id === "import-save") runImportSave(); });
+  }
+
   function initMyPlaces() {
+    initImport();
     const form = $("#my-places-form");
     if (!form) return;
     $("#my-place-city").innerHTML = Object.entries(window.Planner.CITIES)
