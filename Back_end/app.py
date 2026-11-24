@@ -639,95 +639,149 @@ def api_search():
 # USER CUSTOM PLACES - For places not in global database
 # =============================================================================
 
-@app.route("/user/places", methods=["GET", "POST", "DELETE"])
+# The categories a traveler can file their own places under:
+# id -> (label, which kind of place the planner treats it as)
+USER_PLACE_CATEGORIES = {
+    "stay":  ("Hotel / where I'm staying", "custom"),
+    "sight": ("Sight / thing to see", "attractions"),
+    "food":  ("Restaurant", "restaurants"),
+    "cafe":  ("Café / sweets", "restaurants"),
+    "shop":  ("Shop", "shopping"),
+    "other": ("Other", "custom"),
+}
+MAX_USER_PLACES = 300
+
+
+def user_place_category(place: Dict[str, Any]) -> str:
+    """Stored category; older places (saved as "custom") count as other"""
+    cat = str(place.get("category") or "").lower()
+    return cat if cat in USER_PLACE_CATEGORIES else "other"
+
+
+def _user_place_out(doc: Dict[str, Any]) -> Dict[str, Any]:
+    """A user's place as sent to the page (only the fields we keep)"""
+    return {
+        "id": str(doc.get("_id")),
+        "name": doc.get("name"),
+        "lat": doc.get("lat"),
+        "lng": doc.get("lng"),
+        "city": doc.get("city"),
+        "category": user_place_category(doc),
+        "notes": doc.get("notes") or "",
+    }
+
+
+def _clean_user_place(body: Dict[str, Any], partial: bool = False) -> Dict[str, Any]:
+    """
+    Validate a place sent by the page and keep only known fields.
+    partial=True (editing): only the fields that were sent.
+    """
+    out: Dict[str, Any] = {}
+    if not partial or "name" in body:
+        name = " ".join(str(body.get("name") or "").split())[:120]
+        if not name:
+            raise PlanInputError("Give the place a name")
+        out["name"] = name
+    if not partial or "lat" in body or "lng" in body:
+        try:
+            lat, lng = float(body["lat"]), float(body["lng"])
+        except (KeyError, TypeError, ValueError):
+            raise PlanInputError("Invalid GPS coordinates")
+        if not (20 <= lat <= 46 and 122 <= lng <= 154):
+            raise PlanInputError("Those coordinates aren't in Japan")
+        out["lat"], out["lng"] = lat, lng
+    if not partial or "city" in body:
+        city = str(body.get("city") or "").strip().lower()
+        if city not in ROUTE_CITIES:
+            raise PlanInputError(f"Unsupported city '{body.get('city')}'")
+        out["city"] = ROUTE_CITIES[city]
+    if not partial or "category" in body:
+        cat = str(body.get("category") or "other").strip().lower()
+        if cat not in USER_PLACE_CATEGORIES:
+            raise PlanInputError(f"Unknown category '{body.get('category')}'")
+        out["category"] = cat
+    if not partial or "notes" in body:
+        out["notes"] = str(body.get("notes") or "").strip()[:500]
+    return out
+
+
+@app.route("/user/places", methods=["GET", "POST", "PATCH", "DELETE"])
 def user_places():
     """
-    Manage user's custom places (hotels, friend's houses, local spots, etc.)
-    
-    GET: Retrieve all custom places for logged-in user
-    POST: Add a new custom place
-    DELETE: Remove a custom place (requires place_id in body)
-    
+    A traveler's own places (their hotel, a café a friend recommended...).
+
+    They're private: stored in the "user_places" collection with the owner's
+    Firebase UID, only ever read or changed for that verified user, and never
+    added to the shared place lists everyone sees.
+
+    GET:    {"places": [{id, name, lat, lng, city, category, notes}], "categories": {...}}
+    POST:   {name, lat, lng, city, category, notes}  -> {"place": {...}}
+    PATCH:  {place_id, ...fields to change}           -> {"place": {...}}
+    DELETE: {place_id}
+
     Requires: Authorization: Bearer <Firebase ID token>
     """
     if not MONGODB_AVAILABLE or mongo_db is None:
-        return jsonify({"error": "MongoDB not available"}), 503
+        return jsonify({"error": "Saving your own places isn't available right now."}), 503
 
     # Get the Firebase UID from the verified ID token
     user_id = get_verified_user_id()
     if not user_id:
         return jsonify({"error": "Authentication required. Please sign in."}), 401
-    
+    col = mongo_db["user_places"]
+    categories = {k: v[0] for k, v in USER_PLACE_CATEGORIES.items()}
+
     if request.method == "GET":
-        # Get user's custom places
-        user_places_list = list(mongo_db["user_places"].find(
-            {"user_id": user_id},
-            {"_id": 0}  # Exclude MongoDB _id from response
-        ))
-        return jsonify({"places": user_places_list, "count": len(user_places_list)})
-    
-    elif request.method == "POST":
-        # Add new custom place
-        place_data = request.get_json(silent=True)
-        if not isinstance(place_data, dict):
-            return jsonify({"error": "Request body must be a JSON object"}), 400
+        docs = list(col.find({"user_id": user_id}))
+        places = sorted((_user_place_out(d) for d in docs), key=lambda p: (p["city"] or "", (p["name"] or "").lower()))
+        return jsonify({"places": places, "count": len(places), "categories": categories})
 
-        # Validate required fields
-        required_fields = ["name", "lat", "lng", "city"]
-        for field in required_fields:
-            if field not in place_data:
-                return jsonify({"error": f"Missing required field: {field}"}), 400
-        
-        # Validate GPS coordinates
-        try:
-            lat = float(place_data["lat"])
-            lng = float(place_data["lng"])
-            if not (-90 <= lat <= 90) or not (-180 <= lng <= 180):
-                raise ValueError("Invalid coordinates")
-        except (ValueError, TypeError):
-            return jsonify({"error": "Invalid GPS coordinates"}), 400
-        
-        # Add user metadata
-        from datetime import datetime
-        place_data["user_id"] = user_id
-        place_data["created_at"] = datetime.utcnow().isoformat()
-        place_data["category"] = place_data.get("category", "custom")
-        place_data["is_public"] = False  # Always private
-        
-        # Insert into user_places collection
-        result = mongo_db["user_places"].insert_one(place_data)
-        
-        logger.info(f"User {user_id} added custom place: {place_data.get('name')}")
-        
-        return jsonify({
-            "success": True,
-            "place_id": str(result.inserted_id),
-            "message": f"'{place_data.get('name')}' added successfully!"
-        })
-    
-    elif request.method == "DELETE":
-        # Delete a custom place
-        body = request.get_json(silent=True) or {}
-        place_id = body.get("place_id")
-        if not place_id:
-            return jsonify({"error": "Missing place_id"}), 400
+    body = request.get_json(silent=True)
+    if not isinstance(body, dict):
+        return jsonify({"error": "Request body must be a JSON object"}), 400
 
-        # Delete only if owned by this user (security check)
-        from bson import ObjectId
-        from bson.errors import InvalidId
+    if request.method == "POST":
         try:
-            object_id = ObjectId(place_id)
-        except (InvalidId, TypeError):
-            return jsonify({"error": "Invalid place_id"}), 400
-        result = mongo_db["user_places"].delete_one({
-            "_id": object_id,
-            "user_id": user_id  # Must match logged-in user
-        })
-        
-        if result.deleted_count > 0:
-            return jsonify({"success": True, "message": "Place deleted"})
-        else:
+            place = _clean_user_place(body)
+        except PlanInputError as e:
+            return jsonify({"error": str(e)}), 400
+        if col.count_documents({"user_id": user_id}) >= MAX_USER_PLACES:
+            return jsonify({"error": f"You can save up to {MAX_USER_PLACES} places."}), 400
+        same = col.find_one({"user_id": user_id, "city": place["city"],
+                             "name": {"$regex": f"^{re.escape(place['name'])}$", "$options": "i"}})
+        if same:
+            return jsonify({"error": f"You already saved “{place['name']}” in {place['city']}."}), 409
+        place.update({"user_id": user_id, "created_at": time.time(), "is_public": False})
+        result = col.insert_one(place)
+        place["_id"] = result.inserted_id
+        logger.info("User %s added a place (%s)", user_id, place["category"])
+        return jsonify({"success": True, "place": _user_place_out(place)})
+
+    # PATCH / DELETE: only the owner's own place
+    from bson import ObjectId
+    from bson.errors import InvalidId
+    try:
+        object_id = ObjectId(str(body.get("place_id")))
+    except (InvalidId, TypeError):
+        return jsonify({"error": "Invalid place_id"}), 400
+    owned = {"_id": object_id, "user_id": user_id}
+
+    if request.method == "PATCH":
+        try:
+            changes = _clean_user_place({k: v for k, v in body.items() if k != "place_id"}, partial=True)
+        except PlanInputError as e:
+            return jsonify({"error": str(e)}), 400
+        if not changes:
+            return jsonify({"error": "Nothing to change"}), 400
+        result = col.update_one(owned, {"$set": changes})
+        if not result.matched_count:
             return jsonify({"error": "Place not found or not yours"}), 404
+        return jsonify({"success": True, "place": _user_place_out(col.find_one(owned))})
+
+    result = col.delete_one(owned)
+    if result.deleted_count > 0:
+        return jsonify({"success": True, "message": "Place deleted"})
+    return jsonify({"error": "Place not found or not yours"}), 404
 
 
 @app.route("/search/combined")
@@ -1226,11 +1280,18 @@ def prepare_trip_days(days_in: Any) -> List[Dict[str, Any]]:
             # "Lunch: Ichiran Shibuya" = a meal at that restaurant (found by its name)
             meal = MEAL_PREFIX.match(stop["name"])
             place = locate(meal.group(2) if meal else stop["name"], anchor)
+            kind = place.get("_kind") if place else None
+            cuisine = place.get("cuisine") if place else None
+            if kind == "custom":
+                # The traveler's own place: plan it as the category they chose
+                category = user_place_category(place)
+                kind = USER_PLACE_CATEGORIES[category][1]
+                cuisine = "cafe" if category == "cafe" else cuisine
             if place:
-                stop.update({"lat": place["lat"], "lng": place["lng"], "kind": place.get("_kind"),
-                             "matched_name": place.get("matched_name") or place.get("name")})
-            stop["type"] = route_planner.classify(stop["name"], place.get("_kind") if place else None,
-                                                  place.get("cuisine") if place else None)
+                stop.update({"lat": place["lat"], "lng": place["lng"], "kind": kind,
+                             "matched_name": place.get("matched_name") or place.get("name"),
+                             "mine": place.get("_kind") == "custom"})
+            stop["type"] = route_planner.classify(stop["name"], kind, cuisine)
             stop["generic"] = _is_generic(stop["name"])
 
         # Unknown places on a shopping day are probably shops, then fill in missing durations

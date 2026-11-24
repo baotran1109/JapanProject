@@ -29,6 +29,13 @@
   const MAX_UNDO = 30;
   const KIND_LABEL = { attractions: "Sight", daytrips: "Day trip", shopping: "Shop", restaurants: "Food" };
   const KIND_ICON = { attractions: "📍", daytrips: "🚆", shopping: "🛍️", restaurants: "🍽️" };
+  // The traveler's own places (⭐ Mine), by category
+  const MINE = {
+    sight: { icon: "📍", label: "My sight" }, food: { icon: "🍽️", label: "My restaurant" },
+    cafe: { icon: "☕", label: "My café" }, shop: { icon: "🛍️", label: "My shop" },
+    stay: { icon: "🏨", label: "My stay" }, other: { icon: "⭐", label: "My place" },
+  };
+  let myPlaces = [];   // From /user/places (planner-share.js), only when signed in
 
   const { esc } = window.PlanDom;
   const $ = (sel, root = document) => root.querySelector(sel);
@@ -575,7 +582,15 @@
       b.className = `rounded-md px-2 py-1 text-xs font-medium ${b.dataset.browserKind === browser.kind
         ? "bg-blue-600 text-white" : "bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50"}`;
     });
-    const places = placeLists[browser.city];
+    const mine = myPlaces.filter((p) => String(p.city || "").toLowerCase() === browser.city)
+      .map((p) => ({ name: p.name, kind: "mine", category: p.category, area: p.notes || null }));
+    const places = browser.kind === "mine" ? mine : placeLists[browser.city] && [...mine, ...placeLists[browser.city]];
+    if (browser.kind === "mine" && !mine.length) {
+      list.innerHTML = `<li class="py-6 text-center text-sm text-slate-400">${window.currentUserId
+        ? `No places of your own in ${CITIES[browser.city].name} yet. Add one under “⭐ My places” below.`
+        : `<a href="/auth.html" class="font-semibold text-blue-700 hover:underline">Sign in</a> to save your own places.`}</li>`;
+      return;
+    }
     if (!places) {
       list.innerHTML = `<li class="py-6 text-center text-sm text-slate-400">Loading places…</li>`;
       return;
@@ -585,16 +600,17 @@
       (!q || `${p.name} ${p.area || ""} ${p.cuisine || ""}`.toLowerCase().includes(q)));
     const inTrip = new Set(state.days.flatMap((d) => d.stops.map((s) => s.name.replace(/^(breakfast|brunch|lunch|dinner)\s*:\s*/i, "").toLowerCase())));
     list.innerHTML = shown.slice(0, 80).map((p) => {
-      const meta = [KIND_LABEL[p.kind], p.area, p.cuisine, p.rating ? `★${p.rating}` : ""].filter(Boolean).join(" · ");
+      const mineInfo = p.kind === "mine" ? MINE[p.category] || MINE.other : null;
+      const meta = [mineInfo ? mineInfo.label : KIND_LABEL[p.kind], p.area, p.cuisine, p.rating ? `★${p.rating}` : ""].filter(Boolean).join(" · ");
       const added = inTrip.has(p.name.toLowerCase());
       return `
         <li class="flex items-center justify-between gap-2 py-1.5">
           <div class="min-w-0">
-            <div class="truncate text-sm font-medium text-slate-800">${KIND_ICON[p.kind] || "📍"} ${p.url
+            <div class="truncate text-sm font-medium text-slate-800">${mineInfo ? mineInfo.icon : KIND_ICON[p.kind] || "📍"} ${p.url
               ? `<a href="${esc(p.url)}" target="_blank" rel="noopener" class="hover:underline">${esc(p.name)}</a>` : esc(p.name)}</div>
             <div class="truncate text-xs text-slate-500">${esc(meta)}</div>
           </div>
-          <button type="button" data-browser-add="${esc(p.name)}" data-kind="${p.kind}"
+          <button type="button" data-browser-add="${esc(p.name)}" data-kind="${p.kind === "mine" && p.category === "food" ? "restaurants" : p.kind}"
             class="shrink-0 rounded-md border px-2 py-0.5 text-xs font-semibold ${added
               ? "border-slate-200 text-slate-400" : "border-blue-300 text-blue-700 hover:bg-blue-50"}">${added ? "✓ In trip" : "+ Add"}</button>
         </li>`;
@@ -945,6 +961,24 @@
     onChange(fn) { listeners.push(fn); },
     recheck: () => scheduleCheck(200),
     get startDate() { return state.startDate; },
+    /** The signed-in traveler's own places (shown under ⭐ Mine and in the add boxes) */
+    setMyPlaces(list) {
+      myPlaces = Array.isArray(list) ? list : [];
+      // Their names also appear in the "Add a place" suggestions
+      for (const city of Object.keys(CITIES)) {
+        const dl = document.getElementById(`places-${city}`);
+        if (!dl) continue;
+        dl.querySelectorAll("option[data-mine]").forEach((o) => o.remove());
+        myPlaces.filter((p) => String(p.city || "").toLowerCase() === city).forEach((p) => {
+          const o = document.createElement("option");
+          o.value = p.name;
+          o.textContent = (MINE[p.category] || MINE.other).label;
+          o.dataset.mine = "1";
+          dl.prepend(o);
+        });
+      }
+      renderBrowser();
+    },
   };
 
   function init() {

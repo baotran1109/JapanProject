@@ -87,70 +87,140 @@
   }
 
   // ---------------------------------------------------------------------------
-  // My places (/user/places, needs sign-in)
+  // My places (/user/places): private to the signed-in traveler
   // ---------------------------------------------------------------------------
+
+  const CATEGORIES = {
+    sight: "📍 Sight", food: "🍽️ Restaurant", cafe: "☕ Café / sweets",
+    shop: "🛍️ Shop", stay: "🏨 Hotel / stay", other: "⭐ Other",
+  };
+  let mine = [];
 
   async function authed(url, options = {}) {
     const headers = typeof window.getAuthHeaders === "function" ? await window.getAuthHeaders() : {};
-    if (!headers.Authorization) throw new Error("Sign in to use your own places.");
-    return fetch(url, { ...options, headers: { ...(options.headers || {}), ...headers } });
+    if (!headers.Authorization) throw new Error("Sign in to save your own places.");
+    const res = await fetch(url, { ...options, headers: { "Content-Type": "application/json", ...(options.headers || {}), ...headers } });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+    return data;
+  }
+
+  /** "35.6895, 139.6917" or a Google Maps link -> {lat, lng} */
+  function parseCoords(text) {
+    const t = String(text || "");
+    const patterns = [/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/, /@(-?\d+\.\d+),(-?\d+\.\d+)/, /[?&](?:q|query|ll)=(-?\d+\.\d+),\s*(-?\d+\.\d+)/,
+                      /(-?\d{1,3}\.\d+)\s*[, ]\s*(-?\d{1,3}\.\d+)/];
+    for (const re of patterns) {
+      const m = t.match(re);
+      if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+    }
+    return null;
+  }
+
+  function renderMine() {
+    const list = $("#my-places-list");
+    if (!list) return;
+    if (!mine.length) {
+      list.innerHTML = `<li class="text-slate-500">No places yet.</li>`;
+      return;
+    }
+    list.innerHTML = mine.map((p) => `
+      <li class="rounded-md bg-white px-2 py-1.5 ring-1 ring-purple-100">
+        <div class="flex items-center justify-between gap-2">
+          <span class="min-w-0 truncate"><strong>${esc(p.name)}</strong> · ${esc(p.city)}</span>
+          <button type="button" data-mine-delete="${esc(p.id)}" class="shrink-0 rounded px-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600" aria-label="Delete ${esc(p.name)}">✕</button>
+        </div>
+        <div class="mt-1 flex items-center gap-2">
+          <select data-mine-category="${esc(p.id)}" aria-label="Category of ${esc(p.name)}" class="rounded border border-slate-200 bg-white px-1 py-0.5 text-[11px]">
+            ${Object.entries(CATEGORIES).map(([id, label]) => `<option value="${id}" ${p.category === id ? "selected" : ""}>${label}</option>`).join("")}
+          </select>
+          ${p.notes ? `<span class="truncate text-[11px] text-slate-500">${esc(p.notes)}</span>` : ""}
+        </div>
+      </li>`).join("");
   }
 
   async function loadMyPlaces() {
-    const list = $("#my-places-list");
-    if (!list) return;
     try {
-      const res = await authed("/user/places");
-      const data = await res.json();
-      list.innerHTML = (data.places || []).map((p) => `
-        <li class="flex items-center justify-between gap-2 rounded-md bg-white px-2 py-1 ring-1 ring-purple-100">
-          <span class="truncate"><strong>${esc(p.name)}</strong> · ${esc(p.city)}</span>
-        </li>`).join("") || `<li class="text-slate-500">No places yet.</li>`;
+      mine = (await authed("/user/places")).places || [];
     } catch (e) {
-      list.innerHTML = `<li class="text-slate-500">${esc(e.message)}</li>`;
+      $("#my-places-list").innerHTML = `<li class="text-slate-500">${esc(e.message)}</li>`;
+      mine = [];
     }
+    renderMine();
+    window.Planner.setMyPlaces(mine);
   }
 
   function initMyPlaces() {
     const form = $("#my-places-form");
     if (!form) return;
     $("#my-place-city").innerHTML = Object.entries(window.Planner.CITIES)
-      .map(([key, c]) => `<option value="${c.name}">${c.icon} ${c.name}</option>`).join("");
+      .map(([key, c]) => `<option value="${key}">${c.icon} ${c.name}</option>`).join("");
     $("#my-places-toggle").addEventListener("click", () => form.classList.toggle("hidden"));
+
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const place = {
-        name: $("#my-place-name").value.trim(),
-        lat: parseFloat($("#my-place-lat").value),
-        lng: parseFloat($("#my-place-lng").value),
-        city: $("#my-place-city").value,
-        category: "custom",
-      };
-      if (!place.name || Number.isNaN(place.lat) || Number.isNaN(place.lng)) {
-        alert("Fill in a name and valid coordinates.");
+      const where = parseCoords($("#my-place-coords").value);
+      if (!where) {
+        alert("Paste the coordinates (e.g. 35.6895, 139.6917) or the place's Google Maps link.");
         return;
       }
+      const button = form.querySelector("button[type=submit]");
+      button.disabled = true;
       try {
-        const res = await authed("/user/places", {
-          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(place),
+        const { place } = await authed("/user/places", {
+          method: "POST",
+          body: JSON.stringify({
+            name: $("#my-place-name").value, category: $("#my-place-category").value,
+            city: $("#my-place-city").value, notes: $("#my-place-notes").value, ...where,
+          }),
         });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || "Couldn't save the place");
+        mine.push(place);
         form.reset();
         form.classList.add("hidden");
-        loadMyPlaces();
+        renderMine();
+        window.Planner.setMyPlaces(mine);
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    $("#my-places-list").addEventListener("change", async (e) => {
+      const id = e.target.dataset.mineCategory;
+      if (!id) return;
+      try {
+        const { place } = await authed("/user/places", { method: "PATCH", body: JSON.stringify({ place_id: id, category: e.target.value }) });
+        mine = mine.map((p) => (p.id === id ? place : p));
+        window.Planner.setMyPlaces(mine);
+      } catch (err) {
+        alert(err.message);
+        renderMine();
+      }
+    });
+    $("#my-places-list").addEventListener("click", async (e) => {
+      const id = e.target.closest("[data-mine-delete]")?.dataset.mineDelete;
+      if (!id) return;
+      const place = mine.find((p) => p.id === id);
+      if (!confirm(`Delete “${place?.name}” from your places?`)) return;
+      try {
+        await authed("/user/places", { method: "DELETE", body: JSON.stringify({ place_id: id }) });
+        mine = mine.filter((p) => p.id !== id);
+        renderMine();
+        window.Planner.setMyPlaces(mine);
       } catch (err) {
         alert(err.message);
       }
     });
-    // Load once we know whether the user is signed in
+
+    // Load once we know whether the traveler is signed in
     let tries = 0;
     const wait = setInterval(() => {
       tries++;
       if (window.currentUserId !== undefined || tries > 20) {
         clearInterval(wait);
         if (window.currentUserId) loadMyPlaces();
-        else $("#my-places-list").innerHTML = `<li class="text-slate-500"><a href="/auth.html" class="font-semibold text-purple-800 hover:underline">Sign in</a> to add your own places.</li>`;
+        else $("#my-places-list").innerHTML = `<li class="text-slate-500"><a href="/auth.html" class="font-semibold text-purple-800 hover:underline">Sign in</a> to save your own places.</li>`;
       }
     }, 250);
   }

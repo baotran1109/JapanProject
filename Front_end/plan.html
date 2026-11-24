@@ -168,6 +168,7 @@
           <button type="button" data-browser-kind="restaurants">Food</button>
           <button type="button" data-browser-kind="shopping">Shops</button>
           <button type="button" data-browser-kind="daytrips">Day trips</button>
+          <button type="button" data-browser-kind="mine">⭐ Mine</button>
         </div>
         <input id="browser-search" type="search" placeholder="Search names, areas, cuisines…"
           class="mt-2 w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200" />
@@ -184,20 +185,30 @@
       </div>
 
       <details class="rounded-2xl border border-purple-200 bg-purple-50 p-4 shadow-sm">
-        <summary class="cursor-pointer font-semibold text-purple-900">➕ My places <span class="text-xs font-normal text-purple-700">(hotels, friends' homes…)</span></summary>
+        <summary class="cursor-pointer font-semibold text-purple-900">⭐ My places <span class="text-xs font-normal text-purple-700">(only you can see them)</span></summary>
         <div class="mt-2 flex items-center justify-between gap-2">
-          <p class="text-xs text-purple-800">Add a place once, then use its name in any day.</p>
+          <p class="text-xs text-purple-800">Save your hotel, a café a friend told you about, a shop you want to visit…
+            They're private to your account and show up under “⭐ Mine” in Places.</p>
           <button id="my-places-toggle" type="button" class="shrink-0 rounded-md bg-purple-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-purple-700">New</button>
         </div>
         <form id="my-places-form" class="mt-2 hidden space-y-2">
-          <input id="my-place-name" required maxlength="120" placeholder="Name, e.g. Hotel Gracery" class="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+          <input id="my-place-name" required maxlength="120" placeholder="Name, e.g. Hidden Kissaten" class="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
           <div class="grid grid-cols-2 gap-2">
-            <input id="my-place-lat" required type="number" step="0.000001" placeholder="Latitude" class="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
-            <input id="my-place-lng" required type="number" step="0.000001" placeholder="Longitude" class="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+            <select id="my-place-category" aria-label="Category" class="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm">
+              <option value="sight">📍 Sight</option>
+              <option value="food">🍽️ Restaurant</option>
+              <option value="cafe">☕ Café / sweets</option>
+              <option value="shop">🛍️ Shop</option>
+              <option value="stay">🏨 Hotel / stay</option>
+              <option value="other">⭐ Other</option>
+            </select>
+            <select id="my-place-city" aria-label="City" class="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm"></select>
           </div>
-          <select id="my-place-city" class="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm"></select>
+          <input id="my-place-coords" required placeholder="Location: 35.6895, 139.6917 or a Google Maps link" class="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+          <input id="my-place-notes" maxlength="500" placeholder="Notes (optional)" class="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
           <button type="submit" class="w-full rounded-md bg-purple-600 py-1.5 text-sm font-semibold text-white hover:bg-purple-700">Save place</button>
-          <p class="text-[11px] text-slate-500">Tip: in Google Maps, right-click a spot to copy its coordinates.</p>
+          <p class="text-[11px] text-slate-500">Tip: in Google Maps, right-click the spot and click the numbers at the top to copy them,
+            or paste the place's link.</p>
         </form>
         <ul id="my-places-list" class="mt-2 space-y-1 text-xs text-slate-700"></ul>
       </details>
@@ -207,14 +218,14 @@
   <footer class="py-10 text-center text-sm text-slate-500">&copy; 2025 Explore Japan · Bao Tran</footer>
 
   <script src="/static/js/plan-dom.js?v=6"></script>
-  <script src="/static/js/planner.js?v=3"></script>
+  <script src="/static/js/planner.js?v=4"></script>
   <script src="/static/js/trip-export.js?v=2"></script>
   <script src="/static/js/route-map.js?v=5"></script>
   <script src="/static/js/route-optimizer.js?v=8"></script>
   <script src="/static/js/ai-review.js?v=4"></script>
   <script src="/static/js/trip-planner.js?v=6"></script>
   <script src="/static/js/chat-edit.js?v=2"></script>
-  <script src="/static/js/planner-share.js?v=1"></script>
+  <script src="/static/js/planner-share.js?v=2"></script>
   <script src="/static/js/planner-layout.js?v=1"></script>
   <script type="module" src="/static/js/planner-cloud.js?v=1"></script>
 </body>
