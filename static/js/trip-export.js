@@ -39,7 +39,7 @@
         mode: "as_planned",
         start_time: "09:00",
         days: trip.days.map((d, i) => ({
-          key: `d${i}`, label: names[i], city: CITY_NAMES[d.city] || d.city, area: d.area, stops: d.stops,
+          key: `d${i}`, label: names[i], city: CITY_NAMES[d.city] || d.city, area: d.area, stay: d.stay, stops: d.stops,
         })),
       }),
     });

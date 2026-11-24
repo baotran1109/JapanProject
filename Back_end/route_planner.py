@@ -385,11 +385,12 @@ class DayPlanner:
     HELD_KARP_MAX = 12  # Exact DP up to this many located stops
 
     def __init__(self, stops: List[Dict[str, Any]], city: str, start_minute: int,
-                 anchor: Optional[Dict[str, Any]] = None):
+                 anchor: Optional[Dict[str, Any]] = None, end: Optional[Dict[str, Any]] = None):
         self.stops = stops
         self.city = city
         self.start_minute = start_minute
         self.anchor = anchor  # Where the day starts (hotel / day's area), optional
+        self.end = end        # Where the day ends (back to the hotel), optional
         n = len(stops)
 
         # Travel legs between every pair of located stops
@@ -403,6 +404,12 @@ class DayPlanner:
             for i in range(n):
                 if self._located(stops[i]):
                     self.anchor_legs[i] = self._leg(anchor, stops[i])
+        # Travel from each stop back to where the traveler is staying
+        self.end_legs: Dict[int, Dict[str, Any]] = {}
+        if end and self._located(end):
+            for i in range(n):
+                if self._located(stops[i]):
+                    self.end_legs[i] = self._leg(stops[i], end)
 
     @staticmethod
     def _located(stop: Dict[str, Any]) -> bool:
@@ -459,8 +466,15 @@ class DayPlanner:
             clock += stop["duration"]
             timeline.append({"index": idx, "arrive": arrive, "depart": clock, "leg": leg, "wait": wait})
 
+        # Back to the hotel after the last stop
+        return_leg = self.end_legs.get(last_located) if last_located is not None else None
+        if return_leg:
+            clock += return_leg["minutes"]
+            travel_total += return_leg["minutes"]
+
         return {
             "timeline": timeline,
+            "return_leg": return_leg,
             "travel_minutes": travel_total,
             "wait_minutes": round(wait_total),
             "penalty": penalty,
@@ -477,6 +491,9 @@ class DayPlanner:
         if i is None:
             return self.anchor_legs[j]["minutes"] if j in self.anchor_legs else 0.0
         return self.legs[(i, j)]["minutes"]
+
+    def _travel_home(self, i: int) -> float:
+        return self.end_legs[i]["minutes"] if i in self.end_legs else 0.0
 
     def _held_karp(self, located: List[int]) -> List[int]:
         """Exact shortest open path through the located stops (bitmask DP)"""
@@ -506,7 +523,8 @@ class DayPlanner:
                         parent[new_mask][nxt] = last
 
         full = size - 1
-        last = min(range(n), key=lambda k: dp[full][k])
+        # Include the way back to the hotel, so the day ends close to it
+        last = min(range(n), key=lambda k: dp[full][k] + self._travel_home(located[k]))
         path, mask = [], full
         while last != -1:
             path.append(located[last])
@@ -527,7 +545,9 @@ class DayPlanner:
             current = nxt
 
         def length(p: List[int]) -> float:
-            total = self._travel(None, p[0]) if p else 0.0
+            if not p:
+                return 0.0
+            total = self._travel(None, p[0]) + self._travel_home(p[-1])
             return total + sum(self.legs[(p[k], p[k + 1])]["minutes"] for k in range(len(p) - 1))
 
         improved = True
@@ -661,6 +681,18 @@ class DayPlanner:
                                 f"Try its full name, or add it as a custom place.")
             stops_out.append(item)
 
+        # The way back to the hotel
+        back = None
+        if after.get("return_leg"):
+            leg = after["return_leg"]
+            back = {
+                "to": self.end.get("matched_name") or self.end.get("name"),
+                "minutes": leg["minutes"], "mode": leg["mode"], "distance_km": leg["distance_km"],
+                "fare_yen": leg["fare_yen"], "arrive": fmt_clock(after["end_minute"]),
+            }
+            local_fares += leg["fare_yen"]
+            jr_fares += round(leg["fare_yen"] * leg["jr_share"])
+
         if self.stops and not any(self._located(s) for s in self.stops):
             warnings.append("None of this day's stops could be found on the map, so the order wasn't changed.")
         if after["end_minute"] > DAY_END_WARNING:
@@ -674,6 +706,7 @@ class DayPlanner:
             "changed": optimized != original,
             "stops": stops_out,
             "unmatched": [s["name"] for s in self.stops if not self._located(s) and not s.get("generic")],
+            "return_leg": back,
             "start_time": fmt_clock(self.start_minute),
             "end_time": fmt_clock(after["end_minute"]),
             "end_minute": round(after["end_minute"]),
@@ -743,7 +776,7 @@ def plan_trip(days: List[Dict[str, Any]], start_minute: int = 9 * 60, optimize: 
     intercity = []
 
     for k, day in enumerate(days):
-        planner = DayPlanner(day["stops"], day["city"], start_minute, day.get("anchor"))
+        planner = DayPlanner(day["stops"], day["city"], start_minute, day.get("anchor"), day.get("end"))
         result = planner.optimize() if optimize else planner.evaluate()
         result.update({"day": day.get("day"), "label": day.get("label"), "city": day["city"],
                        "key": day.get("key"),
@@ -751,7 +784,11 @@ def plan_trip(days: List[Dict[str, Any]], start_minute: int = 9 * 60, optimize: 
                        # Where the day starts, for drawing the route on a map
                        "anchor_point": ({"name": day["anchor"].get("matched_name") or day["anchor"].get("name"),
                                          "lat": day["anchor"]["lat"], "lng": day["anchor"]["lng"]}
-                                        if day.get("anchor") else None)})
+                                        if day.get("anchor") else None),
+                       "end_point": ({"name": day["end"].get("matched_name") or day["end"].get("name"),
+                                      "lat": day["end"]["lat"], "lng": day["end"]["lng"]}
+                                     if day.get("end") else None),
+                       "stay": day.get("stay") or None})
         results.append(result)
         day_jr_fares.append(result["jr_fares_yen"])
 

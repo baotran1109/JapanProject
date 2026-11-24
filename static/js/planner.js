@@ -38,6 +38,8 @@
   let mode = "draft";              // "draft" (kept in this browser) or "cloud" (a saved itinerary)
   let activeKey = null;            // Day that "Add" in the place browser adds to
   let checks = null;               // Last /trip-check result
+  const startElsewhere = new Set(); // Days whose "start somewhere else" box is open
+  const stayStatus = new Map();     // "city|text" -> {found, name, source} from /locate-stay
   const undoStack = [];
   const listeners = [];
 
@@ -50,11 +52,12 @@
   // Trip helpers
   // ---------------------------------------------------------------------------
 
-  function makeDay(city, area = "", stops = []) {
+  function makeDay(city, area = "", stops = [], stay = "") {
     return {
       id: nextId++,
       city: CITIES[city] ? city : "tokyo",
       area: area || "",
+      stay: String(stay || "").slice(0, 120),   // Where the traveler sleeps (start and end of the day)
       stops: (stops || []).filter((s) => s && String(s.name || "").trim())
         .map((s) => ({ name: String(s.name).trim(), duration: Number.isFinite(+s.duration) && s.duration !== null && s.duration !== "" ? +s.duration : null })),
     };
@@ -105,7 +108,7 @@
     const s = JSON.parse(last);
     state.title = s.title;
     state.startDate = s.startDate;
-    state.days = s.days.map((d) => makeDay(d.city, d.area, d.stops));
+    state.days = s.days.map((d) => makeDay(d.city, d.area, d.stops, d.stay));
     changed({ structure: true, skipUndo: true });
   }
 
@@ -143,7 +146,7 @@
     const plan = data?.plan ?? data;
     const title = data?.title || "";
     if (plan && plan.version === 2 && Array.isArray(plan.days)) {
-      return { title, startDate: plan.startDate || "", days: plan.days.map((d) => makeDay(d.city, d.area, d.stops)) };
+      return { title, startDate: plan.startDate || "", days: plan.days.map((d) => makeDay(d.city, d.area, d.stops, d.stay)) };
     }
     if (Array.isArray(plan)) {
       const city = String(data?.city || "tokyo").toLowerCase();
@@ -165,7 +168,7 @@
     if (!options.skipUndo && state.days.some((d) => d.stops.length)) pushUndo();
     state.title = trip.title || "";
     state.startDate = trip.startDate || "";
-    state.days = (trip.days || []).map((d) => makeDay(d.city, d.area, d.stops));
+    state.days = (trip.days || []).map((d) => makeDay(d.city, d.area, d.stops, d.stay));
     if (!state.days.length) state.days = [makeDay("tokyo")];
     if (options.mode) mode = options.mode;
     checks = null;
@@ -173,13 +176,16 @@
     $("#trip-start").value = state.startDate;
     changed({ structure: true });
     loadPlaceLists();
+    lookUpAllStays();
   }
 
   function toSaved() {
     return {
       version: 2,
       startDate: state.startDate || null,
-      days: state.days.map((d) => ({ city: d.city, area: d.area, stops: d.stops.map((s) => ({ name: s.name, duration: s.duration })) })),
+      days: state.days.map((d) => ({
+        city: d.city, area: d.area, stay: d.stay, stops: d.stops.map((s) => ({ name: s.name, duration: s.duration })),
+      })),
     };
   }
 
@@ -207,7 +213,7 @@
         presetCities.map((c) => CITIES[c].name).join(" → ") + "? Your unsaved draft will be replaced."))) {
       return { title: "", startDate: "", days: presetCities.map((c) => makeDay(c)) };
     }
-    if (draft && draft.days?.length) return { title: draft.title, startDate: draft.startDate, days: draft.days.map((d) => makeDay(d.city, d.area, d.stops)) };
+    if (draft && draft.days?.length) return { title: draft.title, startDate: draft.startDate, days: draft.days.map((d) => makeDay(d.city, d.area, d.stops, d.stay)) };
     return { title: "", startDate: "", days: [makeDay("tokyo")] };
   }
 
@@ -218,7 +224,9 @@
   function addDayAfter(index, city) {
     if (state.days.length >= MAX_DAYS) return alert(`A trip can have up to ${MAX_DAYS} days.`);
     pushUndo();
-    state.days.splice(index + 1, 0, makeDay(city || state.days[index]?.city || "tokyo"));
+    const prev = state.days[index];
+    const newCity = city || prev?.city || "tokyo";
+    state.days.splice(index + 1, 0, makeDay(newCity, "", [], prev && prev.city === newCity ? prev.stay : ""));
     activeKey = keyOf(state.days[index + 1]);
     changed({ structure: true });
   }
@@ -328,6 +336,7 @@
       label: labelOf(index),
       city: CITIES[day.city].name,
       area: day.area,
+      stay: day.stay,
       date: dateOf(index)?.toISOString().slice(0, 10) || null,
       stops: day.stops.map((s) => ({ name: s.name, duration: s.duration })),
     };
@@ -389,6 +398,41 @@
       </li>`;
   }
 
+  /** "Starts and ends at your hotel", or an input for a different start */
+  function startEndHtml(day, index) {
+    const key = keyOf(day);
+    const next = state.days[index + 1];
+    const moving = next && next.city !== day.city;
+    const showInput = !day.stay || day.area || startElsewhere.has(key);
+    const line = day.stay && !day.area ? `
+      <p class="mt-2 flex flex-wrap items-center gap-x-2 text-xs text-slate-600">
+        <span>🏨 ${moving ? "Starts at" : "Starts and ends at"} <strong>${esc(day.stay)}</strong>${moving
+          ? ` · ends at the station for ${CITIES[next.city].name}` : ""}</span>
+        ${startElsewhere.has(key) ? "" : `<button type="button" data-action="start-elsewhere" data-key="${key}" class="text-blue-700 hover:underline">Start somewhere else</button>`}
+      </p>` : day.stay ? `<p class="mt-2 text-xs text-slate-600">🏨 Starts below${moving ? "" : `, ends back at <strong>${esc(day.stay)}</strong>`}</p>` : "";
+    const input = showInput ? `
+      <div class="mt-2 flex gap-2">
+        <input data-field="area" data-key="${key}" value="${esc(day.area)}"
+          placeholder="${day.stay ? "Start this day somewhere else (optional)" : "Where the day starts (optional, e.g. Shinjuku). Tip: add where you're staying above"}"
+          class="min-w-0 flex-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200" />
+        ${day.stay && (day.area || startElsewhere.has(key)) ? `<button type="button" data-action="start-at-stay" data-key="${key}"
+          class="shrink-0 rounded-md border border-slate-300 bg-white px-2 text-xs text-slate-600 hover:bg-slate-50" title="Start at your stay again">✕</button>` : ""}
+      </div>` : "";
+    return line + input;
+  }
+
+  function stayStatusHtml(city, text) {
+    if (!text.trim()) return `Each day in this city will start here and end back here.`;
+    const st = stayStatus.get(`${city}|${text.trim().toLowerCase()}`);
+    if (!st) return `Looking it up…`;
+    if (st.error) return ``;
+    if (!st.found) return `<span class="text-amber-800">⚠️ Couldn't find this on the map, so travel to and from it isn't counted.
+      Try the hotel's full name, its area (e.g. “Shinjuku”), or add it under My places.</span>`;
+    const where = st.source === "map search" ? "found on the map" : st.source === "my place" ? "one of your places"
+      : st.source === "area" ? "area center (approximate)" : "found";
+    return `<span class="text-emerald-700">✓ ${esc(st.name)}</span> <span class="text-slate-400">· ${where}</span>`;
+  }
+
   function dayCard(day, index) {
     const key = keyOf(day);
     const date = dateOf(index);
@@ -411,8 +455,7 @@
             <button type="button" data-action="day-remove" data-key="${key}" class="rounded px-1.5 text-slate-500 hover:bg-rose-50 hover:text-rose-600" aria-label="Delete day">🗑</button>
           </div>
         </div>
-        <input data-field="area" data-key="${key}" value="${esc(day.area)}" placeholder="Where the day starts (hotel or area, e.g. Shinjuku)"
-          class="mt-2 w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200" />
+        ${startEndHtml(day, index)}
         ${closures ? `<ul class="mt-2 space-y-0.5 text-xs text-amber-800">${closures}</ul>` : ""}
         <ol class="mt-2 space-y-1.5">${day.stops.map((s, k) => stopRow(day, index, s, k)).join("") ||
           `<li class="rounded-lg border-2 border-dashed border-slate-200 px-3 py-3 text-center text-xs text-slate-400">No stops yet: add places below or from the place list</li>`}</ol>
@@ -437,6 +480,15 @@
             <button type="button" data-action="leg-down" data-leg="${li}" ${li < all.length - 1 ? "" : "disabled"} class="rounded px-2 py-1 text-slate-500 hover:bg-slate-100 disabled:opacity-30" title="Visit later">↓</button>
             <button type="button" data-action="leg-remove" data-leg="${li}" class="rounded px-2 py-1 text-slate-500 hover:bg-rose-50 hover:text-rose-600">Remove</button>
           </div>
+        </div>
+        <div class="mt-3 rounded-lg bg-amber-50/70 px-3 py-2 ring-1 ring-amber-100">
+          <label class="flex flex-wrap items-center gap-2 text-sm">
+            <span class="font-medium text-amber-900">🏨 Staying at</span>
+            <input data-field="stay" data-leg="${li}" value="${esc(state.days[leg.days[0]].stay)}"
+              placeholder="Hotel name, address or area (e.g. Hotel Gracery Shinjuku)"
+              class="min-w-0 flex-1 rounded-md border border-amber-200 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-200" />
+          </label>
+          <p class="mt-1 text-xs text-slate-500" data-stay-status="${li}">${stayStatusHtml(leg.city, state.days[leg.days[0]].stay)}</p>
         </div>
         <div class="mt-3 space-y-3">${leg.days.map((i) => dayCard(state.days[i], i)).join("")}</div>
         <button type="button" data-action="add-day" data-index="${leg.days[leg.days.length - 1]}"
@@ -551,6 +603,51 @@
   }
 
   // ---------------------------------------------------------------------------
+  // Where you're staying: check it can be found on the map (/locate-stay)
+  // ---------------------------------------------------------------------------
+
+  let stayTimer = null;
+
+  function lookUpStay(city, text, legIndex) {
+    clearTimeout(stayTimer);
+    const status = () => document.querySelector(`#trip-days [data-stay-status="${legIndex}"]`);
+    const key = `${city}|${text.trim().toLowerCase()}`;
+    if (!text.trim() || stayStatus.has(key)) {
+      if (status()) status().innerHTML = stayStatusHtml(city, text);
+      return;
+    }
+    if (status()) status().innerHTML = "Looking it up…";
+    stayTimer = setTimeout(async () => {
+      try {
+        const authHeaders = typeof window.getAuthHeaders === "function" ? await window.getAuthHeaders() : {};
+        const res = await fetch(`/locate-stay?${new URLSearchParams({ city, q: text.trim() })}`, { headers: authHeaders });
+        stayStatus.set(key, res.ok ? await res.json() : { error: true });
+      } catch {
+        stayStatus.set(key, { error: true });
+      }
+      if (status()) status().innerHTML = stayStatusHtml(city, text);
+    }, 700);
+  }
+
+  /** Look up every leg's stay once (after loading a trip) */
+  function lookUpAllStays() {
+    legs().forEach((leg, li) => {
+      const text = state.days[leg.days[0]].stay;
+      const key = `${leg.city}|${text.trim().toLowerCase()}`;
+      if (text.trim() && !stayStatus.has(key)) {
+        fetch(`/locate-stay?${new URLSearchParams({ city: leg.city, q: text.trim() })}`)
+          .then((r) => (r.ok ? r.json() : { error: true }))
+          .catch(() => ({ error: true }))
+          .then((st) => {
+            stayStatus.set(key, st);
+            const el = document.querySelector(`#trip-days [data-stay-status="${li}"]`);
+            if (el) el.innerHTML = stayStatusHtml(leg.city, text);
+          });
+      }
+    });
+  }
+
+  // ---------------------------------------------------------------------------
   // Dates, weather and closed days (/trip-check)
   // ---------------------------------------------------------------------------
 
@@ -657,6 +754,18 @@
         case "leg-up": moveLeg(Number(btn.dataset.leg), -1); break;
         case "leg-down": moveLeg(Number(btn.dataset.leg), 1); break;
         case "leg-remove": removeLeg(Number(btn.dataset.leg)); break;
+        case "start-elsewhere":
+          startElsewhere.add(btn.dataset.key);
+          render();
+          document.querySelector(`#trip-days [data-field="area"][data-key="${btn.dataset.key}"]`)?.focus();
+          break;
+        case "start-at-stay":
+          pushUndo();
+          state.days[index].area = "";
+          startElsewhere.delete(btn.dataset.key);
+          changed({ structure: true });
+          scheduleCheck();
+          break;
       }
       if (["add-stop", "stop-remove", "day-remove", "add-day", "leg-up", "leg-down", "leg-remove", "day-up", "day-down"].includes(btn.dataset.action)) scheduleCheck();
     });
@@ -665,6 +774,15 @@
     let undoArmed = true;
     root.addEventListener("input", (e) => {
       const el = e.target;
+      if (el.dataset.field === "stay") {
+        if (undoArmed) { pushUndo(); undoArmed = false; }
+        const leg = legs()[Number(el.dataset.leg)];
+        if (!leg) return;
+        leg.days.forEach((i) => { state.days[i].stay = el.value.slice(0, 120); });
+        lookUpStay(leg.city, el.value, Number(el.dataset.leg));
+        changed();
+        return;
+      }
       const index = indexOfKey(el.dataset.key);
       if (index < 0 || el.dataset.field === "add") return;
       if (undoArmed) { pushUndo(); undoArmed = false; }
@@ -686,7 +804,9 @@
         state.days[index].stops.splice(Number(el.dataset.stop), 1);
         changed({ structure: true });
       }
-      if (["area", "stop-name", "stop-duration"].includes(el.dataset.field)) scheduleCheck();
+      // Day cards show the new stay / start
+      if (el.dataset.field === "stay" || (el.dataset.field === "area" && state.days[indexOfKey(el.dataset.key)]?.stay)) render();
+      if (["area", "stay", "stop-name", "stop-duration"].includes(el.dataset.field)) scheduleCheck();
     });
 
     root.addEventListener("keydown", (e) => {
@@ -802,17 +922,22 @@
     /** Cities in trip order with their day counts: [{city, days}] */
     cityPlan: () => legs().reduce((acc, leg) => {
       const found = acc.find((c) => c.city === leg.city);
-      if (found) found.days += leg.days.length; else acc.push({ city: leg.city, days: leg.days.length });
+      if (found) found.days += leg.days.length;
+      else acc.push({ city: leg.city, days: leg.days.length, stay: state.days[leg.days[0]].stay });
       return acc;
     }, []),
     /** Replace the days (e.g. from "Plan my trip"): [{city, area, stops}] */
     replaceDays(days) {
       pushUndo();
-      state.days = days.map((d) => makeDay(d.city, d.area, d.stops));
+      const oldStay = {};
+      state.days.forEach((d) => { if (d.stay && !oldStay[d.city]) oldStay[d.city] = d.stay; });
+      days = days.map((d) => ({ ...d, stay: d.stay || oldStay[d.city] || "" }));
+      state.days = days.map((d) => makeDay(d.city, d.area, d.stops, d.stay));
       if (!state.days.length) state.days = [makeDay("tokyo")];
       checks = null;
       changed({ structure: true });
       loadPlaceLists();
+      lookUpAllStays();
       scheduleCheck(300);
     },
     swapDays, moveStopBetween,

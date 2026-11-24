@@ -88,6 +88,20 @@
       </li>`;
   }
 
+  /** The way back to the hotel at the end of the day */
+  function renderReturn(back) {
+    if (!back || back.minutes < 2) return "";
+    return `
+      <li class="flex gap-3">
+        <div class="w-24 shrink-0 pt-0.5 text-right font-mono text-xs text-slate-500">${esc(back.arrive)}</div>
+        <div class="min-w-0 flex-1 border-l-2 border-dashed border-amber-200 pl-3">
+          <div class="text-xs text-slate-500">${MODE_ICON[back.mode] || "🚃"} ${formatMinutes(back.minutes)}
+            · ${back.distance_km} km${back.fare_yen ? ` · ${yen(back.fare_yen)}` : ""}</div>
+          <div class="font-medium text-slate-800">🏨 Back at ${esc(back.to)}</div>
+        </div>
+      </li>`;
+  }
+
   function renderDay(result, index) {
     const saved = result.travel_saved_minutes;
     const timingFixed = result.timing_issues_before - result.timing_issues_after;
@@ -106,7 +120,7 @@
             <h4 class="font-semibold text-slate-800">${esc(result.label)}</h4>
             <div class="text-xs text-slate-500">
               ${esc(result.start_time)}–${esc(result.end_time)} · travel ${formatMinutes(result.travel_minutes)}
-              ${result.anchor ? ` · starts near ${esc(result.anchor)}` : ""}
+              ${result.stay_point ? ` · 🏨 ${esc(result.stay_point.name)}` : result.anchor ? ` · starts near ${esc(result.anchor)}` : ""}
             </div>
           </div>
           <div class="flex flex-wrap items-center gap-2">
@@ -117,7 +131,7 @@
           </div>
         </div>
         ${warnings ? `<ul class="mt-2 space-y-1 rounded-lg bg-amber-50 p-2">${warnings}</ul>` : ""}
-        <ol class="mt-3">${result.stops.map((stop) => renderStop(stop, result.key)).join("")}</ol>
+        <ol class="mt-3">${result.stops.map((stop) => renderStop(stop, result.key)).join("")}${renderReturn(result.return_leg)}</ol>
       </section>`;
   }
 

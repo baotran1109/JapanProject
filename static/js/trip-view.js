@@ -54,7 +54,7 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           start_date: trip.start_date,
-          days: trip.days.map((d, i) => ({ key: `d${i}`, label: labels[i], city: CITY_NAMES[d.city], area: d.area, stops: d.stops })),
+          days: trip.days.map((d, i) => ({ key: `d${i}`, label: labels[i], city: CITY_NAMES[d.city], area: d.area, stay: d.stay, stops: d.stops })),
         }),
       });
       return res.ok ? await res.json() : null;
@@ -76,6 +76,17 @@
           </div>
           <div class="text-xs text-slate-500">${esc(stop.arrive)}–${esc(stop.depart)} · ${formatMinutes(stop.duration)}</div>
         </div>
+      </li>`;
+  }
+
+  function backRow(back) {
+    if (!back || back.minutes < 2) return "";
+    return `
+      <div class="ml-[4.5rem] border-l-2 border-dashed border-slate-200 py-1 pl-3 text-xs text-slate-400">
+        ${MODE_ICON[back.mode] || "➡️"} ${formatMinutes(back.minutes)}${back.fare_yen ? ` · ${yen(back.fare_yen)}` : ""}</div>
+      <li class="flex gap-3">
+        <div class="w-16 shrink-0 pt-0.5 text-right text-sm font-semibold tabular-nums text-slate-700">${esc(back.arrive)}</div>
+        <div class="min-w-0 flex-1 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-sm font-medium text-slate-800">🏨 Back at ${esc(back.to)}</div>
       </li>`;
   }
 
@@ -106,9 +117,10 @@
             <h2 class="text-lg font-semibold">${esc(labels[i])}${date ? ` <span class="font-normal text-slate-500">· ${longDate(date)}</span>` : ""}</h2>
             ${weatherLine(info)}
           </div>
-          ${day.area ? `<p class="text-sm text-slate-500">Starting from ${esc(day.area)}</p>` : ""}
+          ${day.stay ? `<p class="text-sm text-slate-500">🏨 Staying at ${esc(day.stay)}${day.area ? ` · starting from ${esc(day.area)}` : ""}</p>`
+            : day.area ? `<p class="text-sm text-slate-500">Starting from ${esc(day.area)}</p>` : ""}
           ${closures ? `<ul class="mt-1 text-xs text-amber-800">${closures}</ul>` : ""}
-          ${s && s.stops.length ? `<ol class="mt-3 space-y-1">${s.stops.map((st) => stopRow(st, s.city)).join("")}</ol>
+          ${s && s.stops.length ? `<ol class="mt-3 space-y-1">${s.stops.map((st) => stopRow(st, s.city)).join("")}${backRow(s.return_leg)}</ol>
              <p class="mt-2 text-xs text-slate-500">Ends around ${esc(s.end_time)} · ${formatMinutes(s.travel_minutes)} of travel</p>`
             : `<p class="mt-2 text-sm text-slate-400">Free day</p>`}
           ${leg ? `<div class="mt-3 rounded-lg bg-indigo-50 px-3 py-2 text-sm text-indigo-900">

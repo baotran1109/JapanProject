@@ -93,7 +93,7 @@ def analyze_trip(days: List[Dict[str, Any]], pace: str, start_minute: int = 9 * 
     duplicates = {key: idxs for key, idxs in seen.items() if len(idxs) > 1}
 
     for i, day in enumerate(days):
-        planner = route_planner.DayPlanner(day["stops"], day["city"], start_minute, day.get("anchor"))
+        planner = route_planner.DayPlanner(day["stops"], day["city"], start_minute, day.get("anchor"), day.get("end"))
         current = planner.evaluate()
         best = planner.optimize()
 

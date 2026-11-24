@@ -101,7 +101,7 @@
   }
 
   /** Strip fields that are only used in the browser */
-  const forServer = (days) => days.map(({ key, label, city, area, stops }) => ({ key, label, city, area, stops }));
+  const forServer = (days) => days.map(({ key, label, city, area, stay, stops }) => ({ key, label, city, area, stay, stops }));
 
   /**
    * Replace a day's activities with 'stops' ([{name, duration}]).

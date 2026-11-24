@@ -45,9 +45,9 @@
     const P = window.Planner;
     const trip = P.cityPlan();
     const hasStops = window.PlanDom.collectDays().some((d) => d.stops.length);
-    const rows = trip.map((c, i) => ({ city: c.city, days: hasStops ? c.days : Math.max(c.days, i === 0 ? 3 : 2) }));
+    const rows = trip.map((c, i) => ({ city: c.city, stay: c.stay || "", days: hasStops ? c.days : Math.max(c.days, i === 0 ? 3 : 2) }));
     for (const city of P.CITY_ORDER) {
-      if (!rows.some((r) => r.city === city)) rows.push({ city, days: 0 });
+      if (!rows.some((r) => r.city === city)) rows.push({ city, stay: "", days: 0 });
     }
     return rows.map((r) => ({ ...r, name: P.CITIES[r.city].name, icon: P.CITIES[r.city].icon }));
   }
@@ -59,7 +59,7 @@
   /** Put the generated plan into the planner */
   function fillPage(plan) {
     window.Planner.replaceDays(plan.days.map((d) => ({
-      city: d.city_key, area: d.area, stops: d.stops.map((s) => ({ name: s.name, duration: s.duration })),
+      city: d.city_key, area: d.area, stay: d.stay, stops: d.stops.map((s) => ({ name: s.name, duration: s.duration })),
     })));
   }
 
@@ -69,7 +69,8 @@
 
   function cityRowHtml(r) {
     return `
-      <li class="flex items-center justify-between gap-2 rounded-lg border border-slate-200 px-2 py-1.5" data-plan-row="${esc(r.city)}">
+      <li class="rounded-lg border border-slate-200 px-2 py-1.5" data-plan-row="${esc(r.city)}">
+        <div class="flex items-center justify-between gap-2">
         <span class="flex items-center gap-1">
           <button type="button" data-plan-move="-1" class="rounded px-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700" aria-label="Earlier">↑</button>
           <button type="button" data-plan-move="1" class="rounded px-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700" aria-label="Later">↓</button>
@@ -79,6 +80,9 @@
           <input type="number" min="0" max="14" value="${esc(r.days)}" data-plan-days="${esc(r.city)}"
             class="w-16 rounded-md border border-slate-300 px-2 py-1 text-right focus:outline-none focus:ring-2 focus:ring-violet-300" />
           days</span>
+        </div>
+        <input data-plan-stay="${esc(r.city)}" value="${esc(r.stay)}" maxlength="120" placeholder="🏨 Staying at (optional)"
+          class="mt-1.5 w-full rounded-md border border-slate-200 px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-violet-200" />
       </li>`;
   }
 
@@ -147,6 +151,7 @@
     // Cities in the order shown (= travel order)
     const days = [...panel.querySelectorAll("[data-plan-days]")].map((el) => ({
       city: el.dataset.planDays, days: Math.max(0, Math.min(14, parseInt(el.value, 10) || 0)),
+      stay: (panel.querySelector(`[data-plan-stay="${el.dataset.planDays}"]`)?.value || "").trim(),
     }));
     const interests = [...panel.querySelectorAll("[data-plan-interest][aria-pressed='true']")].map((b) => b.dataset.planInterest);
     const pace = panel.querySelector("[data-plan-pace][aria-pressed='true']")?.dataset.planPace || "normal";

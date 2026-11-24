@@ -78,13 +78,16 @@
     return el;
   }
 
-  function startElement() {
+  function startElement(isStay) {
     const el = document.createElement("div");
-    el.style.cssText = `width:22px;height:22px;border-radius:6px;background:#0f172a;color:#fff;border:2px solid #fff;
-      box-shadow:0 1px 4px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer`;
-    el.textContent = "⌂";
+    el.style.cssText = `width:${isStay ? 26 : 22}px;height:${isStay ? 26 : 22}px;border-radius:6px;background:#0f172a;color:#fff;
+      border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;
+      font-size:${isStay ? 14 : 12}px;cursor:pointer`;
+    el.textContent = isStay ? "🏨" : "⌂";
     return el;
   }
+
+  const samePoint = (a, b) => a && b && Math.abs(a.lat - b.lat) < 1e-5 && Math.abs(a.lng - b.lng) < 1e-5;
 
   // ---------------------------------------------------------------------------
   // Public: render into a container
@@ -155,11 +158,14 @@
         const color = DAY_COLORS[i % DAY_COLORS.length];
         const coords = [];
         const anchor = day.anchor_point;
+        const end = day.end_point;
         if (anchor && anchor.lat != null) {
           coords.push([anchor.lng, anchor.lat]);
-          markers.push(new maplibregl.Marker({ element: startElement() })
+          const isStay = samePoint(anchor, end) || (day.stay_point && day.stay_point.name === anchor.name);
+          markers.push(new maplibregl.Marker({ element: startElement(isStay) })
             .setLngLat([anchor.lng, anchor.lat])
-            .setPopup(new maplibregl.Popup({ offset: 14 }).setHTML(`<strong>${esc(day.label)}</strong><br>Start: ${esc(anchor.name)}`)));
+            .setPopup(new maplibregl.Popup({ offset: 14 }).setHTML(
+              `<strong>${esc(day.label)}</strong><br>${samePoint(anchor, end) ? "Start and end" : "Start"}: ${esc(anchor.name)}`)));
         }
         dayPoints(day, state.mode).forEach((stop, k) => {
           coords.push([stop.lng, stop.lat]);
@@ -169,6 +175,15 @@
             .setPopup(new maplibregl.Popup({ offset: 16 }).setHTML(
               `<strong>${k + 1}. ${esc(stop.name)}</strong><br>${when}<span style="color:#64748b">${esc(day.label)}</span>`)));
         });
+        // Back to the hotel at the end of the day
+        if (end && end.lat != null && coords.length) {
+          coords.push([end.lng, end.lat]);
+          if (!samePoint(anchor, end)) {
+            markers.push(new maplibregl.Marker({ element: startElement(true) })
+              .setLngLat([end.lng, end.lat])
+              .setPopup(new maplibregl.Popup({ offset: 14 }).setHTML(`<strong>${esc(day.label)}</strong><br>End: ${esc(end.name)}`)));
+          }
+        }
         if (coords.length > 1) {
           features.push({
             type: "Feature",

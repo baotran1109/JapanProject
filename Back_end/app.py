@@ -31,6 +31,7 @@ import ai_reviewer
 import place_picks
 import trip_generator
 import trip_checks
+import geocode
 import chat_editor
 import secrets
 
@@ -1174,6 +1175,7 @@ def prepare_trip_days(days_in: Any) -> List[Dict[str, Any]]:
             "city_key": city_key,
             "city": ROUTE_CITIES[city_key],
             "area": str(day.get("area") or "").strip()[:80],
+            "stay": str(day.get("stay") or "").strip()[:120],
             "stops": stops,
             "dropped_stops": dropped,
         })
@@ -1184,19 +1186,10 @@ def prepare_trip_days(days_in: Any) -> List[Dict[str, Any]]:
     kb = load_kb_for(sorted({d["city_key"] for d in days}))
 
     # The user's own places (hotels, friends' houses...) are matched first
-    user_places_by_city: Dict[str, List[Dict[str, Any]]] = {}
-    user_id = get_verified_user_id()
-    if user_id and MONGODB_AVAILABLE and mongo_db is not None:
-        for place in mongo_db["user_places"].find({"user_id": user_id}, {"_id": 0}):
-            city = str(place.get("city") or "").strip().lower()
-            try:
-                place["lat"], place["lng"] = float(place["lat"]), float(place["lng"])
-            except (KeyError, TypeError, ValueError):
-                continue
-            place["_kind"] = "custom"
-            user_places_by_city.setdefault(city, []).append(place)
+    user_places_by_city = user_places_for_request()
 
     # Match every stop to a real place
+    stay_cache: Dict[Tuple[str, str], Any] = {}
     for day in days:
         city_kb = kb.get(day["city_key"], [])
         custom = user_places_by_city.get(day["city_key"], [])
@@ -1207,14 +1200,27 @@ def prepare_trip_days(days_in: Any) -> List[Dict[str, Any]]:
                     or _area_center(city_kb, text, day["city_key"])
                     or match_place(text, city_kb, near))
 
-        # Where the day starts (hotel, the day's area...), if we can find it
+        # Where the traveler is staying (the day starts and ends there)
+        stay = None
+        if day["stay"]:
+            stay = stay_cache.get((day["city_key"], day["stay"].lower()))
+            if stay is None:
+                stay = locate_stay(day["stay"], day["city_key"], custom, city_kb) or False
+                stay_cache[(day["city_key"], day["stay"].lower())] = stay
+        day["stay_point"] = stay or None
+        day["stay_found"] = bool(stay) if day["stay"] else None
+
+        # Where the day starts: its own start area if given, else the stay
         anchor = None
         if day["area"]:
             place = locate(day["area"], None)
             if place:
                 anchor = {"name": day["area"], "matched_name": place.get("matched_name") or place.get("name"),
                           "lat": place["lat"], "lng": place["lng"]}
+        if anchor is None and stay:
+            anchor = stay
         day["anchor"] = anchor
+        day["end"] = stay or None
 
         for stop in day["stops"]:
             # "Lunch: Ichiran Shibuya" = a meal at that restaurant (found by its name)
@@ -1235,7 +1241,79 @@ def prepare_trip_days(days_in: Any) -> List[Dict[str, Any]]:
                     stop["name"], stop["type"], stop.get("kind"), stop["generic"])
                 stop["duration_estimated"] = True
 
+    # Moving to another city after this day: it ends at the station, not back at the hotel
+    for k, day in enumerate(days[:-1]):
+        if days[k + 1]["city_key"] != day["city_key"]:
+            day["end"] = None
+
     return days
+
+
+def user_places_for_request() -> Dict[str, List[Dict[str, Any]]]:
+    """The signed-in user's own places, by city key (empty when not signed in)"""
+    out: Dict[str, List[Dict[str, Any]]] = {}
+    user_id = get_verified_user_id()
+    if user_id and MONGODB_AVAILABLE and mongo_db is not None:
+        for place in mongo_db["user_places"].find({"user_id": user_id}, {"_id": 0}):
+            city = str(place.get("city") or "").strip().lower()
+            try:
+                place["lat"], place["lng"] = float(place["lat"]), float(place["lng"])
+            except (KeyError, TypeError, ValueError):
+                continue
+            place["_kind"] = "custom"
+            out.setdefault(city, []).append(place)
+    return out
+
+
+@app.route("/locate-stay")
+def api_locate_stay():
+    """
+    Where is the place the traveler is staying? GET /locate-stay?city=tokyo&q=Hotel Gracery Shinjuku
+    Returns {"found": true, "name", "source", "lat", "lng"} or {"found": false}.
+    """
+    key = str(request.args.get("city") or "").strip().lower()
+    text = str(request.args.get("q") or "").strip()[:120]
+    if key not in ROUTE_CITIES or not text:
+        return jsonify({"error": "Send ?city= and ?q="}), 400
+    kb = load_kb_for([key]).get(key, [])
+    place = locate_stay(text, key, user_places_for_request().get(key, []), kb)
+    if not place:
+        return jsonify({"found": False})
+    return jsonify({"found": True, "name": place["matched_name"], "source": place["source"],
+                    "lat": place["lat"], "lng": place["lng"]})
+
+
+def locate_stay(text: str, city_key: str, custom: List[Dict[str, Any]],
+                city_kb: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    """
+    Find where the traveler is staying: their own places first, then our database,
+    then OpenStreetMap (most hotels), then an area named in the text ("... Shinjuku").
+    Returns {name, matched_name, lat, lng, source} or None.
+    """
+    def point(place, source, label=None):
+        return {"name": text, "matched_name": label or place.get("matched_name") or place.get("name"),
+                "lat": float(place["lat"]), "lng": float(place["lng"]), "source": source}
+
+    place = match_place(text, custom, None)
+    if place:
+        return point(place, "my place")
+    area = _area_center(city_kb, text, city_key)
+    if area and len(text.split()) <= 2:  # Just an area ("Shinjuku", "Ueno"): its center is fine
+        return point(area, "area")
+    place = match_place(text, [p for p in city_kb if p.get("_kind") != "restaurants"], None)
+    if place:
+        return point(place, "database")
+    found = geocode.find(text, ROUTE_CITIES[city_key])
+    if found:
+        return point(found, "map search", found["name"])
+    # "Hotel Gracery Shinjuku" not found: at least the Shinjuku area
+    words = re.findall(r"[a-z0-9À-ɏ'-]+", text.lower())
+    for n in (3, 2, 1):
+        for i in range(len(words) - n + 1):
+            area = _area_center(city_kb, " ".join(words[i:i + n]), city_key)
+            if area:
+                return point(area, "area", f"{area['name']} area (approximate)")
+    return None
 
 
 # "Lunch: <restaurant>", "Dinner - <restaurant>" (written by "Plan my trip", or by hand)
@@ -1289,6 +1367,13 @@ def optimize_route():
         for day, day_result in zip(days, result["days"]):
             if day["dropped_stops"]:
                 day_result["warnings"].insert(0, too_many_stops_text(day))
+            if day["stay"]:
+                sp = day.get("stay_point")
+                day_result["stay_point"] = ({"name": sp["matched_name"], "source": sp["source"]} if sp else None)
+                if not sp:
+                    day_result["warnings"].insert(0, f"Couldn't find where you're staying (“{day['stay']}”) on the map, "
+                                                     f"so travel to and from it isn't counted. Try the hotel's full name, "
+                                                     f"its area (e.g. “Shinjuku”), or add it under My places.")
             for pick in day_picks(day, day_result["stops"]):
                 stop = day_result["stops"][pick["step"] - 1]
                 stop["picks"] = pick["options"]
@@ -1324,7 +1409,13 @@ def plan_trip_for_me():
 
     try:
         kb = load_kb_for(sorted({c["key"] for c in req["cities"]}))
-        plan = trip_generator.generate_trip(req, kb, lambda key: _city_areas(kb.get(key, []), key))
+        my_places = user_places_for_request()
+
+        def stay_for(entry):
+            return locate_stay(entry["stay"], entry["key"], my_places.get(entry["key"], []), kb.get(entry["key"], []))
+
+        plan = trip_generator.generate_trip(req, kb, lambda key: _city_areas(kb.get(key, []), key),
+                                            stay_for=stay_for)
         days = plan["days"]
         # The same checks the AI review starts from, so the plan comes with its own score
         for day in days:
@@ -1344,6 +1435,7 @@ def plan_trip_for_me():
             "city_key": day["city_key"],
             "day_in_city": day["day_in_city"],
             "area": day["area"],
+            "stay": day.get("stay", ""),
             "theme": day["theme"],
             "stops": [{"name": s["name"], "duration": s["duration"], "type": s["type"]} for s in day["stops"]],
             "start_time": sched["start_time"],
@@ -1443,7 +1535,8 @@ def clean_trip(trip: Any) -> Dict[str, Any]:
             except (TypeError, ValueError):
                 duration = None
             stops.append({"name": str(stop["name"]).strip()[:120], "duration": duration})
-        days.append({"city": city, "area": str(day.get("area") or "").strip()[:80], "stops": stops})
+        days.append({"city": city, "area": str(day.get("area") or "").strip()[:80],
+                     "stay": str(day.get("stay") or "").strip()[:120], "stops": stops})
     start = trip_checks.parse_date(trip.get("start_date"))
     return {
         "title": str(trip.get("title") or "").strip()[:100] or "My Japan trip",
@@ -1570,7 +1663,7 @@ def ai_chat_edit():
     for day in days:
         page_days.append({
             "key": day.get("key"), "label": day["label"], "city": day["city"], "city_key": day["city_key"],
-            "area": day["area"],
+            "area": day["area"], "stay": day["stay"],
             "stops": [{"name": s["name"], "duration": None if s.get("duration_estimated") else s["duration"]}
                       for s in day["stops"]],
         })
@@ -1589,13 +1682,13 @@ def ai_chat_edit():
     out_days = []
     if changed:
         try:
-            after = prepare_trip_days([{k: editor.days[i][k] for k in ("key", "label", "city", "area", "stops")}
+            after = prepare_trip_days([{k: editor.days[i][k] for k in ("key", "label", "city", "area", "stay", "stops")}
                                        for i in changed])
         except PlanInputError:
             after = []
         def facts_of(day):
             # Both sides in their best order, so before / after compare fairly
-            best = route_planner.DayPlanner(day["stops"], day["city"], 9 * 60, day.get("anchor")).optimize()
+            best = route_planner.DayPlanner(day["stops"], day["city"], 9 * 60, day.get("anchor"), day.get("end")).optimize()
             return best, {"end_time": best["end_time"], "travel_minutes": best["travel_minutes"],
                           "active_minutes": best["activity_minutes"] + best["travel_minutes"],
                           "stops": len(day["stops"])}

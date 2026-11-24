@@ -25,6 +25,7 @@
       { "source": "/plan-trip", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
       { "source": "/plan-trip/**", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
       { "source": "/trip-check", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
+      { "source": "/locate-stay", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
       { "source": "/places/**", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
       { "source": "/share", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },
       { "source": "/share/**", "run": { "serviceId": "japan-travel-backend", "region": "us-central1" } },

@@ -313,8 +313,8 @@ def _area_label(center: Tuple[float, float], areas: Dict[str, Dict[str, Any]],
 
 
 def _fits(stops: List[Dict[str, Any]], city: str, anchor, limits: Dict[str, int],
-          reserve: int, start_minute: int) -> Tuple[bool, Dict[str, Any]]:
-    result = route_planner.DayPlanner(stops, city, start_minute, anchor).optimize()
+          reserve: int, start_minute: int, end=None) -> Tuple[bool, Dict[str, Any]]:
+    result = route_planner.DayPlanner(stops, city, start_minute, anchor, end).optimize()
     active = result["activity_minutes"] + result["travel_minutes"]
     ok = (active <= limits["active_minutes"] - FIT_MARGIN_MIN - reserve
           and result["end_minute"] <= limits["latest_end"] - FIT_MARGIN_MIN - reserve)
@@ -335,10 +335,12 @@ def _theme(stops: List[Dict[str, Any]], area: str, far: bool) -> str:
 
 def build_city_days(city: str, n_days: int, city_kb: List[Dict[str, Any]], wanted: Set[str], pace: str,
                     areas: Dict[str, Dict[str, Any]], used_restaurants: Set[str], used_places: Set[str],
-                    reserve_last_day: int = 0, start_minute: int = 9 * 60) -> List[Dict[str, Any]]:
+                    reserve_last_day: int = 0, start_minute: int = 9 * 60,
+                    stay: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
     """
     Plan n_days in one city. Returns days in route_planner format (stops in optimized order).
     used_restaurants / used_places: names already in the trip (updated), so nothing repeats.
+    stay: where the traveler sleeps ({name, lat, lng}); days then start and end there.
     """
     limits = PACE_LIMITS.get(pace, PACE_LIMITS[DEFAULT_PACE])
     pool = [c for c in _candidates(city_kb, city, wanted) if _norm(c["name"]).strip() not in used_places]
@@ -364,6 +366,11 @@ def build_city_days(city: str, n_days: int, city_kb: List[Dict[str, Any]], wante
         center = _center([m["point"] for m in members])
         area, anchor = _area_label(center, areas, seed)
         reserve = (reserve_last_day + STATION_BUFFER_MIN) if (reserve_last_day and k == n_days - 1) else 0
+        # Staying somewhere: start there, and come back there (except before moving on to the next city)
+        end = None
+        if stay:
+            anchor = stay
+            end = None if reserve else stay
 
         sights = [_stop(m) for m in members]
         meals = []
@@ -377,14 +384,14 @@ def build_city_days(city: str, n_days: int, city_kb: List[Dict[str, Any]], wante
                     "duration": route_planner.default_duration(meal, meal.lower())})
 
         # Drop the weakest sights until the optimized day fits the pace
-        ok, result = _fits(sights + meals, city, anchor, limits, reserve, start_minute)
+        ok, result = _fits(sights + meals, city, anchor, limits, reserve, start_minute, end)
         while not ok and len(sights) > 1:
             weakest = min(sights[1:], key=lambda s: s["_score"])  # never drop the day's main sight
             sights.remove(weakest)
-            ok, result = _fits(sights + meals, city, anchor, limits, reserve, start_minute)
+            ok, result = _fits(sights + meals, city, anchor, limits, reserve, start_minute, end)
         if not ok and reserve and meals:
             meals = meals[:1]  # Travel day: skip dinner here, eat after arriving
-            ok, result = _fits(sights + meals, city, anchor, limits, reserve, start_minute)
+            ok, result = _fits(sights + meals, city, anchor, limits, reserve, start_minute, end)
 
         kept = {s["name"] for s in sights}
         for m in members:
@@ -397,8 +404,12 @@ def build_city_days(city: str, n_days: int, city_kb: List[Dict[str, Any]], wante
         ordered = [by_name[name] for name in result["optimized_order"]]
         days.append({
             "city": city,
-            "area": area,
+            # With a stay the day starts from it, so no separate start area is needed
+            "area": "" if stay else area,
+            "theme_area": area,
+            "stay": stay["name"] if stay else "",
             "anchor": anchor,
+            "end": end,
             "theme": _theme(sights, area, seed["far"]),
             "stops": ordered,
             "schedule": result,
@@ -431,7 +442,8 @@ def parse_request(body: Dict[str, Any], supported: Dict[str, str]) -> Dict[str, 
         except (TypeError, ValueError):
             n = 0
         if n > 0:
-            cities.append({"key": key, "city": supported[key], "days": min(n, MAX_DAYS_PER_CITY)})
+            cities.append({"key": key, "city": supported[key], "days": min(n, MAX_DAYS_PER_CITY),
+                           "stay": str(entry.get("stay") or "").strip()[:120]})
     if not cities:
         raise GeneratorInputError("Give at least one city one day or more.")
     if sum(c["days"] for c in cities) > MAX_TRIP_DAYS:
@@ -445,9 +457,11 @@ def parse_request(body: Dict[str, Any], supported: Dict[str, str]) -> Dict[str, 
 
 def generate_trip(request: Dict[str, Any], kb: Dict[str, List[Dict[str, Any]]],
                   areas_for: Callable[[str], Dict[str, Dict[str, Any]]],
-                  start_minute: int = 9 * 60) -> Dict[str, Any]:
+                  start_minute: int = 9 * 60,
+                  stay_for: Optional[Callable[[Dict[str, Any]], Optional[Dict[str, Any]]]] = None) -> Dict[str, Any]:
     """
     request: output of parse_request. kb: {city_key: places}. areas_for(city_key) -> neighborhoods.
+    stay_for(city entry) -> where the traveler stays in that city ({name, lat, lng}) or None.
     Returns {"days": [...], "notes": [...]} with days in route_planner format plus
     'city_key', 'label', 'theme' and the optimized schedule.
     """
@@ -462,7 +476,8 @@ def generate_trip(request: Dict[str, Any], kb: Dict[str, List[Dict[str, Any]]],
         reserve = route_planner.intercity_leg(entry["city"], nxt["city"])["minutes"] if nxt else 0
         city_days = build_city_days(
             entry["city"], entry["days"], kb.get(entry["key"], []), request["interests"], request["pace"],
-            areas_for(entry["key"]), used_restaurants, used_places, reserve, start_minute)
+            areas_for(entry["key"]), used_restaurants, used_places, reserve, start_minute,
+            stay_for(entry) if stay_for and entry.get("stay") else None)
         if len(city_days) < entry["days"]:
             notes.append(f"{entry['city']}: only enough places in our data for {len(city_days)} "
                          f"of {entry['days']} days — the rest are left free.")
